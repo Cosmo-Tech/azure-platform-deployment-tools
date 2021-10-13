@@ -1,0 +1,275 @@
+[
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Workspace Writer",
+			"displayName": "Workspace Writer",
+			"id": "3f7ba86c-9940-43c8-a54d-0bfb706da136",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Workspace.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Workspace Reader",
+			"displayName": "Workspace Reader",
+			"id": "73ce2073-d918-4fe1-bc24-a4e69db07db8",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Workspace.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Solution Writer",
+			"displayName": "Solution Writer",
+			"id": "4f6e62a3-7f0a-4396-9620-ab465cd6577b",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Solution.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Solution Reader",
+			"displayName": "Solution Reader",
+			"id": "cf1a8625-38d9-417b-a5b9-a27c0014e740",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Solution.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "ScenarioRun Writer",
+			"displayName": "ScenarioRun Writer",
+			"id": "ca8a2a19-3e09-48cc-976b-85ec9de4f68a",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "ScenarioRun.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "ScenarioRun Reader",
+			"displayName": "ScenarioRun Reader",
+			"id": "bdc8fe2a-73a8-477d-9efa-d8a37a4eb0f7",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "ScenarioRun.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Scenario Writer",
+			"displayName": "Scenario Writer",
+			"id": "8fb9d03e-c46d-4003-a2a6-34d8b506e4e7",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Scenario.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Scenario Reader",
+			"displayName": "Scenario Reader",
+			"id": "e07dab65-4200-4502-8e36-79ca687320d9",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Scenario.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization Writer",
+			"displayName": "Organization Writer",
+			"id": "89d74995-095c-442f-bfda-06a77d3dbaa4",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization Reader",
+			"displayName": "Organization Reader",
+			"id": "96213509-202a-497c-9f60-53c5f85268ec",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Dataset Writer",
+			"displayName": "Dataset Writer",
+			"id": "c6e5d483-ec2c-4710-bf0c-78b0fda611dc",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Dataset.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Dataset Reader",
+			"displayName": "Dataset Reader",
+			"id": "454dc3f5-3012-45b3-bad6-975dae94338c",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Dataset.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Ability to write connectors",
+			"displayName": "Connector Writer",
+			"id": "e150953f-4835-4502-b95e-81d9ce97f591",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Connector.Writer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization Viewer",
+			"displayName": "Organization Viewer",
+			"id": "ec5fdd3c-4df0-4c2f-bdad-0495a49f6e90",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.Viewer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization User",
+			"displayName": "Organization User",
+			"id": "bb9ffb73-997e-4320-8625-cfe45469aa3c",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.User"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization Modeler",
+			"displayName": "Organization Modeler",
+			"id": "adcdb0a1-1588-4d2b-8657-364e544ac7e1",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.Modeler"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization Administrator",
+			"displayName": "Organization Admin",
+			"id": "04b96a76-d77e-4a9d-967f-c55c857c478c",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.Admin"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Organization Collaborator",
+			"displayName": "Organization Collaborator",
+			"id": "6f5ec4e3-1f2d-4502-837e-5d9754ea8acb",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Organization.Collaborator"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Ability to develop connectors",
+			"displayName": "Connector Developer",
+			"id": "428ab58e-ab61-4621-907c-d7908be72df7",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Connector.Developer"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Ability to read connectors",
+			"displayName": "Connector Reader",
+			"id": "2cd74037-3ccd-4ab7-929d-4afce87be2e4",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Connector.Reader"
+		},
+		{
+			"allowedMemberTypes": [
+				"User",
+				"Application"
+			],
+			"description": "Platform Administrator",
+			"displayName": "Platform Admin",
+			"id": "bb49d61f-8b6a-4a19-b5bd-06a29d6b8e60",
+			"isEnabled": true,
+			"lang": null,
+			"origin": "Application",
+			"value": "Platform.Admin"
+		}
+	]
