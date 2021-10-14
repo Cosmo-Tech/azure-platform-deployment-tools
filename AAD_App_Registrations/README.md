@@ -1,3 +1,5 @@
+__PRE-REQUISITES__: This toolset required jq: https://stedolan.github.io/jq/
+
 Installation scripts of the App Registration for the Cosmo Tech Platform applications
 * Authentication
 * Roles
