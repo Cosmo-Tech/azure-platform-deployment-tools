@@ -16,14 +16,21 @@ if [[ -z "$STAGE" ]]; then
   echo No stage defined, using Dev
 fi
 
-export PLATFORM_URL=$4
+export PROJECT=$4
+if [[ -z "$PROJECT" ]]; then
+  echo No project name defined
+else
+  export PROJECT=" - $PROJECT"
+fi
+
+export PLATFORM_URL=$5
 if [[ -z "$PLATFORM_URL" ]]; then
   export PLATFORM_URL=$IDENTIFIER_URI
   echo No specific API platform URL set, using identifier uri $IDENTIFIER_URI
 fi
 
 echo Creating App Registration...
-app=$(az ad app create --display-name "Cosmo Tech $STAGE Platform For $CUSTOMER" --app-roles @platform_app_roles_manifest.json --available-to-other-tenants --reply-urls $PLATFORM_URL/swagger-ui/oauth2-redirect.html --oauth2-allow-implicit-flow true)
+app=$(az ad app create --display-name "Cosmo Tech $STAGE Platform For ${CUSTOMER}${PROJECT}" --app-roles @platform_app_roles_manifest.json --available-to-other-tenants --reply-urls $PLATFORM_URL/swagger-ui/oauth2-redirect.html --oauth2-allow-implicit-flow true)
 export appId=$(echo $app | jq -r '.appId')
 echo App Registration created: $appId
 echo Creating associated Service Principal
