@@ -1,3 +1,4 @@
+echo usage: ./aad_ap_create_webapp.sh CUSTOMER PLATFORM_APP_ID WEBAPP_URL [STAGE=Dev] [PROJECT]
 export CUSTOMER=$1
 if [[ -z "$CUSTOMER" ]]; then
   echo Please provide customer name as first parameter

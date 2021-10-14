@@ -1,3 +1,4 @@
+echo usage: ./aad_app_create_swagger.sh CUSTOMER PLATFORM_URL [STAGE=Dev] [PROJECT]
 export CUSTOMER=$1
 if [[ -z "$CUSTOMER" ]]; then
   echo Please provide customer name as first parameter

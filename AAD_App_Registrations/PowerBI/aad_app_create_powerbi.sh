@@ -1,3 +1,4 @@
+echo usage: ./aad_app_create_powerbi.sh [STAGE=Dev] [PROJECT]
 export STAGE=$1
 if [[ -z "$STAGE" ]]; then
   export STAGE=Dev

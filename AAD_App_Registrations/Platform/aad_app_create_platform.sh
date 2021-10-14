@@ -1,3 +1,4 @@
+echo usage: ./aad_app_create_platform.sh CUSTOMER IDENTIFIER_URI [STAGE=Dev] [PROJECT] [PLATFORM_URL=IDENTIFIER_URI]
 export CUSTOMER=$1
 if [[ -z "$CUSTOMER" ]]; then
   echo Please provide customer name as first parameter
@@ -6,7 +7,7 @@ fi
 
 export IDENTIFIER_URI=$2
 if [[ -z "$IDENTIFIER_URI" ]]; then
-  echo Please provide the base path identifier for oauth2 scope. Example: https://dev.api.cosmotech.com
+  echo Please provide the base path identifier uri for oauth2 scope. Example: https://dev.api.cosmotech.com
   exit 1
 fi
 
