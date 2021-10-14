@@ -3,20 +3,27 @@ if [[ -z "$CUSTOMER" ]]; then
   echo Please provide customer name as first parameter
   exit 1
 fi
+
 export IDENTIFIER_URI=$2
 if [[ -z "$IDENTIFIER_URI" ]]; then
   echo Please provide the base path identifier for oauth2 scope. example: https://dev.api.cosmotech.com
   exit 1
 fi
 
-export PLATFORM_URL=$3
+export STAGE=$3
+if [[ -z "$STAGE" ]]; then
+  export STAGE=Dev
+  echo No stage defined, using Dev
+fi
+
+export PLATFORM_URL=$4
 if [[ -z "$PLATFORM_URL" ]]; then
   export PLATFORM_URL=$IDENTIFIER_URI
   echo No specific API platform URL set, using identifier uri $IDENTIFIER_URI
 fi
 
 echo Creating App Registration...
-app=$(az ad app create --display-name "Cosmo Tech Platform For $CUSTOMER" --app-roles @platform_app_roles_manifest.json --available-to-other-tenants --reply-urls $PLATFORM_URL/swagger-ui/oauth2-redirect.html --oauth2-allow-implicit-flow true)
+app=$(az ad app create --display-name "Cosmo Tech $STAGE Platform For $CUSTOMER" --app-roles @platform_app_roles_manifest.json --available-to-other-tenants --reply-urls $PLATFORM_URL/swagger-ui/oauth2-redirect.html --oauth2-allow-implicit-flow true)
 export appId=$(echo $app | jq -r '.appId')
 echo App Registration created: $appId
 echo Creating associated Service Principal
@@ -36,8 +43,8 @@ az ad app permission grant --id $appId --api 00000002-0000-0000-c000-00000000000
 echo Adding and granting API Application Permission on itself as Platform.Admin role
 az ad app permission add --id $appId --api $appId --api-permissions bb49d61f-8b6a-4a19-b5bd-06a29d6b8e60=Role
 az ad app permission grant --id $appId --api $appId --consent-type AllPrincipals
-echo Waiting 60s for admin consent....
-sleep 60s
+echo Waiting 90s for admin consent....
+sleep 90s
 echo Granting admin consent...
 az ad app permission admin-consent --id $appId
 echo Admin consent done
