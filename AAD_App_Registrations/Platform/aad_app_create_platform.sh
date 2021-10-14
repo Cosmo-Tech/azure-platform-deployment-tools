@@ -6,7 +6,7 @@ fi
 
 export IDENTIFIER_URI=$2
 if [[ -z "$IDENTIFIER_URI" ]]; then
-  echo Please provide the base path identifier for oauth2 scope. example: https://dev.api.cosmotech.com
+  echo Please provide the base path identifier for oauth2 scope. Example: https://dev.api.cosmotech.com
   exit 1
 fi
 
