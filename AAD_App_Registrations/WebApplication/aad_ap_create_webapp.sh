@@ -37,13 +37,16 @@ export appObjectId=$(echo $app | jq -r '.objectId')
 echo App Registration created: $appId \($appObjectId\)
 echo Creating associated Service Principal
 az ad sp create --id $appId
+echo Adding tags to Hide App and Integrated App
+az ad sp update --id $appId --add tags "HideApp"
+az ad sp update --id $appId --add tags "WindowsAzureActiveDirectoryIntegratedApp"
 echo
 echo Adding Authentication SPA Platform with authorized redirect URI
 # it is not possible to update directly replyUrlsWithType with az ad app update and set SPA reply url another way than REST API (10/2021)
 az rest --method PATCH --uri "https://graph.microsoft.com/v1.0/applications/${appObjectId}" --headers "Content-Type=application/json" --body "{\"spa\":{\"redirectUris\":[\"${WEBAPP_URL}/scenario\"]}}"
 echo Adding and granting API Delegated Permission for Microsoft Graph User.Read scope
-az ad app permission add --id $appId --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
-az ad app permission grant --id $appId --api 00000002-0000-0000-c000-000000000000 --consent-type AllPrincipals --scope User.Read
+az ad app permission add --id $appId --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
+az ad app permission grant --id $appId --api 00000003-0000-0000-c000-000000000000 --consent-type AllPrincipals --scope User.Read
 echo Adding and granting API Delegated Permission for Cosmo Tech API Platform - platform scope
 az ad app permission add --id $appId --api $PLATFORM_APP_ID --api-permissions 6332363e-bcba-4c4a-a605-c25f23117400=Scope
 az ad app permission grant --id $appId --api $PLATFORM_APP_ID --consent-type AllPrincipals --scope platform

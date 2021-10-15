@@ -18,4 +18,7 @@ export appId=$(echo $app | jq -r '.appId')
 echo App Registration created: $appId
 echo Creating associated Service Principal
 az ad sp create --id $appId
+echo Adding tags to Hide App and Integrated App
+az ad sp update --id $appId --add tags "HideApp"
+az ad sp update --id $appId --add tags "WindowsAzureActiveDirectoryIntegratedApp"
 echo Done

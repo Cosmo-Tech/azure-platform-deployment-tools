@@ -36,7 +36,7 @@ export appId=$(echo $app | jq -r '.appId')
 echo App Registration created: $appId
 echo Creating associated Service Principal
 az ad sp create --id $appId
-echo Adding tags to hide app and Integrated App
+echo Adding tags to Hide App and Integrated App
 az ad sp update --id $appId --add tags "HideApp"
 az ad sp update --id $appId --add tags "WindowsAzureActiveDirectoryIntegratedApp"
 echo
@@ -59,6 +59,6 @@ sleep 120s
 echo Granting admin consent...
 az ad app permission admin-consent --id $appId
 echo Admin consent done
-echo Remove permission from list
+echo Remove platform permission from list
 az ad app permission delete --id $appId --api $appId
 echo Done
