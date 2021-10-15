@@ -36,6 +36,9 @@ export appId=$(echo $app | jq -r '.appId')
 echo App Registration created: $appId
 echo Creating associated Service Principal
 az ad sp create --id $appId
+echo Adding tags to hide app and Integrated App
+az ad sp update --id $appId --add tags "HideApp"
+az ad sp update --id $appId --add tags "WindowsAzureActiveDirectoryIntegratedApp"
 echo
 echo Creating application scope base identifier
 az ad app update --id $appId --set identifierUris="[ \"$IDENTIFIER_URI\" ]"
@@ -46,8 +49,8 @@ echo Adding Cosmo Tech platform scope
 az ad app update --id $appId --set oauth2Permissions=@platform_oauth2Permissions_manifest.json
 echo
 echo Adding and granting API Delegated Permission for Microsoft Graph User.Read scope
-az ad app permission add --id $appId --api 00000002-0000-0000-c000-000000000000 --api-permissions 311a71cc-e848-46a1-bdf8-97ff7156d8e6=Scope
-az ad app permission grant --id $appId --api 00000002-0000-0000-c000-000000000000 --consent-type AllPrincipals --scope User.Read
+az ad app permission add --id $appId --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
+az ad app permission grant --id $appId --api 00000003-0000-0000-c000-000000000000 --consent-type AllPrincipals --scope User.Read
 echo Adding and granting API Application Permission on itself as Platform.Admin role
 az ad app permission add --id $appId --api $appId --api-permissions bb49d61f-8b6a-4a19-b5bd-06a29d6b8e60=Role
 az ad app permission grant --id $appId --api $appId --consent-type AllPrincipals
@@ -56,3 +59,6 @@ sleep 90s
 echo Granting admin consent...
 az ad app permission admin-consent --id $appId
 echo Admin consent done
+# echo Remove permission from list
+# az ad app permission delete --id $appId --api $appId --api-permissions bb49d61f-8b6a-4a19-b5bd-06a29d6b8e60=Role
+echo Done
