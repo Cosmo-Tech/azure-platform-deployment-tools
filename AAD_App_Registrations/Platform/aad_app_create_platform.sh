@@ -54,11 +54,11 @@ az ad app permission grant --id $appId --api 00000003-0000-0000-c000-00000000000
 echo Adding and granting API Application Permission on itself as Platform.Admin role
 az ad app permission add --id $appId --api $appId --api-permissions bb49d61f-8b6a-4a19-b5bd-06a29d6b8e60=Role
 az ad app permission grant --id $appId --api $appId --consent-type AllPrincipals
-echo Waiting 90s for admin consent....
-sleep 90s
+echo Waiting 2mn for admin consent....
+sleep 120s
 echo Granting admin consent...
 az ad app permission admin-consent --id $appId
 echo Admin consent done
-# echo Remove permission from list
-# az ad app permission delete --id $appId --api $appId --api-permissions bb49d61f-8b6a-4a19-b5bd-06a29d6b8e60=Role
+echo Remove permission from list
+az ad app permission delete --id $appId --api $appId
 echo Done
