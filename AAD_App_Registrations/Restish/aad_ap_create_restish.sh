@@ -36,7 +36,7 @@ az ad sp update --id $appId --add tags "HideApp"
 az ad sp update --id $appId --add tags "WindowsAzureActiveDirectoryIntegratedApp"
 echo
 echo Adding and granting API Delegated Permission for Microsoft Graph User.Read scope
-az ad app paz ad app permission add --id $appId --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
+az ad app permission add --id $appId --api 00000003-0000-0000-c000-000000000000 --api-permissions e1fe6dd8-ba31-4d61-89e7-88639da4683d=Scope
 az ad app permission grant --id $appId --api 00000003-0000-0000-c000-000000000000 --consent-type AllPrincipals --scope User.Read
 echo Adding and granting API Delegated Permission for Cosmo Tech API Platform - platform scope
 az ad app permission add --id $appId --api $PLATFORM_APP_ID --api-permissions 6332363e-bcba-4c4a-a605-c25f23117400=Scope
