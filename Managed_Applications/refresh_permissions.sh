@@ -1,0 +1,1 @@
+az rest --method POST --uri /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Solutions/applications/${APPLICATION_NAME}/refreshPermissions?api-version=2019-07-01
