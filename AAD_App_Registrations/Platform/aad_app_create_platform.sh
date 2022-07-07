@@ -35,6 +35,7 @@ app=$(az ad app create --display-name "Cosmo Tech $STAGE Platform For ${CUSTOMER
 export appId=$(echo $app | jq -r '.appId')
 echo App Registration created: $appId
 echo Creating associated Service Principal
+echo WARNING: User Assignment Required setting is not supported by az command: you must activate manually this option if you need it
 az ad sp create --id $appId
 echo Adding tags to Hide App and Integrated App
 az ad sp update --id $appId --add tags "HideApp"
