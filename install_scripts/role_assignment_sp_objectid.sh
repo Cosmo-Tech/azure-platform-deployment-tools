@@ -13,6 +13,7 @@ az role assignment create \
   --assignee-object-id ${OBJECT_ID} \
   --role ${ROLE_ID} \
   --scope ${RESOURCE_SCOPE} \
+  --assignee-principal-type "ServicePrincipal"
   2>&1 || exit 1;
 
 echo role_assignment_objectid.sh end
