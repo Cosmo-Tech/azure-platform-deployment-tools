@@ -10,7 +10,7 @@ echo RESOURCE_GROUP: the resource group where to create the private DNS zone
 echo ZONE_LINK_NAME: the private DNS zone to vnet link name
 echo VNET_ID: the virtual network resource id to connect the private DNS zone to
 echo
-./az_login_customer_sp.sh
+./az_login_as_sp.sh
 
 echo Creating private DNS zone ${ZONE_NAME}...
 az network private-dns zone create \
