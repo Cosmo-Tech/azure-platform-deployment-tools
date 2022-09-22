@@ -8,7 +8,7 @@ echo ROLE_ID: the Azure role UID to assign
 echo RESOURCE_SCOPE: the resource scope to assign role to
 echo
 
-echo Assigning ${ROLE_ID} to ${OBJECT_ID} on ${RESOURCE_SCOPE}
+echo Assigning ${ROLE_ID} to ${SP_NAME} on ${RESOURCE_SCOPE}
 az role assignment create \
   --assignee "${SP_NAME}" \
   --role "${ROLE_ID}" \
