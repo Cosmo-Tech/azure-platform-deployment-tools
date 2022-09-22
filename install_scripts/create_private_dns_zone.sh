@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+./az_login_customer_sp.sh
+
 echo Creating private DNS zone ${ZONE_NAME}...
 az network private-dns zone create --resource-group ${RESOURCE_GROUP} \
    --name  $ZONE_NAME
