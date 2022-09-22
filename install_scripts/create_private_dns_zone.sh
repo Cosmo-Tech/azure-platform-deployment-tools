@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) Cosmo Tech.
 # Licensed under the MIT license.
+set -x
 echo create_private_dns_zone.sh start
 echo SP_APPID: the service principal application / client id
 echo SP_SECRET: the service principal secret
@@ -10,12 +11,13 @@ echo RESOURCE_GROUP: the resource group where to create the private DNS zone
 echo ZONE_LINK_NAME: the private DNS zone to vnet link name
 echo VNET_ID: the virtual network resource id to connect the private DNS zone to
 echo
-./az_login_as_sp.sh
+source ./az_login_as_sp.sh
 
 echo Creating private DNS zone ${ZONE_NAME} in ${RESOURCE_GROUP}...
 az network private-dns zone create \
   --resource-group ${RESOURCE_GROUP} \
-  --name  ${ZONE_NAME}
+  --name  ${ZONE_NAME} \
+  2>&1 || exit 1;
 
 echo Creating private DNS link ${ZONE_LINK_NAME} for ${ZONE_NAME} to ${VNET_ID}...
 az network private-dns link vnet create \
@@ -23,6 +25,7 @@ az network private-dns link vnet create \
   --zone-name ${ZONE_NAME} \
   --name ${ZONE_LINK_NAME} \
   --virtual-network ${VNET_ID} \
-  --registration-enabled false 
+  --registration-enabled false \
+  2>&1 || exit 1;
 
 echo create_private_dns_zone.sh end
