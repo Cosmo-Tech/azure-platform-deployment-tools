@@ -21,14 +21,14 @@ echo
 source ./az_login_as_sp.sh
 
 echo Creating private endpoint ${PRIVATE_ENDPOINT_NAME} for ${RESOURCE_ID} in ${SUBNET_ID}...
-az network private-endpoint create \
-  --name ${PRIVATE_ENDPOINT_NAME} \
-  --resource-group ${RESOURCE_GROUP} \
-  --subnet ${SUBNET_ID} \
-  --private-connection-resource-id ${RESOURCE_ID} \
-  --group-id ${GROUP_ID} \
-  --connection-name ${CONNECTION_NAME} \
-  2>&1 || exit 1
+#az network private-endpoint create \
+#  --name ${PRIVATE_ENDPOINT_NAME} \
+#  --resource-group ${RESOURCE_GROUP} \
+#  --subnet ${SUBNET_ID} \
+#  --private-connection-resource-id ${RESOURCE_ID} \
+#  --group-id ${GROUP_ID} \
+#  --connection-name ${CONNECTION_NAME} \
+#  2>&1 || exit 1
 
 echo Creating private DNS group ${DNS_GROUP_NAME} in ${ZONE_NAME} for ADX cluster...
 az network private-endpoint dns-zone-group create \
@@ -40,7 +40,7 @@ az network private-endpoint dns-zone-group create \
   2>&1 || exit 1
 
 echo Creating private DNS group ${DNS_GROUP_NAME} in ${ZONE_NAME} for ADX blob...
-az network private-endpoint dns-zone-group create \
+az network private-endpoint dns-zone-group add \
   --resource-group ${RESOURCE_GROUP} \
   --endpoint-name ${PRIVATE_ENDPOINT_NAME} \
   --name ${DNS_GROUP_NAME} \
@@ -49,7 +49,7 @@ az network private-endpoint dns-zone-group create \
   2>&1 || exit 1
 
 echo Creating private DNS group ${DNS_GROUP_NAME} in ${ZONE_NAME} for ADX queue...
-az network private-endpoint dns-zone-group create \
+az network private-endpoint dns-zone-group add \
   --resource-group ${RESOURCE_GROUP} \
   --endpoint-name ${PRIVATE_ENDPOINT_NAME} \
   --name ${DNS_GROUP_NAME} \
@@ -58,7 +58,7 @@ az network private-endpoint dns-zone-group create \
   2>&1 || exit 1
 
 echo Creating private DNS group ${DNS_GROUP_NAME} in ${ZONE_NAME} for ADX table...
-az network private-endpoint dns-zone-group create \
+az network private-endpoint dns-zone-group add \
   --resource-group ${RESOURCE_GROUP} \
   --endpoint-name ${PRIVATE_ENDPOINT_NAME} \
   --name ${DNS_GROUP_NAME} \
