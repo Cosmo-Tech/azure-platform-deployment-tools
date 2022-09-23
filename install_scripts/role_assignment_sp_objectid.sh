@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) Cosmo Tech.
 # Licensed under the MIT license.
-set -x
 echo role_assignment_objectid.sh start
 echo SP_ID: the service principal id to assign role to
 echo ROLE_ID: the Azure role UID to assign
@@ -14,6 +13,6 @@ az role assignment create \
   --role "${ROLE_ID}" \
   --scope "${RESOURCE_SCOPE}" \
   --assignee-principal-type "ServicePrincipal" \
-  2>&1 || exit 1;
+  2>&1 || exit 1
 
 echo role_assignment_objectid.sh end
