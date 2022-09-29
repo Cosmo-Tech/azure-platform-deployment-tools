@@ -10,6 +10,8 @@ echo PRIVATE_ENDPOINT_NAME: The private endpoint name to create
 echo RESOURCE_GROUP: The resource group where to create the private endpoint 
 echo SUBNET_ID: The sub net id linked to the private endpoint
 echo RESOURCE_ID: The resource id linked to the private endpoint
+echo RESOURCE_TYPE: The resource type linked to private endpoint
+echo RESOURCE_NAME: The resource name linked to private endpoint
 echo GROUP_ID: The resource group to link
 echo CONNECTION_NAME: The private endpoint connection name
 echo DNS_GROUP_NAME: The DNS zone group name
