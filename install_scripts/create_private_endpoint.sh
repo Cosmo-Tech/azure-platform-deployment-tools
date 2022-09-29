@@ -43,6 +43,7 @@ az network private-endpoint dns-zone-group create \
   --zone-name ${ZONE_NAME} \
   2>&1 || exit 1
 
+# Need to get id since it can be different from provided connection name
 echo Get private endpoint connection id for: ${RESOURCE_GROUP} - ${RESOURCE_TYPE} - ${RESOURCE_NAME}
 export PRIVATE_ENDPOINT_CONNECTION_ID="$( \
   az network private-endpoint-connection list \

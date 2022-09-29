@@ -20,6 +20,9 @@ echo ZONE_NAME_TABLE: The DNS private zone name for table
 echo
 source ./az_login_as_sp.sh
 
+# We need to create private endpoint with manual approval since automatic apprival needs
+# PrivateEndpointConnectionsApproval/action permission which cannot be set in Managed Application
+# allowed actions
 echo Creating private endpoint ${PRIVATE_ENDPOINT_NAME} for ${RESOURCE_ID} in ${SUBNET_ID}...
 az network private-endpoint create \
   --name ${PRIVATE_ENDPOINT_NAME} \
@@ -28,6 +31,8 @@ az network private-endpoint create \
   --private-connection-resource-id ${RESOURCE_ID} \
   --group-id ${GROUP_ID} \
   --connection-name ${CONNECTION_NAME} \
+  --manual-request true \
+  --request-message "Deployment script request" \
   2>&1 || exit 1
 
 echo Creating private DNS group ${DNS_GROUP_NAME} in ${ZONE_NAME} for ADX cluster...
@@ -64,6 +69,22 @@ az network private-endpoint dns-zone-group add \
   --name ${DNS_GROUP_NAME} \
   --private-dns-zone ${ZONE_NAME_TABLE} \
   --zone-name ${ZONE_NAME_TABLE} \
+  2>&1 || exit 1
+
+# Need to get id since it can be different from provided connection name
+echo Get private endpoint connection id for: ${RESOURCE_GROUP} - ${RESOURCE_TYPE} - ${RESOURCE_NAME}
+export PRIVATE_ENDPOINT_CONNECTION_ID="$( \
+  az network private-endpoint-connection list \
+    --type ${RESOURCE_TYPE} \
+    -g ${RESOURCE_GROUP} \
+    -n ${RESOURCE_NAME} \
+    -o tsv \
+    --query "[].id"
+  )"
+echo Approving private endpoint connection ${PRIVATE_ENDPOINT_CONNECTION_ID}
+az network private-endpoint-connection approve \
+  --id ${PRIVATE_ENDPOINT_CONNECTION_ID} \
+  --description "Approved by install script" \
   2>&1 || exit 1
 
 echo create_private_endpoint_adx.sh end
