@@ -1,1 +1,1 @@
-az rest --method post --uri "/subscriptions/${SUB}/resourceGroups/${MARG}/providers/Microsoft.Solutions/applications/${MA}/refreshPermissions?targetVersion=${MAVER}&api-version=2019-07-01"
+az rest --method POST --uri "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Solutions/applications/${APPLICATION_NAME}/refreshPermissions?targetVersion=${TARGET_VERSION}&api-version=2019-07-01"
