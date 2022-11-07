@@ -37,6 +37,7 @@ help() {
   echo "--- PROM_CPU_MEM_REQUESTS | memory size requested for prometheus (default is 2Gi)"
   echo "--- PROM_REPLICAS_NUMBER | number of prometheus replicas (default is 1)"
   echo "--- PROM_ADMIN_PASSWORD | admin password for grafana (generated if not specified)"
+  echo "- REDIS_ADMIN_PASSWORD | admin password for redis (generated if not specified)"
   echo
   echo "Usage: ./$(basename "$0") CHART_PACKAGE_VERSION NAMESPACE ARGO_POSTGRESQL_PASSWORD API_VERSION [any additional options to pass as is to the cosmotech-api Helm Chart]"
   echo
@@ -364,10 +365,14 @@ fi
 
 echo -- Redis
 # Redis Cluster
+REDIS_ADMIN_PASSWORD_VAR=${REDIS_ADMIN_PASSWORD:-$(date +%s | sha256sum | base64 | head -c 32)}
+
 helm repo add bitnami https://charts.bitnami.com/bitnami
 help repo update
 
 cat <<EOF > values-redis.yaml
+auth:
+  password: ${REDIS_ADMIN_PASSWORD_VAR}
 image:
   registry: ghcr.io
   repository: cosmo-tech/cosmotech-redis

@@ -89,6 +89,9 @@ export ARGO_MINIO_SECRET_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -
 # shellcheck disable=SC2155
 export ARGO_POSTGRESQL_PASSWORD=$(kubectl -n "${NAMESPACE}" get secret argo-postgres-config -o json | jq -r '.data["password"]' | base64 -d)
 
+# Retrieve the current redis password from secret
+export REDIS_ADMIN_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 --decode)
+
 # Get the current Ingress Controller Load Balancer IP
 # shellcheck disable=SC2155
 export NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP=$(kubectl -n "${NAMESPACE}" get service ingress-nginx-controller -o json | jq -r '.spec.loadBalancerIP')
