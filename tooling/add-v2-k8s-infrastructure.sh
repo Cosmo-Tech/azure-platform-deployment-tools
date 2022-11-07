@@ -15,11 +15,12 @@ help() {
   echo "This script takes at least 2 parameters."
   echo
   echo
-  echo "Usage: ./$(basename "$0") <cluster-name> <resource_group> "
+  echo "Usage: ./$(basename "$0") <cluster-name> <resource_group> <creation-monitoring-nodepool>"
   echo
   echo "Example:"
   echo
-  echo "- ./$(basename "$0") phoenixAKSdev phoenixdev"
+  echo "- ./$(basename "$0") phoenixAKSdev phoenixdev true"
+  echo "- ./$(basename "$0") phoenixAKSdev phoenixdev false"
   echo
 }
 
@@ -34,6 +35,7 @@ fi
 
 export CLUSTER_NAME=$1
 export RESOURCE_GROUP=$2
+export CREATE_MONITORING_NODE_POOL=$3
 
 echo "Creating 'system' nodepool..."
 
@@ -113,26 +115,6 @@ az aks nodepool add --cluster-name "$CLUSTER_NAME" \
 
 echo "... 'highmemory' nodepool created"
 
-echo "Creating 'monitoring' nodepool..."
-
-az aks nodepool add --cluster-name "$CLUSTER_NAME" \
-                    -g "$RESOURCE_GROUP" \
-                    --name "monitoring" \
-                    --node-count 0 \
-                    --node-vm-size "Standard_D2ads_v5" \
-                    --node-osdisk-size 128 \
-                    --node-osdisk-type "Managed" \
-                    --max-pods 110 \
-                    --max-count 10 \
-                    --min-count 0 \
-                    --enable-cluster-autoscaler \
-                    --labels "cosmotech.com/tier=monitoring" \
-                    --node-taints "vendor=cosmotech:NoSchedule" \
-                    --mode "User" \
-                    --os-type "Linux"
-
-echo "... 'monitoring' nodepool created"
-
 echo "Creating 'services' nodepool..."
 
 az aks nodepool add --cluster-name "$CLUSTER_NAME" \
@@ -172,3 +154,27 @@ az aks nodepool add --cluster-name "$CLUSTER_NAME" \
                     --os-type "Linux"
 
 echo "... 'db' nodepool created"
+
+if [[ "${CREATE_MONITORING_NODE_POOL:-true}" == "true" ]]; then
+
+  echo "Creating 'monitoring' nodepool..."
+
+  az aks nodepool add --cluster-name "$CLUSTER_NAME" \
+                      -g "$RESOURCE_GROUP" \
+                      --name "monitoring" \
+                      --node-count 0 \
+                      --node-vm-size "Standard_D2ads_v5" \
+                      --node-osdisk-size 128 \
+                      --node-osdisk-type "Managed" \
+                      --max-pods 110 \
+                      --max-count 10 \
+                      --min-count 0 \
+                      --enable-cluster-autoscaler \
+                      --labels "cosmotech.com/tier=monitoring" \
+                      --node-taints "vendor=cosmotech:NoSchedule" \
+                      --mode "User" \
+                      --os-type "Linux"
+
+  echo "... 'monitoring' nodepool created"
+
+fi
