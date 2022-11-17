@@ -79,6 +79,7 @@ export ARGO_POSTGRESQL_USER=argo
 export ARGO_POSTGRESQL_PASSWORD="$3"
 export INGRESS_NGINX_VERSION="4.2.5"
 export CERT_MANAGER_VERSION="1.9.1"
+export PROMETHEUS_STACK_VERSION="41.7.4"
 
 export ARGO_DATABASE=argo_workflows
 export ARGO_BUCKET_NAME=argo-workflows
@@ -576,5 +577,6 @@ EOF
 
   helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
                --namespace "${MONITORING_NAMESPACE}" \
+               --version ${PROMETHEUS_STACK_VERSION} \
                --values "kube-prometheus-stack.yaml"
 fi

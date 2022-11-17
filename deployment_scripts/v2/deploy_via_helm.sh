@@ -83,6 +83,7 @@ export CERT_MANAGER_VERSION="1.9.1"
 export VERSION_REDIS="16.13.0"
 export VERSION_REDIS_COSMOTECH="1.0.0"
 export VERSION_REDIS_INSIGHT="0.1.0"
+export PROMETHEUS_STACK_VERSION="41.7.4"
 
 export ARGO_DATABASE=argo_workflows
 export ARGO_BUCKET_NAME=argo-workflows
@@ -887,5 +888,6 @@ EOF
 
   helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
                --namespace "${MONITORING_NAMESPACE}" \
+               --version ${PROMETHEUS_STACK_VERSION} \
                --values "kube-prometheus-stack.yaml"
 fi
