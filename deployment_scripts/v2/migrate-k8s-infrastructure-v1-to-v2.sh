@@ -121,7 +121,7 @@ az aks nodepool add --cluster-name "$CLUSTER_NAME" \
                     -g "$RESOURCE_GROUP" \
                     --name "services" \
                     --node-count 2 \
-                    --node-vm-size "Standard_B4ms" \
+                    --node-vm-size "Standard_A2m_v2" \
                     --node-osdisk-size 128 \
                     --node-osdisk-type "Managed" \
                     --max-pods 110 \
