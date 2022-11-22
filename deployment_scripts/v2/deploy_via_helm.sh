@@ -706,6 +706,7 @@ image:
 config:
   csm:
     platform:
+      namespace: ${NAMESPACE}
       argo:
         base-uri: "http://${ARGO_RELEASE_NAME}-argo-workflows-server.${NAMESPACE}.svc.cluster.local:2746"
         workflows:
