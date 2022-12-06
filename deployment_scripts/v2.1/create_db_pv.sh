@@ -14,6 +14,7 @@ help() {
   echo "- NAMESPACE | string | name of the targeted namespace. Generated when not set"
   echo "- REDIS_DISK_RESOURCE | string | ex: /subscriptions/<my-subscription>/resourceGroups/<my-resource-group>/providers/Microsoft.Compute/disks/<my-disk-name>"
   echo "- REDIS_DISK_SIZE | string | requested disk size (default: 64Gi)"
+  echo "- REDIS_MASTER_NAME_PVC | redis master persistent volume claim name (default: cosmotech-database-master-pvc)"
   echo
   echo "Usage: ./$(basename "$0") NAMESPACE REDIS_DISK_RESOURCE REDIS_DISK_SIZE"
 }
@@ -30,6 +31,9 @@ fi
 export NAMESPACE="$1"
 export REDIS_DISK_RESOURCE_VAR="$2"
 export REDIS_DISK_SIZE_VAR="$3"
+
+REDIS_PV_NAME=cosmotech-database-master-pv
+REDIS_PVC_NAME="${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}"
 
 WORKING_DIR=$(mktemp -d -t create_db_pv-XXXXXXXXXX)
 echo "[info] Working directory: ${WORKING_DIR}"
