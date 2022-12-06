@@ -1,1 +1,7 @@
 perso/
+.idea/
+*.iml
+*.tgz
+/deployment_scripts/v2/arch/deploy.sh
+/deployment_scripts/v2/arch/values-ARCH.yaml
+/deployment_scripts/v2/values-cosmotech-api-deploy.yaml
