@@ -81,7 +81,7 @@ export PRIVATE_ENDPOINT_CONNECTION_ID="$( \
     -g ${RESOURCE_GROUP} \
     -n ${RESOURCE_NAME} \
     -o tsv \
-    --query "[].id"
+    --query "[-1:].id"
   )"
 echo Approving private endpoint connection ${PRIVATE_ENDPOINT_CONNECTION_ID}
 az network private-endpoint-connection approve \
