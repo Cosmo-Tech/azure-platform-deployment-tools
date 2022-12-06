@@ -370,6 +370,8 @@ fi
 echo -- Redis
 
 EXISTING_REDIS_PV_NAME=$(kubectl get persistentvolumes -n "${NAMESPACE}" -l "cosmotech.com/service=redis" --field-selector='metadata.name=cosmotech-database-master-pv' -o name)
+REDIS_PV_NAME=cosmotech-database-master-pv
+REDIS_PVC_NAME="${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}"
 
 if [[ "${EXISTING_REDIS_PV_NAME:-}" == "" && "${REDIS_DISK_RESOURCE:-}" != "" ]]; then
 
@@ -377,10 +379,14 @@ cat <<EOF > redis-pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: cosmotech-database-master-pv
+  name: "${REDIS_PV_NAME}"
   labels:
     "cosmotech.com/service": "redis"
 spec:
+  storageClassName: ""
+  claimRef:
+    name: "${REDIS_PVC_NAME}"
+    namespace: "${NAMESPACE}"
   capacity:
     storage: ${REDIS_DISK_SIZE:-"64Gi"}
   accessModes:
@@ -408,18 +414,16 @@ cat <<EOF > redis-master-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: "${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}"
+  name: "${REDIS_PVC_NAME}"
   namespace: ${NAMESPACE}
 spec:
   storageClassName: ""
+  volumeName: "${REDIS_PV_NAME}"
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: "${REDIS_DISK_SIZE:-"64Gi"}"
-  selector:
-      matchLabels:
-        "cosmotech.com/service": "redis"
 
 EOF
 kubectl apply -n "${NAMESPACE}" -f redis-master-pvc.yaml
