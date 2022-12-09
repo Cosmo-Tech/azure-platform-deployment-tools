@@ -400,7 +400,7 @@ spec:
 EOF
 
 echo "Deploying DB Persistent Volume cosmotech-database-master-pv"
-kubectl apply -n "${NAMESPACE}" -f redis_pv.yaml
+kubectl apply -n "${NAMESPACE}" -f redis-pv.yaml
 
 fi
 
