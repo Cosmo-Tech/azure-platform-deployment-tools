@@ -405,10 +405,13 @@ kubectl apply -n "${NAMESPACE}" -f redis-pv.yaml
 fi
 
 # Redis Cluster
-REDIS_ADMIN_PASSWORD_VAR=${REDIS_ADMIN_PASSWORD:-$(date +%s | sha256sum | base64 | head -c 32)}
-
 helm repo add bitnami https://charts.bitnami.com/bitnami
 help repo update
+
+REDIS_PASSWORD=${REDIS_ADMIN_PASSWORD:-$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 -d || "")}
+if [[ -z $REDIS_PASSWORD ]] ; then
+  REDIS_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32)
+fi
 
 cat <<EOF > redis-master-pvc.yaml
 apiVersion: v1
@@ -431,7 +434,7 @@ kubectl apply -n "${NAMESPACE}" -f redis-master-pvc.yaml
 
 cat <<EOF > values-redis.yaml
 auth:
-  password: ${REDIS_ADMIN_PASSWORD_VAR}
+  password: ${REDIS_PASSWORD}
 image:
   registry: ghcr.io
   repository: cosmo-tech/cosmotech-redis
@@ -524,8 +527,6 @@ helm upgrade --install \
    --wait \
    --values values-redis-insight.yaml \
    --timeout 10m0s
-
-REDIS_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 -d)
 
 echo -- Minio
 # Minio
