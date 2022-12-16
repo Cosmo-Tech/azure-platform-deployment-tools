@@ -118,7 +118,7 @@ fi
 
 # Export the TLS Configuration
 # shellcheck disable=SC2155
-export TLS_SECRET_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-latest -o json | jq -r '.spec.tls[0].secretName')
+export TLS_SECRET_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-${API_VERSION} -o json | jq -r '.spec.tls[0].secretName')
 
 if [[ "${TLS_SECRET_NAME}" = letsencrypt-* ]]; then
   export TLS_CERTIFICATE_TYPE=let_s_encrypt
@@ -138,7 +138,7 @@ else
 fi
 
 # shellcheck disable=SC2155
-export COSMOTECH_API_DNS_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-latest -o json | jq -r '.spec.tls[0].hosts[0]')
+export COSMOTECH_API_DNS_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-${API_VERSION} -o json | jq -r '.spec.tls[0].hosts[0]')
 
 export PROM_ADMIN_PASSWORD=$(kubectl -n "${NAMESPACE}-monitoring" get secret "prometheus-operator-grafana" -o=jsonpath='{.data.admin-password}' | base64 -d)
 
