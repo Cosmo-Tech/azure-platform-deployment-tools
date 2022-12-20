@@ -35,7 +35,7 @@ export AZURE_DIGITAL_TWINS_URL="$2"
 export CRON_MINUTES_INTERVAL="${3:-5}"
 BASE_PATH=$(realpath "$(dirname "$0")")
 
-API_CONFIG_YAML=$(kubectl get secret --namespace ${NAMESPACE} cosmotech-api-latest -o jsonpath="{.data.application-helm\.yml}" | base64 --decode)
+API_CONFIG_YAML=$(kubectl get secret --namespace ${NAMESPACE} cosmotech-api-v2 -o jsonpath="{.data.application-helm\.yml}" | base64 --decode)
 
 if [ -e /usr/bin/yq ]
 then
@@ -46,7 +46,7 @@ else
 fi
 
 TWIN_CACHE_INFO=$(echo "$API_CONFIG_YAML" | yq e '.csm.platform.twincache' - )
-AZURE_CREDENTIALS_INFO=$(echo "$API_CONFIG_YAML" | yq e '.csm.platform.azure.credentials' - )
+AZURE_CREDENTIALS_INFO=$(echo "$API_CONFIG_YAML" | yq e '.csm.platform.azure.credentials.customer' - )
 
 export TWIN_CACHE_HOST=$( echo "$TWIN_CACHE_INFO" | yq e '.host' - )
 export TWIN_CACHE_PORT=$(echo "$TWIN_CACHE_INFO" | yq e '.port' - )
@@ -85,7 +85,7 @@ spec:
               effect: "NoSchedule"
           containers:
             - name: adt-connector-full-sync-container
-              image: ghcr.io/cosmo-tech/adt-twincache-connector:0.0.4
+              image: ghcr.io/cosmo-tech/adt-twincache-connector:0.0.5
               imagePullPolicy: IfNotPresent
               command: [ 'python', "main.py" ]
               env:
