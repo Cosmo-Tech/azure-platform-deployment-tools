@@ -147,7 +147,7 @@ export PROM_ADMIN_PASSWORD=$(kubectl -n "${NAMESPACE}-monitoring" get secret "pr
 
 # Now run the deployment script with the right environment variables set
 echo "Now running the deployment script (from \"${GIT_BRANCH_NAME}\" Git Branch) with the right environment variables..."
-curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/${API_VERSION}/deploy_via_helm.sh | bash -s -- \
+curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.1/deploy_via_helm.sh | bash -s -- \
   "${CHART_PACKAGE_VERSION}" \
   "${NAMESPACE}" \
   "${ARGO_POSTGRESQL_PASSWORD}" \
