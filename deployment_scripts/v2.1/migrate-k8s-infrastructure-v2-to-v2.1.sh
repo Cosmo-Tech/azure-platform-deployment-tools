@@ -51,5 +51,6 @@ az disk create --name "cosmotech-database-disk" \
                       --tier "$DISK_TIER"
 
 echo "... 'cosmotech-database-disk' disk created"
+echo "You may need to add kubernetes identity as disk contributor"
 
 
