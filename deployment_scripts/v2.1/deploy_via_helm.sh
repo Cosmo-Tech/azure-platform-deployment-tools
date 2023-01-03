@@ -373,7 +373,9 @@ EXISTING_REDIS_PV_NAME=$(kubectl get persistentvolumes -n "${NAMESPACE}" -l "cos
 REDIS_PV_NAME=cosmotech-database-master-pv
 REDIS_PVC_NAME="${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}"
 
-[[ ${REDIS_DISK_SIZE} == *Gi ]] || ${REDIS_DISK_SIZE}+=Gi
+[[ ${REDIS_DISK_SIZE} != *Gi ]]; then
+  export REDIS_DISK_SIZE=${REDIS_DISK_SIZE}Gi
+fi
 
 if [[ "${EXISTING_REDIS_PV_NAME:-}" == "" && "${REDIS_DISK_RESOURCE:-}" != "" ]]; then
 
