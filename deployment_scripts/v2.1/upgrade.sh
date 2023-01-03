@@ -90,10 +90,16 @@ export ARGO_MINIO_SECRET_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -
 export ARGO_POSTGRESQL_PASSWORD=$(kubectl -n "${NAMESPACE}" get secret argo-postgres-config -o json | jq -r '.data["password"]' | base64 -d)
 
 # Retrieve the current redis password from secret
-export REDIS_ADMIN_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 --decode)
+if [[ -z ${REDIS_ADMIN_PASSWORD} ]]; then
+  export REDIS_ADMIN_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 --decode)
+fi
 # Retrive redis disk information
-export REDIS_DISK_RESOURCE=$(kubectl get pv -n ${NAMESPACE} cosmotech-database-master-pv -o jsonpath="{.spec.csl.volumeHandler}")
-export REDIS_DISK_SIZE=$(kubectl get pv -n ${NAMESPACE} cosmotech-database-master-pv -o jsonpath="{.spec.capacity.storage}")
+if [[ -z ${REDIS_DISK_RESOURCE} ]]; then
+  export REDIS_DISK_RESOURCE=$(kubectl get pv -n ${NAMESPACE} cosmotech-database-master-pv -o jsonpath="{.spec.csl.volumeHandler}")
+fi
+if [[ -z ${REDIS_DISK_SIZE} ]]; then
+  export REDIS_DISK_SIZE=$(kubectl get pv -n ${NAMESPACE} cosmotech-database-master-pv -o jsonpath="{.spec.capacity.storage}")
+fi
 
 # Get the current Ingress Controller Load Balancer IP
 # shellcheck disable=SC2155
