@@ -20,9 +20,9 @@ help() {
   echo "Example:"
   echo
   echo "- ./$(basename "$0") phoenixdev eastus2 "
-  echo "- ./$(basename "$0") phoenixdev eastus2 StandardSSD_LRS"
-  echo "- ./$(basename "$0") phoenixdev eastus2 StandardSSD_LRS P6"
-  echo "- ./$(basename "$0") phoenixdev eastus2 StandardSSD_LRS P6 128Gi"
+  echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS"
+  echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS P6"
+  echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS P10 128Gi"
   echo
 }
 
@@ -37,7 +37,7 @@ fi
 
 export RESOURCE_GROUP=$1
 export DISK_LOCATION=$2
-export DISK_SKU=${3:-"StandardSSD_LRS"}
+export DISK_SKU=${3:-"Premium_LRS"}
 export DISK_TIER=${4:-"P6"}
 export DISK_SIZE=${5:-"64Gi"}
 
