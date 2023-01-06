@@ -9,7 +9,7 @@ export HELM_EXPERIMENTAL_OCI=1
 
 help() {
   echo
-  echo "This script takes at least 4 parameters."
+  echo "This script takes at least 5 parameters."
   echo
   echo "The following optional environment variables can be set to alter this script behavior:"
   echo "- ARGO_MINIO_ACCESS_KEY | string | AccessKey for MinIO. Generated when not set"
@@ -67,6 +67,7 @@ export HELM_EXPERIMENTAL_OCI=1
 export CHART_PACKAGE_VERSION="$1"
 export NAMESPACE="$2"
 export API_VERSION="$4"
+export REQUEUE_TIME="$5"
 
 echo CHART_PACKAGE_VERSION: $CHART_PACKAGE_VERSION
 echo NAMEPSACE: $NAMESPACE
@@ -684,6 +685,9 @@ server:
       memory: "128Mi"
       cpu: "1"
 controller:
+  extraEnv:
+  - name: DEFAULT_REQUEUE_TIME
+    value: "${REQUEUE_TIME}"
   podLabels:
     networking/traffic-allowed: "yes"
   tolerations:
@@ -828,7 +832,7 @@ helm upgrade --install "${COSMOTECH_API_RELEASE_NAME}" "cosmotech-api-chart-${CH
     --version ${CHART_PACKAGE_VERSION} \
     --values values-cosmotech-api-deploy.yaml \
     ${CERT_MANAGER_INGRESS_ANNOTATION_SET} \
-    "${@:5}"
+    "${@:6}"
 
 
 # kube-prometheus-stack
