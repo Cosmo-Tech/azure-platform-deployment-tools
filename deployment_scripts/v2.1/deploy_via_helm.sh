@@ -953,6 +953,32 @@ prometheus:
       selector:
         matchLabels:
           app.kubernetes.io/instance: cosmotech-api-latest
+    - name: cosmotech-v1
+      additionalLabels:
+        serviceMonitorSelector: prometheus
+      endpoints:
+        - interval: 30s
+          targetPort: 8081
+          path: /actuator/prometheus
+      namespaceSelector:
+        matchNames:
+        - phoenix
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: cosmotech-api-v1
+    - name: cosmotech-v2
+      additionalLabels:
+        serviceMonitorSelector: prometheus
+      endpoints:
+        - interval: 30s
+          targetPort: 8081
+          path: /actuator/prometheus
+      namespaceSelector:
+        matchNames:
+        - phoenix
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: cosmotech-api-v2
 
 EOF
 
