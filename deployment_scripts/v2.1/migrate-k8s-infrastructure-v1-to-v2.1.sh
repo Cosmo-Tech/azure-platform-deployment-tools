@@ -23,7 +23,7 @@ help() {
   echo "- ./$(basename "$0") phoenixAKSdev phoenixdev true eastus2 "
   echo "- ./$(basename "$0") phoenixAKSdev phoenixdev true eastus2 Premium_LRS"
   echo "- ./$(basename "$0") phoenixAKSdev phoenixdev false eastus2 Premium_LRS"
-  echo "- ./$(basename "$0") phoenixAKSdev phoenixdev false eastus2 Premium_LRS P6 128Gi"
+  echo "- ./$(basename "$0") phoenixAKSdev phoenixdev false eastus2 Premium_LRS P6 128"
   echo
 }
 
@@ -42,7 +42,7 @@ export CREATE_MONITORING_NODE_POOL=$3
 export DISK_LOCATION=$4
 export DISK_SKU=${5:-"Premium_LRS"}
 export DISK_TIER=${6:-"P6"}
-export DISK_SIZE=${7:-"64Gi"}
+export DISK_SIZE=${7:-"64"}
 
 echo "Creating 'system' nodepool..."
 

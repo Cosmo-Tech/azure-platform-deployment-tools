@@ -22,7 +22,7 @@ help() {
   echo "- ./$(basename "$0") phoenixdev eastus2 "
   echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS"
   echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS P6"
-  echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS P10 128Gi"
+  echo "- ./$(basename "$0") phoenixdev eastus2 Premium_LRS P10 128"
   echo
 }
 
@@ -39,7 +39,7 @@ export RESOURCE_GROUP=$1
 export DISK_LOCATION=$2
 export DISK_SKU=${3:-"Premium_LRS"}
 export DISK_TIER=${4:-"P6"}
-export DISK_SIZE=${5:-"64Gi"}
+export DISK_SIZE=${5:-"64"}
 
 echo "Creating 'cosmotech-database-disk' disk..."
 
