@@ -494,7 +494,7 @@ EOF
 helm upgrade --install cosmotechredis bitnami/redis \
     --namespace ${NAMESPACE} \
     --version "${VERSION_REDIS}" \
-    --values https://raw.githubusercontent.com/Cosmo-Tech/cosmotech-redis/main/values-cosmotech-cluster.yaml \
+    --values https://raw.githubusercontent.com/Cosmo-Tech/cosmotech-redis/main/values/v1/values-cosmotech-cluster.yaml \
     --values values-redis.yaml \
     --wait \
     --timeout 10m0s
