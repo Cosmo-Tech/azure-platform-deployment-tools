@@ -65,6 +65,7 @@ kubeScheduler:
   enabled: true
 kubeStateMetrics:
   enabled: true
+kube-state-metrics:
   tolerations:
       - key: "vendor"
         operator: "Equal"
