@@ -8,8 +8,18 @@ alertmanager:
   enabled: false
 grafana:
   enabled: true
+  plugins:
+    - redis-datasource
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
   defaultDashboardsEnabled: false
+  additionalDataSources:
+    - name: cosmotech-redis
+      basicAuth: true
+      basicAuthPassword: $REDIS_ADMIN_PASSWORD_VAR
+      basicAuthUser: default
+      editable: false
+      type: redis-datasource
+      url: redis://$REDIS_HOST_VAR:$REDIS_PORT_VAR
   tolerations:
     - key: "vendor"
       operator: "Equal"
