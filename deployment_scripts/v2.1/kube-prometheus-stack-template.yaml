@@ -14,12 +14,17 @@ grafana:
   defaultDashboardsEnabled: false
   additionalDataSources:
     - name: cosmotech-redis
-      basicAuth: true
-      basicAuthPassword: $REDIS_ADMIN_PASSWORD_VAR
-      basicAuthUser: default
-      editable: false
+      orgId: 1
       type: redis-datasource
+      access: proxy
       url: redis://$REDIS_HOST_VAR:$REDIS_PORT_VAR
+      basicAuth: false
+      withCredentials: false
+      isDefault: false
+      version: 1
+      editable: false
+      secureJsonData:
+        password: $REDIS_ADMIN_PASSWORD_VAR
   tolerations:
     - key: "vendor"
       operator: "Equal"
