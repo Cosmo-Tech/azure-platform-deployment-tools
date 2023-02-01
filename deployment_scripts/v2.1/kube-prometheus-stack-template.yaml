@@ -65,6 +65,23 @@ kubeScheduler:
   enabled: true
 kubeStateMetrics:
   enabled: true
+  tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "monitoring"
+  podMetadata:
+    labels:
+      networking/traffic-allowed: "yes"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 400Mi
 nodeExporter:
   enabled: true
 prometheusOperator:
