@@ -11,7 +11,7 @@ grafana:
   plugins:
     - redis-datasource
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
-  defaultDashboardsEnabled: false
+  defaultDashboardsEnabled: true
   additionalDataSources:
     - name: cosmotech-redis
       orgId: 1
