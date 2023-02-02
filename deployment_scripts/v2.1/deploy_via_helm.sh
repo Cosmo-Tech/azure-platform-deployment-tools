@@ -867,6 +867,8 @@ grafana:
   enabled: true
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
   defaultDashboardsEnabled: false
+  plugins:
+    - redis-datasource
   tolerations:
     - key: "vendor"
       operator: "Equal"
