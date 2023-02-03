@@ -80,6 +80,14 @@ grafana:
         gnetId: 9614
         revision: 1
         datasource: Prometheus
+      minio:
+        gnetId: 13502
+        revision: 20
+        datasource: Prometheus
+      postgresql:
+        gnetId: 9628
+        revision: 7
+        datasource: Prometheus
   tolerations:
     - key: "vendor"
       operator: "Equal"
