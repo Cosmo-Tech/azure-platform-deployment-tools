@@ -95,6 +95,11 @@ grafana:
       effect: "NoSchedule"
   nodeSelector:
     "cosmotech.com/tier": "monitoring"
+  serviceMonitor:
+    enabled: true
+    namespace: phoenix-monitoring
+    labels:
+      networking/traffic-allowed: "yes"
 kubeApiServer:
   enabled: true
 kubelet:
@@ -252,16 +257,3 @@ prometheus:
       selector:
         matchLabels:
           app.kubernetes.io/instance: ingress-nginx
-    - name: grafana
-      additionalLabels:
-        serviceMonitorSelector: prometheus
-      endpoints:
-        - interval: 30s
-          targetPort: 3000
-          path: /metrics
-      namespaceSelector:
-        matchNames:
-          - phoenix-monitoring
-      selector:
-        matchLabels:
-          app.kubernetes.io/name: grafana
