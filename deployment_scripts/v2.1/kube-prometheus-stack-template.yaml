@@ -72,6 +72,10 @@ grafana:
         gnetId: 12776
         revision: 2
         datasource: cosmotech-redis
+      argo:
+        gnetId: 14136
+        revision: 1
+        datasource: Prometheus
   tolerations:
     - key: "vendor"
       operator: "Equal"
