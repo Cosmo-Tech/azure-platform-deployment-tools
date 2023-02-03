@@ -27,6 +27,11 @@ alertmanager:
         memory: 400Mi
 grafana:
   enabled: true
+  ingress:
+    enabled: true
+    path: /grafana
+    hosts:
+      - localhost
   plugins:
     - redis-datasource
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
