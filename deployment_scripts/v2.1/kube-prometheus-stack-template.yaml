@@ -54,6 +54,24 @@ grafana:
       editable: false
       secureJsonData:
         password: $REDIS_ADMIN_PASSWORD_VAR
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      redis:
+        gnetId: 12776
+        revision: 2
+        datasource: cosmotech-redis
   tolerations:
     - key: "vendor"
       operator: "Equal"
