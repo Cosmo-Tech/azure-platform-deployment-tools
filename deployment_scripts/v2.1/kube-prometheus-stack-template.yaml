@@ -76,6 +76,10 @@ grafana:
         gnetId: 14136
         revision: 1
         datasource: Prometheus
+      nginx:
+        gnetId: 9614
+        revision: 1
+        datasource: Prometheus
   tolerations:
     - key: "vendor"
       operator: "Equal"
@@ -210,7 +214,33 @@ prometheus:
           path: /actuator/prometheus
       namespaceSelector:
         matchNames:
-        - phoenix
+          - phoenix
       selector:
         matchLabels:
           app.kubernetes.io/instance: cosmotech-api-v2
+    - name: argo
+      additionalLabels:
+        serviceMonitorSelector: prometheus
+      endpoints:
+        - interval: 30s
+          targetPort: 9090
+          path: /metrics
+      namespaceSelector:
+        matchNames:
+          - phoenix
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: argocsmv2
+    - name: ingress-nginx
+      additionalLabels:
+        serviceMonitorSelector: prometheus
+      endpoints:
+        - interval: 30s
+          targetPort: 10254
+          path: /metrics
+      namespaceSelector:
+        matchNames:
+          - ingress-nginx
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: ingress-nginx
