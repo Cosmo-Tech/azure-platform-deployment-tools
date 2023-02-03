@@ -155,7 +155,8 @@ prometheus:
     create: true
     name: prometheus-service-account
   prometheusSpec:
-    logLevel: info
+  serviceMonitorSelectorNilUsesHelmValues: false
+  logLevel: info
     replicas: $PROM_REPLICAS_NUMBER_VAR
     tolerations:
       - key: "vendor"
