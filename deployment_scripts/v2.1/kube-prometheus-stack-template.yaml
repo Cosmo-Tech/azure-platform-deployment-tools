@@ -30,11 +30,11 @@ grafana:
   grafana.ini:
     server:
       domain: localhost
-      root_url: "%(protocol)s://%(domain)s/grafana"
+      root_url: "%(protocol)s://%(domain)s/monitoring"
       serve_from_sub_path: true
   ingress:
     enabled: true
-    path: "/grafana"
+    path: "/monitoring"
     hosts:
       - "localhost"
   plugins:
