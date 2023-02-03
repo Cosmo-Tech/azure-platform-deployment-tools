@@ -244,3 +244,16 @@ prometheus:
       selector:
         matchLabels:
           app.kubernetes.io/instance: ingress-nginx
+    - name: grafana
+      additionalLabels:
+        serviceMonitorSelector: prometheus
+      endpoints:
+        - interval: 30s
+          targetPort: 3000
+          path: /metrics
+      namespaceSelector:
+        matchNames:
+          - phoenix-monitoring
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: grafana
