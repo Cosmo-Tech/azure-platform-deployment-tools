@@ -95,11 +95,6 @@ grafana:
       effect: "NoSchedule"
   nodeSelector:
     "cosmotech.com/tier": "monitoring"
-  serviceMonitor:
-    enabled: true
-    namespace: phoenix-monitoring
-    labels:
-      networking/traffic-allowed: "yes"
 kubeApiServer:
   enabled: true
 kubelet:
