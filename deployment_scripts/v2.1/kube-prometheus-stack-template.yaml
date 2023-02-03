@@ -82,7 +82,7 @@ grafana:
         datasource: Prometheus
       minio:
         gnetId: 15305
-        revision: 20
+        revision: 1
         datasource: Prometheus
       postgresql:
         gnetId: 9628
