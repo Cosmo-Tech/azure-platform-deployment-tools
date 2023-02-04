@@ -89,7 +89,7 @@ grafana:
         revision: 7
         datasource: Prometheus
       licensing:
-        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.1/grafana/cosmotech_licensing.json"
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.1/grafana/v2/cosmotech_licensing.json"
   tolerations:
     - key: "vendor"
       operator: "Equal"
