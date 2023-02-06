@@ -70,9 +70,9 @@ export NAMESPACE="$2"
 export API_VERSION="$4"
 export REQUEUE_TIME="${ARGO_REQUEUE_TIME:-1s}"
 
-echo CHART_PACKAGE_VERSION: $CHART_PACKAGE_VERSION
-echo NAMEPSACE: $NAMESPACE
-echo API_VERSION: $API_VERSION
+echo CHART_PACKAGE_VERSION: "$CHART_PACKAGE_VERSION"
+echo NAMEPSACE: "$NAMESPACE"
+echo API_VERSION: "$API_VERSION"
 
 export ARGO_VERSION="0.16.6"
 export ARGO_RELEASE_NAME=argocsmv2
@@ -102,10 +102,12 @@ echo -- "[info] Working directory: ${WORKING_DIR}"
 # common exports
 export COSMOTECH_API_RELEASE_NAME="cosmotech-api-${API_VERSION}"
 export REDIS_PORT=6379
-REDIS_PASSWORD=${REDIS_ADMIN_PASSWORD:-$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 -d || "")}
+REDIS_PASSWORD=${REDIS_ADMIN_PASSWORD:-$(kubectl get secret --namespace "${NAMESPACE}" cosmotechredis -o jsonpath="{.data.redis-password}" | base64 -d || "")}
 if [[ -z $REDIS_PASSWORD ]] ; then
   REDIS_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32)
 fi
+
+# HELM_CHARTS_BASE_PATH=$(realpath "$(dirname "$0")")
 
 # Create namespace if it does not exist
 kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
@@ -469,7 +471,7 @@ EOF
     --namespace "${NAMESPACE}" \
     --version ${INGRESS_NGINX_VERSION} \
     --values values-ingress-nginx.yaml \
-    ${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}
+    "${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}"
 fi
 
 echo -- Cert Manager
@@ -761,18 +763,17 @@ EOF
 
 
 helm upgrade --install cosmotechredis bitnami/redis \
-    --namespace ${NAMESPACE} \
+    --namespace "${NAMESPACE}" \
     --version "${VERSION_REDIS}" \
     --values https://raw.githubusercontent.com/Cosmo-Tech/cosmotech-redis/main/values/v1/values-cosmotech-cluster.yaml \
     --values values-redis.yaml \
     --wait \
     --timeout 10m0s
-HELM_CHARTS_BASE_PATH=$(realpath "$(dirname "$0")")
 
 echo -- Redis Insight
 # Redis Insight
 REDIS_INSIGHT_HELM_CHART="${WORKING_DIR}/redisinsight-chart.tgz"
-wget https://docs.redis.com/latest/pkgs/redisinsight-chart-${VERSION_REDIS_INSIGHT}.tgz  -O ${REDIS_INSIGHT_HELM_CHART}
+wget https://docs.redis.com/latest/pkgs/redisinsight-chart-${VERSION_REDIS_INSIGHT}.tgz  -O "${REDIS_INSIGHT_HELM_CHART}"
 
 cat <<EOF > values-redis-insight.yaml
 service:
@@ -797,7 +798,7 @@ EOF
 
 
 helm upgrade --install \
-   --namespace ${NAMESPACE} redisinsight ${REDIS_INSIGHT_HELM_CHART} \
+   --namespace "${NAMESPACE}" redisinsight "${REDIS_INSIGHT_HELM_CHART}" \
    --set service.type=NodePort \
    --wait \
    --values values-redis-insight.yaml \
@@ -841,7 +842,7 @@ metrics:
 EOF
 
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm upgrade --install ${MINIO_RELEASE_NAME} bitnami/minio --namespace ${NAMESPACE} --version ${MINIO_VERSION} --values values-minio.yaml
+helm upgrade --install ${MINIO_RELEASE_NAME} bitnami/minio --namespace "${NAMESPACE}" --version ${MINIO_VERSION} --values values-minio.yaml
 
 echo -- Postgres
 # Postgres
@@ -885,7 +886,7 @@ metrics:
 EOF
 
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm upgrade --install -n ${NAMESPACE} ${POSTGRES_RELEASE_NAME} bitnami/postgresql --version ${POSTGRESQL_VERSION} --values values-postgresql.yaml
+helm upgrade --install -n "${NAMESPACE}" ${POSTGRES_RELEASE_NAME} bitnami/postgresql --version ${POSTGRESQL_VERSION} --values values-postgresql.yaml
 
 export ARGO_POSTGRESQL_SECRET_NAME=argo-postgres-config
 cat <<EOF > postgres-secret.yaml
@@ -901,7 +902,7 @@ stringData:
 type: Opaque
 
 EOF
-kubectl apply -n ${NAMESPACE} -f postgres-secret.yaml
+kubectl apply -n "${NAMESPACE}" -f postgres-secret.yaml
 
 echo -- Argo
 # Argo
@@ -1021,7 +1022,7 @@ mainContainer:
 EOF
 
 helm repo add argo https://argoproj.github.io/argo-helm
-helm upgrade --install -n ${NAMESPACE} ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
+helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
 
 popd
 
@@ -1105,8 +1106,8 @@ fi
 
 helm upgrade --install "${COSMOTECH_API_RELEASE_NAME}" "cosmotech-api-chart-${CHART_PACKAGE_VERSION}.tgz" \
     --namespace "${NAMESPACE}" \
-    --version ${CHART_PACKAGE_VERSION} \
+    --version "${CHART_PACKAGE_VERSION}" \
     --values values-cosmotech-api-deploy.yaml \
-    ${CERT_MANAGER_INGRESS_ANNOTATION_SET} \
+    "${CERT_MANAGER_INGRESS_ANNOTATION_SET}" \
     "${@:5}"
 
