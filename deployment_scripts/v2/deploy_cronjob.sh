@@ -13,9 +13,11 @@ help() {
   echo "The following optional environment variables can be set to alter this script behavior:"
   echo "- NAMESPACE | string | name of the targeted namespace. Generated when not set"
   echo "- AZURE_DIGITAL_TWINS_URL | string | ex: https://<my-adt-instance>.api.weu.digitaltwins.azure.net"
-  echo "- CRON_MINUTES_INTERVAL | string | 5"
+  echo "- CRON_MINUTES_INTERVAL | int | 5"
+  echo "- TWIN_GRAPH_ROTATION | int | 2"
+  echo "- LOG_LEVEL | string | INFO | CRITICAL, ERROR, WARNING, INFO, DEBUG, NOTSET"
   echo
-  echo "Usage: ./$(basename "$0") NAMESPACE AZURE_DIGITAL_TWINS_URL CRON_MINUTES_INTERVAL"
+  echo "Usage: ./$(basename "$0") NAMESPACE AZURE_DIGITAL_TWINS_URL CRON_MINUTES_INTERVAL TWIN_GRAPH_ROTATION LOG_LEVEL"
 }
 
 if [[ "${1:-}" == "--help" ||  "${1:-}" == "-h" ]]; then
@@ -33,9 +35,12 @@ BINARY=yq_linux_amd64
 export NAMESPACE="$1"
 export AZURE_DIGITAL_TWINS_URL="$2"
 export CRON_MINUTES_INTERVAL="${3:-5}"
+export TWIN_GRAPH_ROTATION="${4:-2}"
+export LOG_LEVEL=${5:-"INFO"}
+
 BASE_PATH=$(realpath "$(dirname "$0")")
 
-API_CONFIG_YAML=$(kubectl get secret --namespace ${NAMESPACE} cosmotech-api-v2 -o jsonpath="{.data.application-helm\.yml}" | base64 --decode)
+API_CONFIG_YAML=$(kubectl get secret --namespace "${NAMESPACE}" cosmotech-api-v2 -o jsonpath="{.data.application-helm\.yml}" | base64 --decode)
 
 if [ -e /usr/bin/yq ]
 then
@@ -85,7 +90,7 @@ spec:
               effect: "NoSchedule"
           containers:
             - name: adt-connector-full-sync-container
-              image: ghcr.io/cosmo-tech/adt-twincache-connector:0.0.5
+              image: ghcr.io/cosmo-tech/adt-twincache-connector:0.0.6
               imagePullPolicy: IfNotPresent
               command: [ 'python', "main.py" ]
               env:
@@ -105,6 +110,10 @@ spec:
                   value: "${TWIN_CACHE_NAME}"
                 - name: TWIN_CACHE_PASSWORD
                   value: "${TWIN_CACHE_PASSWORD}"
+                - name: TWIN_CACHE_ROTATION
+                  value: "${TWIN_GRAPH_ROTATION}"
+                - name: LOG_LEVEL
+                  value: "${LOG_LEVEL}"
           restartPolicy: Never
 
 EOF
