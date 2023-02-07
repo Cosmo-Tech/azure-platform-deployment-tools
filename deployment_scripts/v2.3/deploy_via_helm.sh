@@ -171,14 +171,14 @@ grafana:
   enabled: true
   grafana.ini:
     server:
-      domain: localhost
+      domain: "${COSMOTECH_API_DNS_NAME}"
       root_url: "%(protocol)s://%(domain)s/monitoring"
       serve_from_sub_path: true
   ingress:
     enabled: true
     path: "/monitoring"
     hosts:
-      - "localhost"
+      - "${COSMOTECH_API_DNS_NAME}"
   plugins:
     - redis-datasource
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
