@@ -90,7 +90,7 @@ spec:
               effect: "NoSchedule"
           containers:
             - name: adt-connector-full-sync-container
-              image: ghcr.io/cosmo-tech/adt-twincache-connector:0.0.6
+              image: ghcr.io/cosmo-tech/adt-twincache-connector:0.0.7
               imagePullPolicy: IfNotPresent
               command: [ 'python', "main.py" ]
               env:
