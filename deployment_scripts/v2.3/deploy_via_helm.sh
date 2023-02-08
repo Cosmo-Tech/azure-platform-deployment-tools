@@ -234,10 +234,12 @@ grafana:
         gnetId: 11001
         revision: 1
         datasource: Prometheus
-      licensing:
-        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.3/grafana/cosmotech_licensing/v3/cosmotech_licensing.json"
-      cat:
-        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.3/grafana/customer_success/v1/customer_success.json"
+      csm_licensing:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v3/cosmotech_licensing.json"
+      csm_customer_success:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/customer_success/v1/customer_success.json"
+      csm_api:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_api/v1/cosmotech_api.json"
   tolerations:
     - key: "vendor"
       operator: "Equal"
