@@ -235,7 +235,7 @@ grafana:
         revision: 1
         datasource: Prometheus
       csm_licensing:
-        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v3/cosmotech_licensing.json"
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v4/cosmotech_licensing.json"
       csm_customer_success:
         url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/customer_success/v1/customer_success.json"
       csm_api:
