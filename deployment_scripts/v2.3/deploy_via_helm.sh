@@ -368,7 +368,6 @@ prometheus:
           app.kubernetes.io/instance: cosmotech-api-v1
 EOF
 
-echo YOYOYO
   helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
                --namespace "${MONITORING_NAMESPACE}" \
                --version ${PROMETHEUS_STACK_VERSION} \
@@ -472,7 +471,6 @@ defaultBackend:
 
 EOF
 
-echo YAYAYAA
   echo helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
     --namespace "${NAMESPACE}" \
     --version ${INGRESS_NGINX_VERSION} \
@@ -484,7 +482,6 @@ echo YAYAYAA
     --version ${INGRESS_NGINX_VERSION} \
     --values values-ingress-nginx.yaml \
     "${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}"
-echo YAYAYAAAAAAAAAAAAAAAAAA
 fi
 
 echo -- Cert Manager
@@ -584,7 +581,6 @@ EOF
 
 
   kubectl label namespace "${NAMESPACE}" cert-manager.io/disable-validation=true --overwrite=true
-echo YUYUYUYUYU
   helm upgrade --install cert-manager jetstack/cert-manager \
     --namespace "${NAMESPACE}" \
     --version v${CERT_MANAGER_VERSION} \
@@ -776,7 +772,6 @@ replica:
 EOF
 
 
-echo YIYIYIYI
 helm upgrade --install cosmotechredis bitnami/redis \
     --namespace "${NAMESPACE}" \
     --version "${VERSION_REDIS}" \
@@ -812,7 +807,6 @@ resources:
 EOF
 
 
-echo YIYIYIYI
 helm upgrade --install \
    --namespace "${NAMESPACE}" redisinsight "${REDIS_INSIGHT_HELM_CHART}" \
    --set service.type=NodePort \
