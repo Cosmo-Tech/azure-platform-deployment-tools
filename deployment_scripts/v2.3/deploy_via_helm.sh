@@ -471,12 +471,6 @@ defaultBackend:
 
 EOF
 
-  echo helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-    --namespace "${NAMESPACE}" \
-    --version ${INGRESS_NGINX_VERSION} \
-    --values values-ingress-nginx.yaml \
-    "${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}"
-
   helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
     --namespace "${NAMESPACE}" \
     --version ${INGRESS_NGINX_VERSION} \
