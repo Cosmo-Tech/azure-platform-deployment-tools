@@ -177,8 +177,13 @@ grafana:
   ingress:
     enabled: true
     path: "/monitoring"
+    annotations:
+      kubernetes.io/ingress.class: nginx
     hosts:
       - "${COSMOTECH_API_DNS_NAME}"
+    tls:
+      - secretName: ${TLS_SECRET_NAME}
+        hosts: [${COSMOTECH_API_DNS_NAME}]
   plugins:
     - redis-datasource
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
@@ -471,11 +476,11 @@ defaultBackend:
 
 EOF
 
-  helm upgrade "ingress-nginx" "ingress-nginx/ingress-nginx" --install \
+  helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
     --namespace "${NAMESPACE}" \
-    --version "${INGRESS_NGINX_VERSION}" \
-    --values "values-ingress-nginx.yaml" \
-    "${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}"
+    --version ${INGRESS_NGINX_VERSION} \
+    --values values-ingress-nginx.yaml \
+    ${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}
 fi
 
 echo -- Cert Manager
@@ -815,6 +820,7 @@ fullnameOverride: ${MINIO_RELEASE_NAME}
 defaultBuckets: "${ARGO_BUCKET_NAME}"
 persistence:
   enabled: true
+  size: "${ARGO_MINIO_PERSISTENCE_SIZE:-16Gi}"
 resources:
   requests:
     memory: "${ARGO_MINIO_REQUESTS_MEMORY:-2Gi}"
@@ -1112,6 +1118,6 @@ helm upgrade --install "${COSMOTECH_API_RELEASE_NAME}" "cosmotech-api-chart-${CH
     --namespace "${NAMESPACE}" \
     --version "${CHART_PACKAGE_VERSION}" \
     --values values-cosmotech-api-deploy.yaml \
-    "${CERT_MANAGER_INGRESS_ANNOTATION_SET}" \
+    ${CERT_MANAGER_INGRESS_ANNOTATION_SET} \
     "${@:5}"
 
