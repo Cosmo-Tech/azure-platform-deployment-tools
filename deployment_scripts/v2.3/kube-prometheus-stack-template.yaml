@@ -35,6 +35,8 @@ grafana:
   ingress:
     enabled: true
     path: "/monitoring"
+    annotations:
+      kubernetes.io/ingress.class: nginx
     hosts:
       - "localhost"
   plugins:
