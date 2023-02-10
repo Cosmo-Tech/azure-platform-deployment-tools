@@ -133,7 +133,7 @@ if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
   PROM_CPU_MEM_REQUESTS_VAR=${PROM_CPU_MEM_REQUESTS:-"2Gi"} \
   PROM_REPLICAS_NUMBER_VAR=${PROM_REPLICAS_NUMBER:-"1"} \
   PROM_ADMIN_PASSWORD_VAR=${PROM_ADMIN_PASSWORD:-$(date +%s | sha256sum | base64 | head -c 32)} \
-  REDIS_ADMIN_PASSWORD_VAR=${REDIS_ADMIN_PASSWORD} \
+  REDIS_ADMIN_PASSWORD_VAR=${REDIS_PASSWORD} \
   REDIS_HOST_VAR=cosmotechredis-master.${NAMESPACE}.svc.cluster.local \
   REDIS_PORT_VAR=${REDIS_PORT} \
   # Cannot use kube-prometheus-stack.yaml here directly since ARM only download deploy_via_helm.sh
