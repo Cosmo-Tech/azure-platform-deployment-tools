@@ -503,7 +503,7 @@ cat <<EOF > values-cert-manager.yaml
 installCRDs: true
 prometheus:
   enabled: true
-  serviceMonitor:
+  servicemonitor:
     enabled: true
     namespace: $MONITORING_NAMESPACE
     interval: 300s
