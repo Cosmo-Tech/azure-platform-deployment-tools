@@ -345,19 +345,6 @@ prometheus:
             requests:
               storage: $PROM_STORAGE_RESOURCE_REQUEST_VAR
   additionalServiceMonitors:
-    - name: cosmotech-latest
-      additionalLabels:
-        serviceMonitorSelector: prometheus
-      endpoints:
-        - interval: 30s
-          targetPort: 8081
-          path: /actuator/prometheus
-      namespaceSelector:
-        matchNames:
-        - phoenix
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: cosmotech-api-latest
     - name: cosmotech-v1
       additionalLabels:
         serviceMonitorSelector: prometheus
