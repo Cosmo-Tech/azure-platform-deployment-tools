@@ -766,40 +766,6 @@ helm upgrade --install cosmotechredis bitnami/redis \
     --wait \
     --timeout 10m0s
 
-echo -- Redis Insight
-# Redis Insight
-REDIS_INSIGHT_HELM_CHART="${WORKING_DIR}/redisinsight-chart.tgz"
-wget https://docs.redis.com/latest/pkgs/redisinsight-chart-${VERSION_REDIS_INSIGHT}.tgz  -O "${REDIS_INSIGHT_HELM_CHART}"
-
-cat <<EOF > values-redis-insight.yaml
-service:
-  type: NodePort
-  port: 80
-tolerations:
-- key: "vendor"
-  operator: "Equal"
-  value: "cosmotech"
-  effect: "NoSchedule"
-nodeSelector:
-  "cosmotech.com/tier": "services"
-resources:
-  requests:
-    cpu: 100m
-    memory: 128Mi
-  limits:
-    cpu: 1000m
-    memory: 128Mi
-
-EOF
-
-
-helm upgrade --install \
-   --namespace "${NAMESPACE}" redisinsight "${REDIS_INSIGHT_HELM_CHART}" \
-   --set service.type=NodePort \
-   --wait \
-   --values values-redis-insight.yaml \
-   --timeout 10m0s
-
 echo -- Minio
 # Minio
 cat <<EOF > values-minio.yaml
