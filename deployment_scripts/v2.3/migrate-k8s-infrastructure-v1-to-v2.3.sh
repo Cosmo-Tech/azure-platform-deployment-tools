@@ -50,7 +50,7 @@ az aks nodepool add --cluster-name "$CLUSTER_NAME" \
                     -g "$RESOURCE_GROUP" \
                     --name "system" \
                     --node-count 4 \
-                    --node-vm-size "Standard_D4d_v4" \
+                    --node-vm-size "Standard_A2_v2" \
                     --node-osdisk-size 128 \
                     --node-osdisk-type "Managed" \
                     --max-pods 110 \
@@ -68,7 +68,7 @@ az aks nodepool add --cluster-name "$CLUSTER_NAME" \
                     -g "$RESOURCE_GROUP" \
                     --name "basic" \
                     --node-count 2 \
-                    --node-vm-size "Standard_B2s" \
+                    --node-vm-size "Standard_F4s_v2" \
                     --node-osdisk-size 128 \
                     --node-osdisk-type "Managed" \
                     --max-pods 110 \
@@ -108,7 +108,7 @@ az aks nodepool add --cluster-name "$CLUSTER_NAME" \
                     -g "$RESOURCE_GROUP" \
                     --name "highmemory" \
                     --node-count 0 \
-                    --node-vm-size "Standard_E2ads_v5" \
+                    --node-vm-size "Standard_E16ads_v5" \
                     --node-osdisk-size 128 \
                     --node-osdisk-type "Managed" \
                     --max-pods 110 \
