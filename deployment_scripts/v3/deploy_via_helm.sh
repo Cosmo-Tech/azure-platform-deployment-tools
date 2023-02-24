@@ -947,10 +947,10 @@ server:
     "cosmotech.com/tier": "services"
   resources:
     requests:
-      memory: "64Mi"
+      memory: "256Mi"
       cpu: "100m"
     limits:
-      memory: "128Mi"
+      memory: "512Mi"
       cpu: "1"
 controller:
   extraEnv:
@@ -970,10 +970,10 @@ controller:
     "cosmotech.com/tier": "services"
   resources:
     requests:
-      memory: "64Mi"
+      memory: "256Mi"
       cpu: "100m"
     limits:
-      memory: "128Mi"
+      memory: "512Mi"
       cpu: "1"
   containerRuntimeExecutor: k8sapi
   metricsConfig:
