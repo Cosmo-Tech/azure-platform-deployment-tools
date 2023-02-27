@@ -128,7 +128,8 @@ if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
 
   MONITORING_NAMESPACE_VAR=${MONITORING_NAMESPACE} \
   PROM_STORAGE_CLASS_NAME_VAR=${PROM_STORAGE_CLASS_NAME:-"default"} \
-  PROM_STORAGE_RESOURCE_REQUEST_VAR=${PROM_STORAGE_RESOURCE_REQUEST:-"32Gi"} \
+  # Count 1Gb per day
+  PROM_STORAGE_RESOURCE_REQUEST_VAR=${PROM_STORAGE_RESOURCE_REQUEST:-"64Gi"} \
   PROM_CPU_MEM_LIMITS_VAR=${PROM_CPU_MEM_LIMITS:-"2Gi"} \
   PROM_CPU_MEM_REQUESTS_VAR=${PROM_CPU_MEM_REQUESTS:-"2Gi"} \
   PROM_REPLICAS_NUMBER_VAR=${PROM_REPLICAS_NUMBER:-"1"} \
@@ -334,7 +335,7 @@ prometheus:
       requests:
         cpu: 1
         memory: $PROM_CPU_MEM_REQUESTS_VAR
-    retention: 365d
+    retention: 60d
     storageSpec:
       volumeClaimTemplate:
         spec:
