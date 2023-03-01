@@ -134,6 +134,8 @@ controller:
   nodeSelector:
     kubernetes.io/os: "linux"
   service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/healthz"
     labels:
       networking/traffic-allowed: "yes"
     loadBalancerIP: "${NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP}"
