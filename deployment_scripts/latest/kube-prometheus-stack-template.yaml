@@ -3,13 +3,99 @@ name: cosmotech-api-latest
 labels:
   networking/traffic-allowed: "yes"
 defaultRules:
-  create: false
+  create: true
 alertmanager:
-  enabled: false
+  enabled: true
+  alertmanagerSpec:
+    logLevel: info
+    tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
+    nodeSelector:
+      "cosmotech.com/tier": "monitoring"
+    podMetadata:
+      labels:
+        networking/traffic-allowed: "yes"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 400Mi
 grafana:
   enabled: true
+  grafana.ini:
+    server:
+      domain: localhost
+      root_url: "%(protocol)s://%(domain)s/monitoring"
+      serve_from_sub_path: true
+  ingress:
+    enabled: true
+    path: "/monitoring"
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - "localhost"
+  plugins:
+    - redis-datasource
   adminPassword: $PROM_ADMIN_PASSWORD_VAR
-  defaultDashboardsEnabled: false
+  defaultDashboardsEnabled: true
+  additionalDataSources:
+    - name: cosmotech-redis
+      orgId: 1
+      type: redis-datasource
+      access: proxy
+      url: redis://$REDIS_HOST_VAR:$REDIS_PORT_VAR
+      basicAuth: false
+      withCredentials: false
+      isDefault: false
+      version: 1
+      editable: false
+      secureJsonData:
+        password: $REDIS_ADMIN_PASSWORD_VAR
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      redis:
+        gnetId: 12776
+        revision: 2
+        datasource: cosmotech-redis
+      argo:
+        gnetId: 14136
+        revision: 1
+        datasource: Prometheus
+      nginx:
+        gnetId: 9614
+        revision: 1
+        datasource: Prometheus
+      minio:
+        gnetId: 15305
+        revision: 1
+        datasource: Prometheus
+      postgresql:
+        gnetId: 9628
+        revision: 7
+        datasource: Prometheus
+      csm_licensing:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v7/cosmotech_licensing.json"
+      csm_customer_success:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/customer_success/v1/customer_success.json"
+      csm_api:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_api/v1/cosmotech_api.json"
   tolerations:
     - key: "vendor"
       operator: "Equal"
@@ -18,21 +104,39 @@ grafana:
   nodeSelector:
     "cosmotech.com/tier": "monitoring"
 kubeApiServer:
-  enabled: false
+  enabled: true
 kubelet:
-  enabled: false
+  enabled: true
 kubeControllerManager:
-  enabled: false
+  enabled: true
 coreDns:
-  enabled: false
+  enabled: true
 kubeEtcd:
-  enabled: false
+  enabled: true
 kubeScheduler:
-  enabled: false
+  enabled: true
 kubeStateMetrics:
-  enabled: false
+  enabled: true
+kube-state-metrics:
+  tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "monitoring"
+  podMetadata:
+    labels:
+      networking/traffic-allowed: "yes"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 400Mi
 nodeExporter:
-  enabled: false
+  enabled: true
 prometheusOperator:
   tolerations:
     - key: "vendor"
@@ -59,6 +163,7 @@ prometheus:
     create: true
     name: prometheus-service-account
   prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
     logLevel: info
     replicas: $PROM_REPLICAS_NUMBER_VAR
     tolerations:
@@ -80,10 +185,7 @@ prometheus:
       requests:
         cpu: 1
         memory: $PROM_CPU_MEM_REQUESTS_VAR
-    retention: 35d
-    serviceMonitorSelector:
-      matchLabels:
-        serviceMonitorSelector: prometheus
+    retention: 365d
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -94,19 +196,6 @@ prometheus:
             requests:
               storage: $PROM_STORAGE_RESOURCE_REQUEST_VAR
   additionalServiceMonitors:
-    - name: cosmotech-latest
-      additionalLabels:
-        serviceMonitorSelector: prometheus
-      endpoints:
-        - interval: 30s
-          targetPort: 8081
-          path: /actuator/prometheus
-      namespaceSelector:
-        matchNames:
-        - phoenix
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: cosmotech-api-latest
     - name: cosmotech-v1
       additionalLabels:
         serviceMonitorSelector: prometheus
@@ -120,16 +209,3 @@ prometheus:
       selector:
         matchLabels:
           app.kubernetes.io/instance: cosmotech-api-v1
-    - name: cosmotech-v2
-      additionalLabels:
-        serviceMonitorSelector: prometheus
-      endpoints:
-        - interval: 30s
-          targetPort: 8081
-          path: /actuator/prometheus
-      namespaceSelector:
-        matchNames:
-        - phoenix
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: cosmotech-api-v2

@@ -9,11 +9,12 @@ export HELM_EXPERIMENTAL_OCI=1
 
 help() {
   echo
-  echo "This script takes at least 4 parameters."
+  echo "This script takes at least 5 parameters."
   echo
   echo "The following optional environment variables can be set to alter this script behavior:"
   echo "- ARGO_MINIO_ACCESS_KEY | string | AccessKey for MinIO. Generated when not set"
   echo "- ARGO_MINIO_SECRET_KEY | string | SecretKey for MinIO. Generated when not set"
+  echo "- ARGO_REQUEUE_TIME | string | Workflow requeue time, 1s by default"
   echo "- ARGO_MINIO_REQUESTS_MEMORY | units of bytes (default is 4Gi) | Memory requests for the Argo MinIO server"
   echo "- ARGO_MINIO_PERSISTENCE_SIZE | units of bytes (default is 500Gi) | Persistence size for the Argo MinIO server"
   echo "- NGINX_INGRESS_CONTROLLER_ENABLED | boolean (default is false) | indicating whether an NGINX Ingress Controller should be deployed and an Ingress resource created too"
@@ -37,6 +38,10 @@ help() {
   echo "--- PROM_CPU_MEM_REQUESTS | memory size requested for prometheus (default is 2Gi)"
   echo "--- PROM_REPLICAS_NUMBER | number of prometheus replicas (default is 1)"
   echo "--- PROM_ADMIN_PASSWORD | admin password for grafana (generated if not specified)"
+  echo "- REDIS_ADMIN_PASSWORD | admin password for redis (generated if not specified)"
+  echo "- REDIS_DISK_SIZE | redis disk size requirement (default: 64Gi)"
+  echo "- REDIS_MASTER_NAME_PVC | redis master persistent volume claim name (default: cosmotech-database-master-pvc)"
+  echo "- REDIS_DISK_RESOURCE | redis volume handle resource id (ex: /subscriptions/<my-subscription>/resourceGroups/<my-resource-group>/providers/Microsoft.Compute/disks/<my-disk-name>)"
   echo
   echo "Usage: ./$(basename "$0") CHART_PACKAGE_VERSION NAMESPACE ARGO_POSTGRESQL_PASSWORD API_VERSION [any additional options to pass as is to the cosmotech-api Helm Chart]"
   echo
@@ -63,15 +68,16 @@ export HELM_EXPERIMENTAL_OCI=1
 export CHART_PACKAGE_VERSION="$1"
 export NAMESPACE="$2"
 export API_VERSION="$4"
+export REQUEUE_TIME="${ARGO_REQUEUE_TIME:-1s}"
 
-echo CHART_PACKAGE_VERSION: $CHART_PACKAGE_VERSION
-echo NAMEPSACE: $NAMESPACE
-echo API_VERSION: $API_VERSION
+echo CHART_PACKAGE_VERSION: "$CHART_PACKAGE_VERSION"
+echo NAMEPSACE: "$NAMESPACE"
+echo API_VERSION: "$API_VERSION"
 
 export ARGO_VERSION="0.16.6"
 export ARGO_RELEASE_NAME=argocsmv2
 export ARGO_RELEASE_NAMESPACE="${NAMESPACE}"
-export MINIO_VERSION="8.0.10"
+export MINIO_VERSION="12.1.3"
 export MINIO_RELEASE_NAME=miniocsmv2
 export POSTGRES_RELEASE_NAME=postgrescsmv2
 export POSTGRESQL_VERSION="11.6.12"
@@ -79,7 +85,10 @@ export ARGO_POSTGRESQL_USER=argo
 export ARGO_POSTGRESQL_PASSWORD="$3"
 export INGRESS_NGINX_VERSION="4.2.5"
 export CERT_MANAGER_VERSION="1.9.1"
-export PROMETHEUS_STACK_VERSION="41.7.4"
+export VERSION_REDIS="17.3.14"
+export VERSION_REDIS_COSMOTECH="1.0.2"
+export VERSION_REDIS_INSIGHT="0.1.0"
+export PROMETHEUS_STACK_VERSION="45.0.0"
 
 export ARGO_DATABASE=argo_workflows
 export ARGO_BUCKET_NAME=argo-workflows
@@ -88,6 +97,18 @@ WORKING_DIR=$(mktemp -d -t cosmotech-api-helm-XXXXXXXXXX)
 echo "[info] Working directory: ${WORKING_DIR}"
 pushd "${WORKING_DIR}"
 
+echo -- "[info] Working directory: ${WORKING_DIR}"
+
+# common exports
+export COSMOTECH_API_RELEASE_NAME="cosmotech-api-${API_VERSION}"
+export REDIS_PORT=6379
+REDIS_PASSWORD=${REDIS_ADMIN_PASSWORD:-$(kubectl get secret --namespace "${NAMESPACE}" cosmotechredis -o jsonpath="{.data.redis-password}" | base64 -d || "")}
+if [[ -z $REDIS_PASSWORD ]] ; then
+  REDIS_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32)
+fi
+
+# HELM_CHARTS_BASE_PATH=$(realpath "$(dirname "$0")")
+
 # Create namespace if it does not exist
 kubectl create namespace "${NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
 
@@ -95,6 +116,257 @@ if [[ "${COSMOTECH_API_DNS_NAME:-}" == "" ]]; then
   export COSMOTECH_API_DNS_NAME="${CERT_MANAGER_COSMOTECH_API_DNS_NAME:-}"
 fi
 
+# kube-prometheus-stack
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+# https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
+if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
+  echo -- Monitoring stack
+  export MONITORING_NAMESPACE="${NAMESPACE}-monitoring"
+  kubectl create namespace "${MONITORING_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo update
+
+  MONITORING_NAMESPACE_VAR=${MONITORING_NAMESPACE} \
+  PROM_STORAGE_CLASS_NAME_VAR=${PROM_STORAGE_CLASS_NAME:-"default"} \
+  PROM_STORAGE_RESOURCE_REQUEST_VAR=${PROM_STORAGE_RESOURCE_REQUEST:-"64Gi"} \
+  PROM_CPU_MEM_LIMITS_VAR=${PROM_CPU_MEM_LIMITS:-"2Gi"} \
+  PROM_CPU_MEM_REQUESTS_VAR=${PROM_CPU_MEM_REQUESTS:-"2Gi"} \
+  PROM_REPLICAS_NUMBER_VAR=${PROM_REPLICAS_NUMBER:-"1"} \
+  PROM_ADMIN_PASSWORD_VAR=${PROM_ADMIN_PASSWORD:-$(date +%s | sha256sum | base64 | head -c 32)} \
+  REDIS_ADMIN_PASSWORD_VAR=${REDIS_PASSWORD} \
+  REDIS_HOST_VAR=cosmotechredis-master.${NAMESPACE}.svc.cluster.local \
+  REDIS_PORT_VAR=${REDIS_PORT} \
+  # Cannot use kube-prometheus-stack.yaml here directly since ARM only download deploy_via_helm.sh
+  # envsubst < "${HELM_CHARTS_BASE_PATH}"/kube-prometheus-stack-template.yaml > kube-prometheus-stack.yaml
+
+cat <<EOF > kube-prometheus-stack.yaml
+namespace: $MONITORING_NAMESPACE_VAR
+name: cosmotech-api-latest
+labels:
+  networking/traffic-allowed: "yes"
+defaultRules:
+  create: true
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    logLevel: info
+    tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
+    nodeSelector:
+      "cosmotech.com/tier": "monitoring"
+    podMetadata:
+      labels:
+        networking/traffic-allowed: "yes"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 1
+        memory: 400Mi
+grafana:
+  enabled: true
+  grafana.ini:
+    server:
+      domain: "${COSMOTECH_API_DNS_NAME}"
+      root_url: "%(protocol)s://%(domain)s/monitoring"
+      serve_from_sub_path: true
+  ingress:
+    enabled: true
+    path: "/monitoring"
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - "${COSMOTECH_API_DNS_NAME}"
+    tls:
+      - secretName: ${TLS_SECRET_NAME}
+        hosts: [${COSMOTECH_API_DNS_NAME}]
+  plugins:
+    - redis-datasource
+  adminPassword: $PROM_ADMIN_PASSWORD_VAR
+  defaultDashboardsEnabled: true
+  additionalDataSources:
+    - name: cosmotech-redis
+      orgId: 1
+      type: redis-datasource
+      access: proxy
+      url: redis://$REDIS_HOST_VAR:$REDIS_PORT_VAR
+      basicAuth: false
+      withCredentials: false
+      isDefault: false
+      version: 1
+      editable: false
+      secureJsonData:
+        password: $REDIS_ADMIN_PASSWORD_VAR
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      redis:
+        gnetId: 12776
+        revision: 2
+        datasource: cosmotech-redis
+      argo:
+        gnetId: 14136
+        revision: 1
+        datasource: Prometheus
+      nginx:
+        gnetId: 9614
+        revision: 1
+        datasource: Prometheus
+      minio:
+        gnetId: 15305
+        revision: 1
+        datasource: Prometheus
+      postgresql:
+        gnetId: 9628
+        revision: 7
+        datasource: Prometheus
+      certmanager:
+        gnetId: 11001
+        revision: 1
+        datasource: Prometheus
+      csm_licensing:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v7/cosmotech_licensing.json"
+      csm_customer_success:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/customer_success/v1/customer_success.json"
+      csm_api:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_api/v1/cosmotech_api.json"
+  tolerations:
+    - key: "vendor"
+      operator: "Equal"
+      value: "cosmotech"
+      effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "monitoring"
+kubeApiServer:
+  enabled: true
+kubelet:
+  enabled: true
+kubeControllerManager:
+  enabled: true
+coreDns:
+  enabled: true
+kubeEtcd:
+  enabled: true
+kubeScheduler:
+  enabled: true
+kubeStateMetrics:
+  enabled: true
+kube-state-metrics:
+  tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "monitoring"
+  podMetadata:
+    labels:
+      networking/traffic-allowed: "yes"
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 400Mi
+nodeExporter:
+  enabled: true
+prometheusOperator:
+  tolerations:
+    - key: "vendor"
+      operator: "Equal"
+      value: "cosmotech"
+      effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "monitoring"
+  admissionWebhooks:
+    patch:
+      labels:
+        networking/traffic-allowed: "yes"
+      nodeSelector:
+        "cosmotech.com/tier": "monitoring"
+      tolerations:
+        - key: "vendor"
+          operator: "Equal"
+          value: "cosmotech"
+          effect: "NoSchedule"
+prometheus:
+  enabled: true
+  crname: prometheus
+  serviceAccount:
+    create: true
+    name: prometheus-service-account
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    logLevel: info
+    replicas: $PROM_REPLICAS_NUMBER_VAR
+    tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
+    nodeSelector:
+      "cosmotech.com/tier": "monitoring"
+    podMetadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+      labels:
+        app: prometheus
+    resources:
+      limits:
+        cpu: 1
+        memory: $PROM_CPU_MEM_LIMITS_VAR
+      requests:
+        cpu: 1
+        memory: $PROM_CPU_MEM_REQUESTS_VAR
+    retention: 60d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: $PROM_STORAGE_CLASS_NAME_VAR
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: $PROM_STORAGE_RESOURCE_REQUEST_VAR
+  additionalServiceMonitors:
+    - name: cosmotech-v1
+      additionalLabels:
+        serviceMonitorSelector: prometheus
+      endpoints:
+        - interval: 30s
+          targetPort: 8081
+          path: /actuator/prometheus
+      namespaceSelector:
+        matchNames:
+        - phoenix
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: cosmotech-api-v1
+EOF
+
+  helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
+               --namespace "${MONITORING_NAMESPACE}" \
+               --version ${PROMETHEUS_STACK_VERSION} \
+               --values "kube-prometheus-stack.yaml"
+fi
+
+echo -- Certificate config
 # NGINX Ingress Controller & Certificate
 if [[ "${CERT_MANAGER_USE_ACME_PROD:-false}" == "true" ]]; then
   export CERT_MANAGER_ACME="prod"
@@ -120,31 +392,76 @@ fi
 
 if [[ "${NGINX_INGRESS_CONTROLLER_ENABLED:-false}" == "true" ]]; then
   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+  helm repo update
 
   export NGINX_INGRESS_CONTROLLER_REPLICA_COUNT="${NGINX_INGRESS_CONTROLLER_REPLICA_COUNT:-1}"
   export NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP="${NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP:-}"
 
 cat <<EOF > values-ingress-nginx.yaml
 controller:
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: $MONITORING_NAMESPACE
   labels:
     networking/traffic-allowed: "yes"
   podLabels:
     networking/traffic-allowed: "yes"
   replicaCount: "${NGINX_INGRESS_CONTROLLER_REPLICA_COUNT}"
   nodeSelector:
-    kubernetes.io/os: "linux"
+    "cosmotech.com/tier": "services"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
   service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/healthz"
     labels:
       networking/traffic-allowed: "yes"
     loadBalancerIP: "${NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP}"
   extraArgs:
     default-ssl-certificate: "${NAMESPACE}/${TLS_SECRET_NAME}"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+  admissionWebhooks:
+    labels:
+      networking/traffic-allowed: "yes"
+    patch:
+      labels:
+        networking/traffic-allowed: "yes"
+      nodeSelector:
+        "cosmotech.com/tier": "services"
+      tolerations:
+      - key: "vendor"
+        operator: "Equal"
+        value: "cosmotech"
+        effect: "NoSchedule"
 
 defaultBackend:
   podLabels:
     networking/traffic-allowed: "yes"
   nodeSelector:
-    "kubernetes.io/os": "linux"
+    "cosmotech.com/tier": "services"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
 
 EOF
 
@@ -155,6 +472,7 @@ EOF
     ${NGINX_INGRESS_CONTROLLER_HELM_ADDITIONAL_OPTIONS:-}
 fi
 
+echo -- Cert Manager
 # cert-manager
 if [[ "${TLS_CERTIFICATE_LET_S_ENCRYPT_CONTACT_EMAIL:-}" == "" ]]; then
   export TLS_CERTIFICATE_LET_S_ENCRYPT_CONTACT_EMAIL="${CERT_MANAGER_ACME_CONTACT_EMAIL:-}"
@@ -168,6 +486,87 @@ if [[ "${TLS_CERTIFICATE_TYPE:-}" == "" ]]; then
 fi
 if [[ "${CERT_MANAGER_ENABLED:-false}" == "true" ]]; then
   helm repo add jetstack https://charts.jetstack.io
+  helm repo update
+
+cat <<EOF > values-cert-manager.yaml
+installCRDs: true
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true
+    namespace: $MONITORING_NAMESPACE
+    interval: 300s
+    scrapeTimeout: 30s
+tolerations:
+- key: "vendor"
+  operator: "Equal"
+  value: "cosmotech"
+  effect: "NoSchedule"
+nodeSelector:
+  "cosmotech.com/tier": "services"
+podLabels:
+  "networking/traffic-allowed": "yes"
+resources:
+  requests:
+    cpu: 10m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 256Mi
+webhook:
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "services"
+  podLabels:
+    "networking/traffic-allowed": "yes"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 1000m
+      memory: 64Mi
+cainjector:
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "services"
+  podLabels:
+    "networking/traffic-allowed": "yes"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 1000m
+      memory: 256Mi
+startupapicheck:
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "services"
+  podLabels:
+    "networking/traffic-allowed": "yes"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      cpu: 1000m
+      memory: 64Mi
+
+EOF
+
 
   kubectl label namespace "${NAMESPACE}" cert-manager.io/disable-validation=true --overwrite=true
   helm upgrade --install cert-manager jetstack/cert-manager \
@@ -176,10 +575,8 @@ if [[ "${CERT_MANAGER_ENABLED:-false}" == "true" ]]; then
     --wait \
     --timeout "${CERT_MANAGER_INSTALL_WAIT_TIMEOUT:-3m}" \
     --set installCRDs=true \
-    --set nodeSelector."kubernetes\.io/os"=linux \
-    --set podLabels."networking/traffic-allowed"=yes \
-    --set webhook.podLabels."networking/traffic-allowed"=yes \
-    --set cainjector.podLabels."networking/traffic-allowed"=yes
+    --values values-cert-manager.yaml
+
 
   if [[ "${COSMOTECH_API_DNS_NAME:-}" != "" && "${TLS_CERTIFICATE_LET_S_ENCRYPT_CONTACT_EMAIL:-}" != "" ]]; then
     # Wait few seconds until the CertManager WebHook pod is ready.
@@ -187,6 +584,7 @@ if [[ "${CERT_MANAGER_ENABLED:-false}" == "true" ]]; then
     # Error from server: error when creating "STDIN": conversion webhook for cert-manager.io/v1,
     # Kind=Certificate failed: Post "https://cert-manager-webhook.${NAMESPACE}.svc:443/convert?timeout=30s"
     sleep 25
+    echo -- Cluster Issuer and Certificate
 cat <<EOF | kubectl --namespace "${NAMESPACE}" apply --validate=false -f -
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -207,8 +605,20 @@ spec:
                 labels:
                   networking/traffic-allowed: "yes"
               spec:
+                tolerations:
+                - key: "vendor"
+                  operator: "Equal"
+                  value: "cosmotech"
+                  effect: "NoSchedule"
                 nodeSelector:
-                  "kubernetes.io/os": linux
+                  "cosmotech.com/tier": "services"
+                resources:
+                  requests:
+                    cpu: 10m
+                    memory: 64Mi
+                  limits:
+                    cpu: 1000m
+                    memory: 64Mi
 
 ---
 
@@ -233,40 +643,173 @@ EOF
   fi
 fi
 
+echo -- Redis
+
+EXISTING_REDIS_PV_NAME=$(kubectl get persistentvolumes -n "${NAMESPACE}" -l "cosmotech.com/service=redis" --field-selector='metadata.name=cosmotech-database-master-pv' -o name)
+REDIS_PV_NAME=cosmotech-database-master-pv
+REDIS_PVC_NAME="${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}"
+
+if [[ "${REDIS_DISK_SIZE}" != *"Gi" ]]; then
+  export REDIS_DISK_SIZE=${REDIS_DISK_SIZE}Gi
+fi
+
+if [[ "${EXISTING_REDIS_PV_NAME:-}" == "" && "${REDIS_DISK_RESOURCE:-}" != "" ]]; then
+
+cat <<EOF > redis-pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: "${REDIS_PV_NAME}"
+  labels:
+    "cosmotech.com/service": "redis"
+spec:
+  storageClassName: ""
+  claimRef:
+    name: "${REDIS_PVC_NAME}"
+    namespace: "${NAMESPACE}"
+  capacity:
+    storage: ${REDIS_DISK_SIZE:-"64Gi"}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  csi:
+    driver: disk.csi.azure.com
+    volumeHandle: ${REDIS_DISK_RESOURCE}
+    volumeAttributes:
+      fsType: ext4
+EOF
+
+echo "Deploying DB Persistent Volume cosmotech-database-master-pv"
+kubectl apply -n "${NAMESPACE}" -f redis-pv.yaml
+
+fi
+
+# Redis Cluster
+helm repo add bitnami https://charts.bitnami.com/bitnami
+help repo update
+
+cat <<EOF > redis-master-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "${REDIS_PVC_NAME}"
+  namespace: ${NAMESPACE}
+spec:
+  storageClassName: ""
+  volumeName: "${REDIS_PV_NAME}"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "${REDIS_DISK_SIZE:-"64Gi"}"
+
+EOF
+kubectl apply -n "${NAMESPACE}" -f redis-master-pvc.yaml
+
+
+cat <<EOF > values-redis.yaml
+auth:
+  password: ${REDIS_PASSWORD}
+image:
+  registry: ghcr.io
+  repository: cosmo-tech/cosmotech-redis
+  tag: ${VERSION_REDIS_COSMOTECH}
+volumePermissions:
+  enabled: true
+master:
+  persistence:
+    existingClaim: ${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}
+  podLabels:
+    "networking/traffic-allowed": "yes"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    cosmotech.com/tier: "db"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 4Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+replica:
+  replicaCount: 1
+  podLabels:
+    "networking/traffic-allowed": "yes"
+  persistence:
+    storageClass: "managed-csi"
+    size: "${REDIS_DISK_SIZE:-"64Gi"}"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "db"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 4Gi
+    limits:
+      cpu: 1000m
+      memory: 4Gi
+
+EOF
+
+
+helm upgrade --install cosmotechredis bitnami/redis \
+    --namespace "${NAMESPACE}" \
+    --version "${VERSION_REDIS}" \
+    --values https://raw.githubusercontent.com/Cosmo-Tech/cosmotech-redis/main/values/v2/values-cosmotech-cluster.yaml \
+    --values values-redis.yaml \
+    --wait \
+    --timeout 10m0s
+
+echo -- Minio
 # Minio
 cat <<EOF > values-minio.yaml
 fullnameOverride: ${MINIO_RELEASE_NAME}
-defaultBucket:
-  enabled: true
-  name: ${ARGO_BUCKET_NAME}
+defaultBuckets: "${ARGO_BUCKET_NAME}"
 persistence:
   enabled: true
   size: "${ARGO_MINIO_PERSISTENCE_SIZE:-16Gi}"
 resources:
   requests:
-    memory: "2Gi"
+    memory: "${ARGO_MINIO_REQUESTS_MEMORY:-2Gi}"
+    cpu: "100m"
+  limits:
+    memory: "${ARGO_MINIO_REQUESTS_MEMORY:-2Gi}"
+    cpu: "1"
 service:
   type: ClusterIP
-DeploymentUpdate:
-  # As Minio uses a ReadWriteOnce PVC by default, using a RollingUpdate strategy will not
-  # work if the new pod is scheduled on a different node.
-  # It is possible to force the replicas scheduling on a same node, but this requires that node
-  # to have a minimum of 4Gi additional memory available, which is the default memory request
-  # set by Argo.
-  type: Recreate
-networkPolicy:
-  # Enabling networking policy returns the following error: unable to recognize "": no matches for kind "NetworkPolicy" in version "networking.k8s.io/v1beta1"
-  # => will use the 'networking/traffic-allowed: "yes"' label instead to allow traffic.
-  enabled: false
-  allowExternal: true
 podLabels:
   networking/traffic-allowed: "yes"
-
+tolerations:
+- key: "vendor"
+  operator: "Equal"
+  value: "cosmotech"
+  effect: "NoSchedule"
+nodeSelector:
+  "cosmotech.com/tier": "services"
+auth:
+  rootUser: "${ARGO_MINIO_ACCESS_KEY:-}"
+  rootPassword: "${ARGO_MINIO_SECRET_KEY:-}"
+metrics:
+  # Metrics can not be disabled yet: https://github.com/minio/minio/issues/7493
+  serviceMonitor:
+    enabled: true
+    namespace: $MONITORING_NAMESPACE
+    interval: 30s
+    scrapeTimeout: 10s
 EOF
 
-helm repo add minio https://helm.min.io/
-helm upgrade --install ${MINIO_RELEASE_NAME} minio/minio --namespace ${NAMESPACE} --version ${MINIO_VERSION} --values values-minio.yaml
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm upgrade --install ${MINIO_RELEASE_NAME} bitnami/minio --namespace "${NAMESPACE}" --version ${MINIO_VERSION} --values values-minio.yaml
 
+echo -- Postgres
 # Postgres
 cat <<EOF > values-postgresql.yaml
 auth:
@@ -276,11 +819,39 @@ auth:
 primary:
   podLabels:
     "networking/traffic-allowed": "yes"
-
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "db"
+readReplicas:
+  nodeSelector:
+    "cosmotech.com/tier": "db"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "256Mi"
+    cpu: "1"
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: $MONITORING_NAMESPACE
+    interval: 30s
+    scrapeTimeout: 10s
 EOF
 
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm upgrade --install -n ${NAMESPACE} ${POSTGRES_RELEASE_NAME} bitnami/postgresql --version ${POSTGRESQL_VERSION} --values values-postgresql.yaml
+helm upgrade --install -n "${NAMESPACE}" ${POSTGRES_RELEASE_NAME} bitnami/postgresql --version ${POSTGRESQL_VERSION} --values values-postgresql.yaml
 
 export ARGO_POSTGRESQL_SECRET_NAME=argo-postgres-config
 cat <<EOF > postgres-secret.yaml
@@ -296,8 +867,9 @@ stringData:
 type: Opaque
 
 EOF
-kubectl apply -n ${NAMESPACE} -f postgres-secret.yaml
+kubectl apply -n "${NAMESPACE}" -f postgres-secret.yaml
 
+echo -- Argo
 # Argo
 export ARGO_SERVICE_ACCOUNT=workflowcsmv2
 cat <<EOF > values-argo.yaml
@@ -324,19 +896,53 @@ artifactRepository:
     insecure: true
     accessKeySecret:
       name: ${MINIO_RELEASE_NAME}
-      key: accesskey
+      key: root-user
     secretKeySecret:
       name: ${MINIO_RELEASE_NAME}
-      key: secretkey
+      key: root-password
 server:
   extraArgs:
   - --auth-mode=server
   secure: false
   podLabels:
     networking/traffic-allowed: "yes"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "services"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "1"
 controller:
+  extraEnv:
+  - name: DEFAULT_REQUEUE_TIME
+    value: "${REQUEUE_TIME}"
   podLabels:
     networking/traffic-allowed: "yes"
+  serviceMonitor:
+    enabled: true
+    namespace: $MONITORING_NAMESPACE
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  nodeSelector:
+    "cosmotech.com/tier": "services"
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "1"
   containerRuntimeExecutor: k8sapi
   metricsConfig:
     enabled: true
@@ -381,12 +987,12 @@ mainContainer:
 EOF
 
 helm repo add argo https://argoproj.github.io/argo-helm
-helm upgrade --install -n ${NAMESPACE} ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
+helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
 
 popd
 
+echo -- Cosmo Tech Api
 # cosmotech-api
-export COSMOTECH_API_RELEASE_NAME="cosmotech-api-${API_VERSION}"
 helm pull oci://ghcr.io/cosmo-tech/cosmotech-api-chart --version "${CHART_PACKAGE_VERSION}"
 
 if [[ "${COSMOTECH_API_DNS_NAME:-}" != "" && "${CERT_MANAGER_ACME:-}" != "" ]]; then
@@ -395,6 +1001,7 @@ else
   export COSMOTECH_API_INGRESS_ENABLED=false
 fi
 cat <<EOF > values-cosmotech-api-deploy.yaml
+replicaCount: 2
 api:
   version: "$API_VERSION"
 
@@ -403,6 +1010,10 @@ image:
   tag: "$CHART_PACKAGE_VERSION"
 
 config:
+  api:
+    serviceMonitor:
+      enabled: true
+      namespace: $MONITORING_NAMESPACE
   csm:
     platform:
       namespace: ${NAMESPACE}
@@ -411,6 +1022,11 @@ config:
         workflows:
           namespace: ${NAMESPACE}
           service-account-name: ${ARGO_SERVICE_ACCOUNT}
+      twincache:
+        host: "cosmotechredis-master.${NAMESPACE}.svc.cluster.local"
+        port: ${REDIS_PORT}
+        username: "default"
+        password: "${REDIS_PASSWORD}"
 
 ingress:
   enabled: ${COSMOTECH_API_INGRESS_ENABLED}
@@ -436,8 +1052,14 @@ resources:
     #   cpu: 100m
     memory: 1024Mi
 
+tolerations:
+- key: "vendor"
+  operator: "Equal"
+  value: "cosmotech"
+  effect: "NoSchedule"
+
 nodeSelector:
-  agentpool: basicpool
+  "cosmotech.com/tier": "services"
 
 EOF
 
@@ -447,137 +1069,10 @@ else
   export CERT_MANAGER_INGRESS_ANNOTATION_SET=""
 fi
 
-HELM_CHARTS_BASE_PATH=$(realpath "$(dirname "$0")")
-
 helm upgrade --install "${COSMOTECH_API_RELEASE_NAME}" "cosmotech-api-chart-${CHART_PACKAGE_VERSION}.tgz" \
     --namespace "${NAMESPACE}" \
-    --version ${CHART_PACKAGE_VERSION} \
+    --version "${CHART_PACKAGE_VERSION}" \
     --values values-cosmotech-api-deploy.yaml \
     ${CERT_MANAGER_INGRESS_ANNOTATION_SET} \
     "${@:5}"
 
-
-# kube-prometheus-stack
-# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
-# https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
-if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
-  export MONITORING_NAMESPACE="${NAMESPACE}-monitoring"
-  kubectl create namespace "${MONITORING_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-  helm repo update
-
-  MONITORING_NAMESPACE_VAR=${MONITORING_NAMESPACE} \
-  PROM_STORAGE_CLASS_NAME_VAR=${PROM_STORAGE_CLASS_NAME:-"default"} \
-  PROM_STORAGE_RESOURCE_REQUEST_VAR=${PROM_STORAGE_RESOURCE_REQUEST:-"10Gi"} \
-  PROM_CPU_MEM_LIMITS_VAR=${PROM_CPU_MEM_LIMITS:-"2Gi"} \
-  PROM_CPU_MEM_REQUESTS_VAR=${PROM_CPU_MEM_REQUESTS:-"2Gi"} \
-  PROM_REPLICAS_NUMBER_VAR=${PROM_REPLICAS_NUMBER:-"1"} \
-  PROM_ADMIN_PASSWORD_VAR=${PROM_ADMIN_PASSWORD:-$(date +%s | sha256sum | base64 | head -c 32)} \
-  # Cannot use kube-prometheus-stack.yaml here directly since ARM only download deploy_via_helm.sh
-  # envsubst < "${HELM_CHARTS_BASE_PATH}"/kube-prometheus-stack-template.yaml > kube-prometheus-stack.yaml
-
-cat <<EOF > kube-prometheus-stack.yaml
-namespace: $MONITORING_NAMESPACE_VAR
-name: cosmotech-api-latest
-defaultRules:
-  create: false
-alertmanager:
-  enabled: false
-grafana:
-  enabled: true
-  adminPassword: $PROM_ADMIN_PASSWORD_VAR
-  defaultDashboardsEnabled: false
-  tolerations:
-    - key: "vendor"
-      operator: "Equal"
-      value: "cosmotech"
-      effect: "NoSchedule"
-  nodeSelector:
-    "cosmotech.com/tier": "monitoring"
-kubeApiServer:
-  enabled: false
-kubelet:
-  enabled: false
-kubeControllerManager:
-  enabled: false
-coreDns:
-  enabled: false
-kubeEtcd:
-  enabled: false
-kubeScheduler:
-  enabled: false
-kubeStateMetrics:
-  enabled: false
-nodeExporter:
-  enabled: false
-prometheusOperator:
-  tolerations:
-    - key: "vendor"
-      operator: "Equal"
-      value: "cosmotech"
-      effect: "NoSchedule"
-  nodeSelector:
-    "cosmotech.com/tier": "monitoring"
-prometheus:
-  enabled: true
-  crname: prometheus
-  serviceAccount:
-    create: true
-    name: prometheus-service-account
-  prometheusSpec:
-    logLevel: info
-    replicas: $PROM_REPLICAS_NUMBER_VAR
-    tolerations:
-      - key: "vendor"
-        operator: "Equal"
-        value: "cosmotech"
-        effect: "NoSchedule"
-    nodeSelector:
-      "cosmotech.com/tier": "monitoring"
-    podMetadata:
-      annotations:
-        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
-      labels:
-        app: prometheus
-    resources:
-      limits:
-        cpu: 1
-        memory: $PROM_CPU_MEM_LIMITS_VAR
-      requests:
-        cpu: 1
-        memory: $PROM_CPU_MEM_REQUESTS_VAR
-    retention: 12h
-    serviceMonitorSelector:
-      matchLabels:
-        serviceMonitorSelector: prometheus
-    storageSpec:
-      volumeClaimTemplate:
-        spec:
-          storageClassName: $PROM_STORAGE_CLASS_NAME_VAR
-          accessModes:
-          - ReadWriteOnce
-          resources:
-            requests:
-              storage: $PROM_STORAGE_RESOURCE_REQUEST_VAR
-  additionalServiceMonitors:
-    - name: cosmotech-latest
-      additionalLabels:
-        serviceMonitorSelector: prometheus
-      endpoints:
-        - interval: 30s
-          targetPort: 8081
-          path: /actuator/prometheus
-      namespaceSelector:
-        matchNames:
-        - phoenix
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: cosmotech-api-latest
-
-EOF
-
-  helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
-               --namespace "${MONITORING_NAMESPACE}" \
-               --version ${PROMETHEUS_STACK_VERSION} \
-               --values "kube-prometheus-stack.yaml"
-fi

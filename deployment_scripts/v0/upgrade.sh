@@ -81,37 +81,13 @@ echo "Setting environment variables useful for this upgrade..."
 
 # Retrieve the Argo MinIO access and secret key credentials
 # shellcheck disable=SC2155
-export ARGO_MINIO_ACCESS_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -o=jsonpath='{.data.root-user}' | base64 -d)
-if [[ -z ${ARGO_MINIO_ACCESS_KEY} ]]; then
-  # migrate existing user
-  export MINIO_MIGRATE=true
-fi
+export ARGO_MINIO_ACCESS_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -o=jsonpath='{.data.accesskey}' | base64 -d)
 # shellcheck disable=SC2155
-export ARGO_MINIO_SECRET_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -o=jsonpath='{.data.root-password}' | base64 -d)
-
-if [[ $MINIO_MIGRATE ]]; then
-  echo Deleting minio installation for migration
-  helm -n ${NAMESPACE} uninstall miniocsmv2
-fi
-
-echo Deleting minio secret for migration
-kubectl -n ${NAMESPACE} delete secret miniocsmv2
+export ARGO_MINIO_SECRET_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -o=jsonpath='{.data.secretkey}' | base64 -d)
 
 # Retrieve the current Argo PostgreSQL secret
 # shellcheck disable=SC2155
 export ARGO_POSTGRESQL_PASSWORD=$(kubectl -n "${NAMESPACE}" get secret argo-postgres-config -o json | jq -r '.data["password"]' | base64 -d)
-
-# Retrieve the current redis password from secret
-if [[ -z ${REDIS_ADMIN_PASSWORD} ]]; then
-  export REDIS_ADMIN_PASSWORD=$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 --decode)
-fi
-# Retrive redis disk information
-if [[ -z ${REDIS_DISK_RESOURCE} ]]; then
-  export REDIS_DISK_RESOURCE=$(kubectl get pv -n ${NAMESPACE} cosmotech-database-master-pv -o jsonpath="{.spec.csl.volumeHandler}")
-fi
-if [[ -z ${REDIS_DISK_SIZE} ]]; then
-  export REDIS_DISK_SIZE=$(kubectl get pv -n ${NAMESPACE} cosmotech-database-master-pv -o jsonpath="{.spec.capacity.storage}")
-fi
 
 # Get the current Ingress Controller Load Balancer IP
 # shellcheck disable=SC2155
@@ -139,7 +115,7 @@ fi
 
 # Export the TLS Configuration
 # shellcheck disable=SC2155
-export TLS_SECRET_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-${API_VERSION} -o json | jq -r '.spec.tls[0].secretName')
+export TLS_SECRET_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-latest -o json | jq -r '.spec.tls[0].secretName')
 
 if [[ "${TLS_SECRET_NAME}" = letsencrypt-* ]]; then
   export TLS_CERTIFICATE_TYPE=let_s_encrypt
@@ -159,27 +135,17 @@ else
 fi
 
 # shellcheck disable=SC2155
-export COSMOTECH_API_DNS_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-${API_VERSION} -o json | jq -r '.spec.tls[0].hosts[0]')
+export COSMOTECH_API_DNS_NAME=$(kubectl -n "${NAMESPACE}" get ingress cosmotech-api-latest -o json | jq -r '.spec.tls[0].hosts[0]')
 
 export PROM_ADMIN_PASSWORD=$(kubectl -n "${NAMESPACE}-monitoring" get secret "prometheus-operator-grafana" -o=jsonpath='{.data.admin-password}' | base64 -d)
-export DEPLOY_PROMETHEUS_STACK=true
-
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
-kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.63.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
 
 # Now run the deployment script with the right environment variables set
 echo "Now running the deployment script (from \"${GIT_BRANCH_NAME}\" Git Branch) with the right environment variables..."
-curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/latest/deploy_via_helm.sh | bash -s -- \
+curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/${API_VERSION}/deploy_via_helm.sh | bash -s -- \
   "${CHART_PACKAGE_VERSION}" \
   "${NAMESPACE}" \
   "${ARGO_POSTGRESQL_PASSWORD}" \
   "${API_VERSION}" \
   --values "${COSMOTECH_API_RELEASE_VALUES_FILE}" \
-  --set image.tag="${CHART_PACKAGE_VERSION}" \
+  --set image.tag="${CHART_PACKAGE_VERSION}"
   "${@:6}"
