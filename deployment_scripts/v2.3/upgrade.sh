@@ -153,6 +153,10 @@ if [[ "${TLS_SECRET_NAME}" = letsencrypt-* ]]; then
 else
   if kubectl -n "${NAMESPACE}" get secret custom-tls-secret > /dev/null 2>&1; then
     export TLS_CERTIFICATE_TYPE=custom
+    kubectl -n phoenix get secret custom-tls-secret -o=json | jq -r '.data["tls.crt"]' | base64 -d > /tmp/tls.crt
+    export TLS_CERTIFICATE_CUSTOM_CERTIFICATE_PATH="/tmp/tls.crt"
+    kubectl -n phoenix get secret custom-tls-secret -o=json | jq -r '.data["tls.key"]' | base64 -d > /tmp/tls.key
+    export TLS_CERTIFICATE_CUSTOM_KEY_PATH="/tmp/tls.key"
   else
     export TLS_CERTIFICATE_TYPE=none
   fi
