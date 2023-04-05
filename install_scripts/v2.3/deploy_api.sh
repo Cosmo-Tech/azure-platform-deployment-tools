@@ -54,6 +54,7 @@ if [[ "$TLS_CERTIFICATE_TYPE" == "custom" ]]; then
     export TLS_CERTIFICATE_CUSTOM_KEY_PATH=$(realpath ./certificate_key.key)
 fi
 export PATH="$(pwd):$PATH"
+export ESCAPED_APP_SCOPE=${APP_SCOPE//\./\\\.}
 echo "Running the deployment script"
 # TODO config.csm.platform.azure.credentials.{tenantId,clientId,clientSecret} are deprecated but still supported in the Helm Chart.
 #  Make sure to replace them by config.csm.platform.azure.credentials.core.{tenantId,clientId,clientSecret} once the Helm Chart no longer
@@ -71,6 +72,11 @@ curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deploy
     --set config.csm.platform.azure.credentials.customer.clientId="$CUSTOMER_SERVICE_PRINCIPAL_APPID" \
     --set config.csm.platform.azure.credentials.customer.clientSecret="$CUSTOMER_SERVICE_PRINCIPAL_SECRET" \
     --set config.csm.platform.azure.appIdUri="$APP_SCOPE" \
+    --set config.csm.platform.identityProvider.code="azure" \
+    --set config.csm.platform.identityProvider.authorizationUrl="https://login.microsoftonline.com/common/oauth2/v2.0/authorize" \
+    --set config.csm.platform.identityProvider.tokenUrl="https://login.microsoftonline.com/common/oauth2/v2.0/token" \
+    --set config.csm.platform.identityProvider.defaultScopes."\[${ESCAPED_APP_SCOPE}/platform\]"="Platform scope" \
+    --set config.csm.platform.identityProvider.containerScopes."\[${ESCAPED_APP_SCOPE}/\.default\]"="Platform scope" \
     --set "config.csm.platform.authorization.allowed-tenants={$TENANT}" \
     --set config.csm.platform.azure.cosmos.uri=$COSMOSDB_URI \
     --set config.csm.platform.azure.cosmos.key=$COSMOSDB_KEY \
