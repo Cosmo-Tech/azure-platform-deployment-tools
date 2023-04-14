@@ -101,7 +101,6 @@ Here are some recommendations or details about platform deployment configuration
     * Network ADT app registration
     * Contributors users
 
-
 ## Cosmo Tech post deployment operations
 
 > These steps are executed by Cosmo Tech engineers.
@@ -125,3 +124,39 @@ Define Power BI embedded authentication mode and related licensing plan.
     * All other users do not need any Power BI account or license
     * Premium capacity is needed for Production applications
 * Power BI admin rights are required to `Enable Power BI embed content and service principals to use Power BI APIs` (for specific Power BI security group) in Power BI Admin Portal
+
+# How to upgrade Cosmo Tech platform from 2.2.0 to 2.3.5
+
+## Prerequisites
+* Platform virtual network and subnet should have a range size of at least /26.
+* User performing the upgrade should be:
+    * Network contributor on the Virtual Network
+    * Contributor on AKS
+* For default platform sizing, subscription CPU quotas should be at least:
+    * Standard FSv2 Family vCPUs -> 250
+    * Standard Av2 Family vCPUs -> 20 
+    * Standard DADSv5 Family vCPUs -> 20
+    * Standard EADSv5 Family vCPUs -> 20
+
+## Upgrade steps
+
+### Retrieve API values (optional)
+This step is optional, but useful to save API values in case of issue during the upgrade.
+> Connect to AKS Cluster Context
+```
+helm -n phoenix get values cosmotech-api-v2 | tail -n +2 > values.yaml
+```
+### Migrate AKS from 1.23.x to 1.25.5
+Migrate AKS successively from 1.23.x to 1.24.9 to 1.25.5.
+```
+az login
+az account set --subscription <subscription_id>
+az aks upgrade --resource-group <myResourceGroup> --name <myAKSCluster> --kubernetes-version 1.24.9
+az aks upgrade --resource-group <myResourceGroup> --name <myAKSCluster> --kubernetes-version 1.25.5
+```
+### Run API upgrade script
+An API upgrade script to update API v2 to version 2.3.5 is available in the folder `deployment_scripts/v2.3/`. This script upgrades the Cosmo Tech Platform API and dependancies.
+> Connect to AKS Cluster Context
+```
+./upgrade.sh 2.3.5
+```
