@@ -70,7 +70,7 @@ Here are some recommendations or details about platform deployment configuration
 **External Access**
 * `Public IP address Resource`: Select Public IP created previously in prerequisites step.
 * `Fully qualified domain name`: Enter the FQDN defined previously in the prerequisites step (e.g. `dev.api.cosmotech.com`).
-* `TLS Certificate`: `Let's Encrypt` is recommended. For Custom certificate, please enter the certificate and key.
+* `TLS Certificate`: `Let's Encrypt` is recommended. For Custom certificate, please enter the certificate and key, as detailed in the [documentation](https://portal.cosmotech.com/docs//documentation/platform_help/2.2/Content/How_To_Build_My_App/Marketplace/Deployment/ExternalAccess_tab.htm).
 
 **Security**
 * `Authorized IP ranges`: In case you want to set an IP white list to access AKS cluster, enter the authorized IP ranges (please add Cosmo Tech IP to the list `185.55.98.20`). If empty: no IP restriction for accessing AKS cluster.
@@ -105,7 +105,7 @@ Here are some recommendations or details about platform deployment configuration
 
 > These steps are executed by Cosmo Tech engineers.
 
-- Add Cosmo Tech tenant to API access authorized tenant
+- Add Cosmo Tech tenant to API access [authorized tenant](https://portal.cosmotech.com/docs//documentation/platform_help/2.2/Content/Platform%20Help/DevOps%20Guide/D_Cosmo%20Tech%20API%20Service/Allowed%20tenants%20list.htm).
 - Declare the Platform Enterprise Application in Cosmo Tech tenant using cross tenant activation link.
 
 ## Power BI
