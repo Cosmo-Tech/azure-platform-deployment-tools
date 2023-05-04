@@ -5,12 +5,17 @@
 ### Azure subscription & resource group
 
 * Provide Azure subscription ID to Cosmo Tech for being added to Marketplace Private offer availability list.
-* Acticate Microsoft.Web as resource provider of your subscription
-* Create a resource group to host the Managed Application and all project resources (IP, VNet, etc)
+* Activate Microsoft.Web as resource provider of your subscription
+* Make sure your subscription quotas for CPUs are high enough. Recommended values for the default sizing of the Cosmo Tech platform:
+    * Standard FSv2 Family vCPUs -> 250
+    * Standard Av2 Family vCPUs -> 20 
+    * Standard DADSv5 Family vCPUs -> 20
+    * Standard EADSv5 Family vCPUs -> 20
 
 ### Technical prerequisites to deploy with Terraform
 
 A [Terraform script](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main/azure/create-platform-prerequisites) is available for deploying the following technical prerequisites:
+* Azure resource group
 * Azure Virtual Network for AKS
 * Azure Public IP
 * Azure DNS record
@@ -32,7 +37,7 @@ A [Terraform script](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main
 ### Platform deployment from Azure Marketplace
 
 > **IMPORTANT**
-> <br>The Cosmo Tech platform is an Azure Managed Application, meaning that Cosmo Tech, as the publisher of the managed application is Owner of all the resources of the managed application.
+> <br>The Cosmo Tech platform is an Azure Managed Application, meaning that Cosmo Tech, as the publisher of the managed application is Contributor of all the resources of the managed application.
 
 Cosmo Tech Simulation Digital Twin Platform available on Azure Marketplace: select [Custom Plan v2](https://portal.azure.com/#create/cosmotech1600259358818.cosmotechsdtplatformuniversal_plan_v2).
 
@@ -42,7 +47,7 @@ Here are some recommendations or details about platform deployment configuration
 
 **Basics**
 * `Resource group`: created previously in the prerequisites step.
-* `Managed resource group name`: this resource group will be created automatically at the managed application deployment to host all managed application resources. Cosmo Tech, as the publisher of the managed application has access to this resource group.
+* `Managed resource group name`: this resource group will be created automatically at the managed application deployment to host all managed application resources. Cosmo Tech, as the publisher of the managed application will be Contributor of this resource group.
 
 **Cosmo Tech Platform**
 * `Application name`: give a name to the platform to be deployed
@@ -80,6 +85,14 @@ Here are some recommendations or details about platform deployment configuration
 **Tags**
 * Define tags if needed.
 
+### Deployment verification
+Once the platform is deployed, a simple check can be performed by a **Customer user** in order to validate the deployment:
+* Connect to the API URL: `https://<platform_fqdn>/v2`
+* Click on **Authorize**:
+    * Enter Swagger client id
+    * Let secret empty
+    * Select the scope
+* The operation should succeed. The platform is ready for the next step: Users management in order to be able to run API queries.
 ## Users management
 
 ### Objectives
@@ -101,12 +114,18 @@ Here are some recommendations or details about platform deployment configuration
     * Network ADT app registration
     * Contributors users
 
-## Cosmo Tech post deployment operations
+## Optional: Configure Cosmo Tech platform to authorize access from Cosmo Tech tenant
 
-> These steps are executed by Cosmo Tech engineers.
-
-- Add Cosmo Tech tenant to API access [authorized tenant](https://portal.cosmotech.com/docs//documentation/platform_help/2.2/Content/Platform%20Help/DevOps%20Guide/D_Cosmo%20Tech%20API%20Service/Allowed%20tenants%20list.htm).
-- Declare the Platform Enterprise Application in Cosmo Tech tenant using cross tenant activation link.
+By default the Cosmo Tech platform is deployed so that the API is only accessible from users of the customer tenant. However it is possible to configure the platform to be accessible also from the Cosmo Tech tenant. To do it so, a few actions have to be performed:
+* By Customer:
+    * Set the app registrations Platform, Network/ADT and Swagger to support multiple organizations accounts. In Azure Portal > open App registration > Authentication > Supported account types : multitenant.
+* By Cosmo Tech:
+    * Add the Platform Enterprise Application to Cosmo Tech tenant (`az ad sp create --id <platform_app_reg_client_id>`). This will create a new Enteprise Application in Cosmo Tech tenant, named after the Platform app registration.
+    * Add Cosmo Tech engineers as Platform.Users of the Enterprise Application in Cosmo Tech tenant. 
+    * Add Cosmo Tech tenant ID (`e413b834-8be8-4822-a370-be619545cb49`) to API access [authorized tenant](https://portal.cosmotech.com/docs//documentation/platform_help/2.2/Content/Platform%20Help/DevOps%20Guide/D_Cosmo%20Tech%20API%20Service/Allowed%20tenants%20list.htm).
+    * Update the API values by replacing `/[TENANT_ID]/` by `/common/` in:
+        * `csm.platform.identityProvider:authorizationUrl`
+        * `csm.platform.identityProvider:tokenUrl`
 
 ## Power BI
 
