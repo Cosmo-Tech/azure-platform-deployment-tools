@@ -66,14 +66,15 @@ fi
 
 echo Migrate data from CosmosDB to Redis...
 # Needed dependancy to parse yaml files
-wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-    chmod +x /usr/bin/yq
+# wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
+#     chmod +x /usr/bin/yq
 
 export COSMOS_DB=phoenix-core
 export COSMOS_KEY=$(kubectl -n "${NAMESPACE}" get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.key')
 export COSMOS_URI=$(kubectl -n "${NAMESPACE}" get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.uri')
 export API_SCOPE=.default
 
+curl -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.4/cosmodb_migration_pod.yaml -o cosmosdb_migration_pod.yaml
 kubectl -n ${NAMESPACE} apply -f cosmosdb_migration_pod.yaml
 
 if [[ -z "${COSMOTECH_API_RELEASE_VALUES_FILE}" ]]; then
