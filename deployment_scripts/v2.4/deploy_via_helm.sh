@@ -1004,16 +1004,15 @@ cat <<EOF > values-cosmotech-api-deploy.yaml
 replicaCount: 2
 api:
   version: "$API_VERSION"
+  serviceMonitor:
+    enabled: true
+    namespace: $MONITORING_NAMESPACE
 
 image:
   repository: ghcr.io/cosmo-tech/cosmotech-api
   tag: "$CHART_PACKAGE_VERSION"
 
 config:
-  api:
-    serviceMonitor:
-      enabled: true
-      namespace: $MONITORING_NAMESPACE
   csm:
     platform:
       namespace: ${NAMESPACE}
