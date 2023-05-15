@@ -8,13 +8,13 @@ spec:
     image: ghcr.io/cosmo-tech/mock-migrate:latest
     env:
     - name: COSMOS_DB
-      value: phoenix-core
+      value: "${COSMOS_DB}"
     - name: COSMOS_URI
-      value: "$(kubectl -n phoenix get secret cosmotech-api-v2 -o yaml | yq -r '.data['application-helm.yml']' | base64 -d | yq '.csm.platform.azure.cosmos.uri')"
+      value: "${COSMOS_URI}"
     - name: COSMOS_KEY
-      value: "$(kubectl -n phoenix get secret cosmotech-api-v2 -o yaml | yq -r '.data['application-helm.yml']' | base64 -d | yq '.csm.platform.azure.cosmos.key')"
+      value: "${COSMOS_KEY}"
     - name: API_SCOPE
-      value: .default
+      value: "${API_SCOPE}"
     - name: API_URL
       value: "${API_URL}"
   nodeSelector:
