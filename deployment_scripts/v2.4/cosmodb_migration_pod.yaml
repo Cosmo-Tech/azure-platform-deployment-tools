@@ -10,13 +10,13 @@ spec:
     - name: COSMOS_DB
       value: phoenix-core
     - name: COSMOS_URI
-      value: $(kubectl -n phoenix get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.uri')
+      value: "$(kubectl -n phoenix get secret cosmotech-api-v2 -o yaml | yq -r '.data['application-helm.yml']' | base64 -d | yq '.csm.platform.azure.cosmos.uri')"
     - name: COSMOS_KEY
-      value: $(kubectl -n phoenix get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.key')
+      value: "$(kubectl -n phoenix get secret cosmotech-api-v2 -o yaml | yq -r '.data['application-helm.yml']' | base64 -d | yq '.csm.platform.azure.cosmos.key')"
     - name: API_SCOPE
       value: .default
     - name: API_URL
-      value: ${API_URL}
+      value: "${API_URL}"
   nodeSelector:
     "cosmotech.com/tier": "db"
   tolerations:
