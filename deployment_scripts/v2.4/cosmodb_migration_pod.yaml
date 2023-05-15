@@ -25,3 +25,11 @@ spec:
     value: "cosmotech"
     effect: "NoSchedule"
   restartPolicy: Never
+  initContainers:
+  - name: download-dependancies
+    image: alpine:latest
+    command: [ "sh", "-c", "apk add --no-cache curl && curl -L https://github.com/mikefarah/yq/releases/download/v4.13.2/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq" ]
+    # volumeMounts:
+    # - name: config-volume
+    #   mountPath: /path/to/my
+    securityContext:
