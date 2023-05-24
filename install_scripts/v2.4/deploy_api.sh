@@ -73,8 +73,8 @@ curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deploy
     --set config.csm.platform.azure.credentials.customer.clientSecret="$CUSTOMER_SERVICE_PRINCIPAL_SECRET" \
     --set config.csm.platform.azure.appIdUri="$APP_SCOPE" \
     --set config.csm.platform.identityProvider.code="azure" \
-    --set config.csm.platform.identityProvider.authorizationUrl="https://login.microsoftonline.com/{$TENANT}/oauth2/v2.0/authorize" \
-    --set config.csm.platform.identityProvider.tokenUrl="https://login.microsoftonline.com/{$TENANT}/oauth2/v2.0/token" \
+    --set config.csm.platform.identityProvider.authorizationUrl="https://login.microsoftonline.com/$TENANT/oauth2/v2.0/authorize" \
+    --set config.csm.platform.identityProvider.tokenUrl="https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token" \
     --set config.csm.platform.identityProvider.defaultScopes."\[${ESCAPED_APP_SCOPE}/platform\]"="Platform scope" \
     --set config.csm.platform.identityProvider.containerScopes."\[${ESCAPED_APP_SCOPE}/\.default\]"="Platform scope" \
     --set "config.csm.platform.authorization.allowed-tenants={$TENANT}" \
