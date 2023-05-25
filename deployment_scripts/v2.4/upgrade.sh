@@ -86,7 +86,7 @@ metadata:
 spec:
   containers:
   - name: migration-pod
-    image: ghcr.io/cosmo-tech/platform-migrate-redis:latest
+    image: ghcr.io/cosmo-tech/platform-migrate-redis:1.0.0
     env:
     - name: COSMOSDB_DATABASE_NAME
       value: ${COSMOSDB_DATABASE_NAME}
@@ -112,7 +112,6 @@ spec:
   - name: download-dependencies
     image: alpine:latest
     command: ["sh", "-c", "wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64", "-o", "/usr/bin/yq", "&&", "chmod", "+x", "/usr/bin/yq"]
-    securityContext:
 EOF
 
   kubectl apply -n ${NAMESPACE} -f cosmosdb_migration_pod.yaml
