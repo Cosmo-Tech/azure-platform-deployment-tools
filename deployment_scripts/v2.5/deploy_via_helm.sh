@@ -1027,6 +1027,7 @@ replicaCount: 2
 api:
   version: "$API_VERSION"
   servletContextPath: "/${NAMESPACE}"
+  multiTenant: ${MULTI_TENANT:-false}
   serviceMonitor:
     enabled: true
     namespace: $MONITORING_NAMESPACE
