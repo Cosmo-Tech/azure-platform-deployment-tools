@@ -65,17 +65,55 @@ if [[ -z "${GIT_BRANCH_NAME}" ]]; then
 fi
 
 echo Migrate data from CosmosDB to Redis...
-# Needed dependancy to parse yaml files
-# wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq &&\
-#     chmod +x /usr/bin/yq
 
-export COSMOS_DB=phoenix-core
-export COSMOS_KEY=$(kubectl -n "${NAMESPACE}" get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.key')
-export COSMOS_URI=$(kubectl -n "${NAMESPACE}" get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.uri')
-export API_SCOPE=.default
+WORKING_DIR=$(mktemp -d -t cosmotech-api-migration-XXXXXXXXXX)
+pushd "${WORKING_DIR}"
 
-curl -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.4/cosmodb_migration_pod.yaml -o cosmosdb_migration_pod.yaml
-kubectl -n ${NAMESPACE} apply -f cosmosdb_migration_pod.yaml
+export COSMOSDB_DATABASE_NAME=phoenix-core
+export NAMESPACE="phoenix"
+export REDIS_INSTANCE="cosmotechredis"
+
+cat <<EOF > cosmosdb_migration_pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: migration-pod
+spec:
+  containers:
+  - name: migration-pod
+    image: ghcr.io/cosmo-tech/platform-migrate-redis:1.0.0
+    env:
+    - name: COSMOSDB_DATABASE_NAME
+      value: ${COSMOSDB_DATABASE_NAME}
+    - name: COSMOSDB_URL
+      value: $(kubectl -n ${NAMESPACE} get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.uri')
+    - name: COSMOSDB_KEY
+      value: $(kubectl -n ${NAMESPACE} get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.key')
+    - name: REDIS_SERVER
+      value: "${REDIS_INSTANCE}-master"
+    - name: REDIS_PASSWORD
+      value: $(kubectl -n ${NAMESPACE} get secret ${REDIS_INSTANCE} -o jsonpath="{.data.redis-password}" | base64 --decode)
+  nodeSelector:
+    "cosmotech.com/tier": "db"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  restartPolicy: Never
+  initContainers:
+  - name: download-dependencies
+    image: alpine:latest
+    command: ["sh", "-c", "wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64", "-o", "/usr/bin/yq", "&&", "chmod", "+x", "/usr/bin/yq"]
+EOF
+
+kubectl apply -n ${NAMESPACE} -f cosmosdb_migration_pod.yaml
+
+rm -rf "${WORKING_DIR}"
+
+echo End of the migration step
+
+
 
 if [[ -z "${COSMOTECH_API_RELEASE_VALUES_FILE}" ]]; then
   echo Getting cosmotech-api-${API_VERSION} helm values...
