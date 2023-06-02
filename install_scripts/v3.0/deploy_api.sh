@@ -59,7 +59,7 @@ echo "Running the deployment script"
 # TODO config.csm.platform.azure.credentials.{tenantId,clientId,clientSecret} are deprecated but still supported in the Helm Chart.
 #  Make sure to replace them by config.csm.platform.azure.credentials.core.{tenantId,clientId,clientSecret} once the Helm Chart no longer
 #  supports such keys.
-curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.3/deploy_via_helm.sh | bash -s -- \
+curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v3.0/deploy_via_helm.sh | bash -s -- \
     $COSMOTECH_API_PACKAGE_VERSION \
     $NAMESPACE \
     $ARGO_PASS \
