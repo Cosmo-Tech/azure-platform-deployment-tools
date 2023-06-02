@@ -231,7 +231,7 @@ kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.c
 
 # Now run the deployment script with the right environment variables set
 echo "Now running the deployment script (from \"${GIT_BRANCH_NAME}\" Git Branch) with the right environment variables..."
-curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.3/deploy_via_helm.sh | bash -s -- \
+curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v2.4/deploy_via_helm.sh | bash -s -- \
   "${CHART_PACKAGE_VERSION}" \
   "${NAMESPACE}" \
   "${ARGO_POSTGRESQL_PASSWORD}" \
