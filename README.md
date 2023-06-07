@@ -93,6 +93,15 @@ Once the platform is deployed, a simple check can be performed by a **Customer u
     * Let secret empty
     * Select the scope
 * The operation should succeed. The platform is ready for the next step: Users management in order to be able to run API queries.
+
+## Post Deployment Operations
+
+### Change platform authentication method to single
+When created with the [Platform Prerequisites Terraform](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main/azure/create-platform-prerequisites),
+the app registrations authentications are configured by default as single-tenant.</br>
+Until Cosmo Tech Platform version 2.3.5, API is deployed by default as multi-tenant.
+The [Configure platform as single-tenant]("./How-to guides/Configure platform as single-tenant.md") doc shows how to configure the Cosmo Tech API as single-tenant.
+
 ## Users management
 
 ### Objectives
