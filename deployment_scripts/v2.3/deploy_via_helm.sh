@@ -126,13 +126,18 @@ if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   helm repo update
 
+  PROM_PASSWORD=${PROM_ADMIN_PASSWORD:-$(kubectl get secret --namespace ${NAMESPACE}-monitoring prometheus-operator-grafana -o jsonpath="{.data.admin-password}" | base64 -d || "")}
+  if [[ -z PROM_PASSWORD ]] ; then
+    PROM_PASSWORD=$(date +%s | sha256sum | base64 | head -c 32)
+  fi
+
   MONITORING_NAMESPACE_VAR=${MONITORING_NAMESPACE} \
   PROM_STORAGE_CLASS_NAME_VAR=${PROM_STORAGE_CLASS_NAME:-"default"} \
   PROM_STORAGE_RESOURCE_REQUEST_VAR=${PROM_STORAGE_RESOURCE_REQUEST:-"64Gi"} \
   PROM_CPU_MEM_LIMITS_VAR=${PROM_CPU_MEM_LIMITS:-"2Gi"} \
   PROM_CPU_MEM_REQUESTS_VAR=${PROM_CPU_MEM_REQUESTS:-"2Gi"} \
   PROM_REPLICAS_NUMBER_VAR=${PROM_REPLICAS_NUMBER:-"1"} \
-  PROM_ADMIN_PASSWORD_VAR=${PROM_ADMIN_PASSWORD:-$(date +%s | sha256sum | base64 | head -c 32)} \
+  PROM_ADMIN_PASSWORD_VAR=${PROM_PASSWORD} \
   REDIS_ADMIN_PASSWORD_VAR=${REDIS_PASSWORD} \
   REDIS_HOST_VAR=cosmotechredis-master.${NAMESPACE}.svc.cluster.local \
   REDIS_PORT_VAR=${REDIS_PORT} \
