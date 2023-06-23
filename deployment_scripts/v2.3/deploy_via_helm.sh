@@ -33,7 +33,7 @@ help() {
   echo "- TLS_CERTIFICATE_CUSTOM_KEY_PATH | File path | path to a file containing the key for the custom TLS certificate to use for HTTPS"
   echo "- DEPLOY_PROMETHEUS_STACK | boolean (default is false) | deploy prometheus stack to monitor platform usage"
   echo "--- PROM_STORAGE_CLASS_NAME | storage class name for the prometheus PVC (default is standard)"
-  echo "--- PROM_STORAGE_RESOURCE_REQUEST | size requested for prometheusPVC (default is 10Gi)"
+  echo "--- PROM_STORAGE_RESOURCE_REQUEST | size requested for prometheusPVC (default is 64Gi)"
   echo "--- PROM_CPU_MEM_LIMITS | memory size limit for prometheus (default is 2Gi)"
   echo "--- PROM_CPU_MEM_REQUESTS | memory size requested for prometheus (default is 2Gi)"
   echo "--- PROM_REPLICAS_NUMBER | number of prometheus replicas (default is 1)"
