@@ -92,6 +92,7 @@ export PROMETHEUS_STACK_VERSION="45.0.0"
 
 export ARGO_DATABASE=argo_workflows
 export ARGO_BUCKET_NAME=argo-workflows
+export ARGO_ARCHIVE_TTL="3d"
 
 WORKING_DIR=$(mktemp -d -t cosmotech-api-helm-XXXXXXXXXX)
 echo "[info] Working directory: ${WORKING_DIR}"
@@ -976,6 +977,7 @@ controller:
         strategy: OnWorkflowCompletion
   persistence:
     archive: true
+    archiveTTL: ${ARGO_ARCHIVE_TTL}
     postgresql:
       host: "${POSTGRES_RELEASE_NAME}-postgresql"
       database: ${ARGO_DATABASE}
