@@ -17,6 +17,8 @@ help() {
   echo "- ARGO_REQUEUE_TIME | string | Workflow requeue time, 1s by default"
   echo "- ARGO_MINIO_REQUESTS_MEMORY | units of bytes (default is 4Gi) | Memory requests for the Argo MinIO server"
   echo "- ARGO_MINIO_PERSISTENCE_SIZE | units of bytes (default is 500Gi) | Persistence size for the Argo MinIO server"
+  echo "- LOKI_PERSISTENCE_MEMORY | units of bytes (default is 4Gi) | Memory for persistence of Loki system"
+  echo "- LOKI_RETENTION_PERIOD | units of hours (default is 720h) | Loki logs retention period"
   echo "- NGINX_INGRESS_CONTROLLER_ENABLED | boolean (default is false) | indicating whether an NGINX Ingress Controller should be deployed and an Ingress resource created too"
   echo "- NGINX_INGRESS_CONTROLLER_REPLICA_COUNT | int (default is 1) | number of pods for the NGINX Ingress Controller"
   echo "- NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP | IP Address String | optional public IP Address to use as LoadBalancer IP. You can create one with this Azure CLI command: az network public-ip create --resource-group <my-rg>> --name <a-name> --sku Standard --allocation-method static --query publicIp.ipAddress -o tsv "
@@ -91,6 +93,7 @@ export VERSION_REDIS="17.3.14"
 export VERSION_REDIS_COSMOTECH="1.0.2"
 export VERSION_REDIS_INSIGHT="0.1.0"
 export PROMETHEUS_STACK_VERSION="45.0.0"
+export LOKI_RELEASE_NAME="loki"
 
 export ARGO_DATABASE=argo_workflows
 export ARGO_BUCKET_NAME=argo-workflows
@@ -1010,6 +1013,26 @@ EOF
 
 helm repo add argo https://argoproj.github.io/argo-helm
 helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_CHART_VERSION} --values values-argo.yaml
+
+echo "Installing Loki service"
+helm repo add grafana https://grafana.github.io/helm-charts
+cat <<EOF > loki-values.yaml
+loki:
+  persistence:
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    size: "${LOKI_PERSISTENCE_MEMORY:-4Gi}"
+  config:
+    table_manager:
+      retention_deletes_enabled: true
+      retention_period: "${LOKI_RETENTION_PERIOD:-720h}"
+promtail:
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists
+EOF
+helm upgrade --install ${LOKI_RELEASE_NAME} grafana/loki-stack -f loki-values.yaml
 
 popd
 
