@@ -689,7 +689,7 @@ fi
 
 # Redis Cluster
 helm repo add bitnami https://charts.bitnami.com/bitnami
-help repo update
+helm repo update
 
 cat <<EOF > redis-master-pvc.yaml
 apiVersion: v1

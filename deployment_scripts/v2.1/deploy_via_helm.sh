@@ -414,7 +414,7 @@ fi
 
 # Redis Cluster
 helm repo add bitnami https://charts.bitnami.com/bitnami
-help repo update
+helm repo update
 
 REDIS_PASSWORD=${REDIS_ADMIN_PASSWORD:-$(kubectl get secret --namespace ${NAMESPACE} cosmotechredis -o jsonpath="{.data.redis-password}" | base64 -d || "")}
 if [[ -z $REDIS_PASSWORD ]] ; then
