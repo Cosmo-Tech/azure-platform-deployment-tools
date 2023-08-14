@@ -77,8 +77,8 @@ echo CHART_PACKAGE_VERSION: "$CHART_PACKAGE_VERSION"
 echo NAMEPSACE: "$NAMESPACE"
 echo API_VERSION: "$API_VERSION"
 
-export ARGO_VERSION="3.4.8"
-export ARGO_CHART_VERSION="0.31.0"
+export ARGO_VERSION="3.4.9"
+export ARGO_CHART_VERSION="0.32.2"
 export ARGO_RELEASE_NAME=argocsmv2
 export ARGO_RELEASE_NAMESPACE="${NAMESPACE}"
 export MINIO_VERSION="12.1.3"
@@ -876,6 +876,17 @@ kubectl apply -n "${NAMESPACE}" -f postgres-secret.yaml
 
 echo -- Argo
 # Argo
+# To fix CRD errors due to Argo update
+CRD=('clusterworkflowtemplates.argoproj.io' 'cronworkflows.argoproj.io' 'workfloweventbindings.argoproj.io' \
+ 'workflows.argoproj.io' 'workflowtaskresults.argoproj.io' 'workflowtasksets.argoproj.io' 'workflowtemplates.argoproj.io')
+
+for crd in "${CRD[@]}"
+do
+  kubectl label --overwrite crd $crd app.kubernetes.io/managed-by=Helm
+  kubectl annotate --overwrite crd $crd meta.helm.sh/release-namespace=phoenix
+  kubectl annotate --overwrite crd $crd meta.helm.sh/release-name=argocsmv2
+done
+
 ## CRDs
 echo "Installing Argo CRDs"
 kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_clusterworkflowtemplates.yaml
