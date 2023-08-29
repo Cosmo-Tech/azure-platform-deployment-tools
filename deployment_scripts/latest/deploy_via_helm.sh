@@ -876,7 +876,8 @@ echo -- Argo
 # Argo
 # To fix CRD errors due to Argo update
 CRD=('clusterworkflowtemplates.argoproj.io' 'cronworkflows.argoproj.io' 'workfloweventbindings.argoproj.io' \
- 'workflows.argoproj.io' 'workflowtaskresults.argoproj.io' 'workflowtasksets.argoproj.io' 'workflowtemplates.argoproj.io')
+ 'workflows.argoproj.io' 'workflowtaskresults.argoproj.io' 'workflowtasksets.argoproj.io' \
+ 'workflowtemplates.argoproj.io' 'workflowartifactgctasks.argoproj.io')
 
 for crd in "${CRD[@]}"
 do
