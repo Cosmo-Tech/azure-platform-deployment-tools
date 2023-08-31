@@ -1,6 +1,6 @@
 podLabels:
   networking/traffic-allowed: "yes"
-httpRelativePath: "/auth/"
+httpRelativePath: "/$NAMESPACE_VAR/auth/"
 auth:
   adminUser: user
   adminPassword: $KEYCLOAK_ADM_PASSWORD_VAR
@@ -11,7 +11,7 @@ ingress:
   pathType: Prefix
   apiVersion: ""
   hostname: localhost
-  path: /auth
+  path: /$NAMESPACE_VAR/auth
   servicePort: 80
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -46,7 +46,7 @@ tolerations:
     effect: "NoSchedule"
 keycloakConfigCli:
   enabled: true
-  existingConfigmap: "csm-keycloak-map"
+  existingConfigmap: "$NAMESPACE_VAR-keycloak-map"
   resources:
     requests:
       cpu: 500m
@@ -100,7 +100,7 @@ postgresql:
     enabled: true
     serviceMonitor:
       enabled: true
-      namespace: "phoenix-monitoring"
+      namespace: "cosmotech-monitoring"
       interval: 30s
       scrapeTimeout: 10s
 metrics:
@@ -119,6 +119,6 @@ metrics:
       - path: /realms/master/metrics
       - path: /realms/csm/metrics
     path: ""
-    namespace: "phoenix-monitoring"
+    namespace: "cosmotech-monitoring"
     interval: 30s
     scrapeTimeout: 10s
