@@ -87,6 +87,7 @@ curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deploy
     --set config.csm.platform.azure.storage.account-name=$STORAGE_ACCOUNT_NAME \
     --set config.csm.platform.azure.storage.account-key="$STORAGE_KEY" \
     --set csm.platform.azure.containerRegistries.solutions=$ACR_LOGIN_SERVER \
+    --set csm.platform.containerRegistry.registryUrl=$ACR_LOGIN_SERVER \
     --set argo.imageCredentials.registry=$ACR_LOGIN_SERVER \
     --set argo.imageCredentials.username=$ACR_LOGIN_USERNAME \
     --set argo.imageCredentials.password=$ACR_LOGIN_PASSWORD \
