@@ -1,6 +1,6 @@
 # Update AKS node pool SKU
 
-The AKS service of Cosmo Tech Platform contains a set of node pools sized in order to cover most of the use cases. However some cases can require an increase of the VM size of the nodes:
+The AKS service of Cosmo Tech Platform contains a set of node pools sized in order to cover most of the use cases. However some cases can require an increase of the VM size of the nodes, as:
 * `services` nodes are too small in memory and API start is unstable. `services` default VM size `Standard_A2m_v2` should be upgraded to `Standard_B4ms`.
 * `basic` nodes are too small in memory for dataset import. `basic` default VM size `Standard_D2ads_v5` should be upgraded to `Standard_F4s_v2`
 
@@ -8,7 +8,7 @@ This procedure enables to update an AKS node pool SKU with no availability inter
 
 Microsoft documentation is available for this type of operation: https://learn.microsoft.com/en-us/azure/aks/resize-node-pool?tabs=azure-cli
 
-## Prerequisite
+## Prerequisites
 
 * Be Contributor over the AKS
 * Be Network Contributor over Virtual Network
@@ -21,9 +21,9 @@ az aks get-upgrades --resource-group "<resource_group>" --name "<AKS_cluster_nam
 az aks upgrade --resource-group "<resource_group>" --name "<AKS_cluster_name>" --kubernetes-version "<target_version>"
 ```
 
-## Update steps
+## Resizing steps
 
-It is not possible to migrate the VM size of a node. The procedure requires to create a new one, and delete the old one afterwards.
+It is not possible to update the VM size of a node. The procedure requires to create a new node pool, and delete the old one afterwards.
 
 **Create new node pool**
 
