@@ -42,6 +42,10 @@ help() {
   echo "- REDIS_DISK_SIZE | redis disk size requirement (default: 64Gi)"
   echo "- REDIS_MASTER_NAME_PVC | redis master persistent volume claim name (default: cosmotech-database-master-pvc)"
   echo "- REDIS_DISK_RESOURCE | redis volume handle resource id (ex: /subscriptions/<my-subscription>/resourceGroups/<my-resource-group>/providers/Microsoft.Compute/disks/<my-disk-name>)"
+  echo "- REDIS_RESOURCES_LIMITS_MEMORY | memory limits for redis replicas/master (default: 4Go)"
+  echo "- REDIS_RESOURCES_REQUESTS_MEMORY | memory requests for redis replicas/master (default: 4Go)"
+  echo "- REDIS_RESOURCES_LIMITS_CPU | cpu limits for redis replicas/master (default: 1)"
+  echo "- REDIS_RESOURCES_REQUESTS_CPU | cpu requests for redis replicas/master (default: 500m)"
   echo
   echo "Usage: ./$(basename "$0") CHART_PACKAGE_VERSION NAMESPACE ARGO_POSTGRESQL_PASSWORD API_VERSION [any additional options to pass as is to the cosmotech-api Helm Chart]"
   echo
@@ -736,11 +740,11 @@ master:
     cosmotech.com/tier: "db"
   resources:
     requests:
-      cpu: 500m
-      memory: 4Gi
+      cpu: ${REDIS_RESOURCES_REQUESTS_CPU:-500m}
+      memory: ${REDIS_RESOURCES_REQUESTS_MEMORY:-4Gi}
     limits:
-      cpu: 1000m
-      memory: 4Gi
+      cpu: ${REDIS_RESOURCES_LIMITS_CPU:-1000m}
+      memory: ${REDIS_RESOURCES_LIMITS_MEMORY:-4Gi}
 replica:
   replicaCount: 1
   podLabels:
@@ -757,11 +761,11 @@ replica:
     "cosmotech.com/tier": "db"
   resources:
     requests:
-      cpu: 500m
-      memory: 4Gi
+      cpu: ${REDIS_RESOURCES_REQUESTS_CPU:-500m}
+      memory: ${REDIS_RESOURCES_REQUESTS_MEMORY:-4Gi}
     limits:
-      cpu: 1000m
-      memory: 4Gi
+      cpu: ${REDIS_RESOURCES_LIMITS_CPU:-1000m}
+      memory: ${REDIS_RESOURCES_LIMITS_MEMORY:-4Gi}
 
 EOF
 
