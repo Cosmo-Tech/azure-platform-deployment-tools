@@ -65,6 +65,12 @@ az aks nodepool add --cluster-name "<AKS_cluster_name>" \
 
 **Cordon and drain the nodes**
 
+List all the nodes of the cluster, in order to identify which nodes to delete.
+```bash
+# Connect to AKS context
+kubectl get nodes
+```
+
 Cordon each node of your node pool in order to prevent new pods to get deployed on it.
 ```bash
 # Connect to AKS context
