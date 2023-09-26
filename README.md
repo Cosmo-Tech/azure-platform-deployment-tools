@@ -113,11 +113,9 @@ The [Configure platform as single-tenant]("./How-to guides/Configure platform as
 * Create user groups in your tenant and add relevant users:
     * Group for Contributors users: should include Cosmo Tech Engineers and application admins
     * Group for Business users
-    * Group for Business readers
 * Assign the following roles on the Platform Enterprise Application (in Azure portal > Enterprise applications > search for Platform app registration name > Users and groups > Add user/group):
     * Contributors users: Platform.Admin
     * Business users: Organization.User
-    * Business readers: Organization.Reader
 * Assign Azure Digital Twins Data Owner role on Azure Digital Twins resource to:
     * Network ADT app registration
     * Contributors users
