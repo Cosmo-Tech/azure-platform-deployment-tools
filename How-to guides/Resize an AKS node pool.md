@@ -65,19 +65,19 @@ az aks nodepool add --cluster-name "<AKS_cluster_name>" \
 
 **Cordon and drain the nodes**
 
-List all the nodes of the cluster, in order to identify which nodes to delete.
+List all the nodes of the cluster, in order to identify which nodes to cordon and drain.
 ```bash
 # Connect to AKS context
 kubectl get nodes
 ```
 
-Cordon each node of your node pool in order to prevent new pods to get deployed on it.
+Cordon each node of the pool you want to remove in order to prevent new pods to get deployed on it.
 ```bash
 # Connect to AKS context
 kubectl cordon "<node_name>"
 ```
 
-Drain each node of your node pool in order to remove all pods running.
+Drain each node of the pool you want to remove in order to remove all pods running.
 ```bash
 # Connect to AKS context
 kubectl drain "<node_name>" --ignore-daemonsets --delete-emptydir-data
