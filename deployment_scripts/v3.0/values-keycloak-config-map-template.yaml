@@ -6,6 +6,12 @@ auth:
   adminPassword: $KEYCLOAK_ADM_PASSWORD_VAR
 service:
   type: NodePort
+customReadinessProbe: |
+  httpGet:
+    path: /auth/realms/master
+    port: 9080
+  initialDelaySeconds: 30
+  timeoutSeconds: 30
 ingress:
   enabled: true
   pathType: Prefix
