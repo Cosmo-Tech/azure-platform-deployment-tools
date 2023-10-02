@@ -11,7 +11,7 @@ ingress:
   pathType: Prefix
   apiVersion: ""
   hostname: localhost
-  path: /auth/
+  path: /auth
   servicePort: 80
   annotations:
     kubernetes.io/ingress.class: nginx
