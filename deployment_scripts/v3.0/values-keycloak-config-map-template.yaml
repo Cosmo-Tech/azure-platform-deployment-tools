@@ -1,6 +1,6 @@
 podLabels:
   networking/traffic-allowed: "yes"
-httpRelativePath: "/$NAMESPACE_VAR/auth"
+httpRelativePath: "/$NAMESPACE_VAR/auth/"
 auth:
   adminUser: user
   adminPassword: $KEYCLOAK_ADM_PASSWORD_VAR
