@@ -1,23 +1,17 @@
 podLabels:
   networking/traffic-allowed: "yes"
-httpRelativePath: "/$NAMESPACE_VAR/auth/"
+httpRelativePath: "/auth/"
 auth:
   adminUser: user
   adminPassword: $KEYCLOAK_ADM_PASSWORD_VAR
 service:
   type: NodePort
-customReadinessProbe: |
-  httpGet:
-    path: /auth/realms/master
-    port: 8080
-  initialDelaySeconds: 30
-  timeoutSeconds: 30
 ingress:
   enabled: true
   pathType: Prefix
   apiVersion: ""
   hostname: localhost
-  path: /$NAMESPACE_VAR/auth/
+  path: /auth/
   servicePort: 80
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -52,7 +46,7 @@ tolerations:
     effect: "NoSchedule"
 keycloakConfigCli:
   enabled: true
-  existingConfigmap: "$NAMESPACE_VAR-keycloak-map"
+  existingConfigmap: "csm-keycloak-map"
   resources:
     requests:
       cpu: 500m
@@ -121,9 +115,8 @@ metrics:
     enabled: true
     port: http
     endpoints:
-      - path: /auth/metrics
-      - path: /auth/realms/master/metrics
-      - path: /auth/realms/$NAMESPACE_VAR/metrics
+      - path: /metrics
+      - path: /realms/master/metrics
     path: ""
     namespace: "cosmotech-monitoring"
     interval: 30s
