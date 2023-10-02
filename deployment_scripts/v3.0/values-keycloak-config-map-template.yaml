@@ -1,6 +1,6 @@
 podLabels:
   networking/traffic-allowed: "yes"
-httpRelativePath: "/$NAMESPACE_VAR/auth/"
+httpRelativePath: "/$NAMESPACE_VAR/auth"
 auth:
   adminUser: user
   adminPassword: $KEYCLOAK_ADM_PASSWORD_VAR
@@ -115,9 +115,9 @@ metrics:
     enabled: true
     port: http
     endpoints:
-      - path: /metrics
-      - path: /realms/master/metrics
-      - path: /realms/csm/metrics
+      - path: /auth/metrics
+      - path: /auth/realms/master/metrics
+      - path: /auth/realms/$NAMESPACE_VAR/metrics
     path: ""
     namespace: "cosmotech-monitoring"
     interval: 30s
