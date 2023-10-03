@@ -2,7 +2,7 @@ podLabels:
   networking/traffic-allowed: "yes"
 httpRelativePath: "/auth/"
 auth:
-  adminUser: user
+  adminUser: $KEYCLOAK_ADM_USERNAME_VAR
   adminPassword: $KEYCLOAK_ADM_PASSWORD_VAR
 service:
   type: NodePort
