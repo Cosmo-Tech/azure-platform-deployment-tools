@@ -45,22 +45,7 @@ tolerations:
     value: "cosmotech"
     effect: "NoSchedule"
 keycloakConfigCli:
-  enabled: true
-  # existingConfigmap: "csm-keycloak-map"
-  resources:
-    requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: 1000m
-      memory: 2Gi
-  nodeSelector:
-    "cosmotech.com/tier": "services"
-  podTolerations:
-    - key: "vendor"
-      operator: "Equal"
-      value: "cosmotech"
-      effect: "NoSchedule"
+  enabled: false
 
 postgresql:
   enabled: true
