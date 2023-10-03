@@ -46,7 +46,7 @@ tolerations:
     effect: "NoSchedule"
 keycloakConfigCli:
   enabled: true
-  existingConfigmap: "csm-keycloak-map"
+  # existingConfigmap: "csm-keycloak-map"
   resources:
     requests:
       cpu: 500m
