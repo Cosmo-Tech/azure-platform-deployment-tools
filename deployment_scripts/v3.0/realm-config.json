@@ -714,7 +714,7 @@
             "userinfo.token.claim": "true",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "customRoles",
+            "claim.name": "userRoles",
             "jsonType.label": "String"
           }
         }
