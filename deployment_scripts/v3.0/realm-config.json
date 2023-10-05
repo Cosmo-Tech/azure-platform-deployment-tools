@@ -1,12 +1,20 @@
 {
   "id": "$NAMESPACE_VAR",
   "realm": "$NAMESPACE_VAR",
-  "displayName": "$NAMESPACE_VAR Realm",
+  "displayName": "$NAMESPACE_VAR",
   "enabled": true,
   "roles": {
     "realm": [
       {
         "name": "Platform.Admin",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "$NAMESPACE_VAR",
+        "attributes": {}
+      },
+      {
+        "name": "Organization.User",
         "description": "",
         "composite": false,
         "clientRole": false,
