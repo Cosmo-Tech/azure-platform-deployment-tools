@@ -2,6 +2,7 @@
   "id": "$NAMESPACE_VAR",
   "realm": "$NAMESPACE_VAR",
   "displayName": "$NAMESPACE_VAR Realm",
+  "enabled": true,
   "roles": {
     "realm": [
       {
@@ -14,6 +15,50 @@
       }
     ]
   },
+  "users": [
+    {
+      "id": "admin-$NAMESPACE_VAR",
+      "username": "admin-$NAMESPACE_VAR",
+      "enabled": true,
+      "emailVerified": false,
+      "credentials": [ {
+          "temporary": false,
+          "type": "Password",
+          "userLabel": "admin-$NAMESPACE_VAR-password",
+          "value": "$TENANT_KEYCLOAK_ADMIN_PASSWORD_VAR"
+        }
+      ],
+      "clientRoles": 
+      {
+        "realm-management": [
+          "create-client",
+          "manage-events",
+          "manage-identity-providers",
+          "manage-realm",
+          "query-clients",
+          "query-groups",
+          "query-users",
+          "manage-realm",
+          "realm-admin",
+          "view-authorization",
+          "view-clients",
+          "impersonation",
+          "manage-authorization",
+          "manage-clients",
+          "manage-users",
+          "query-realms",
+          "view-events",
+          "view-realm",
+          "view-users"
+        ]
+      },
+      "realmRoles": [
+        "uma_authorization",
+        "default-roles-tenant7",
+        "offline_access"
+      ]
+    }
+  ],
   "clients": [
     {
       "clientId": "cosmotech-api-client",
@@ -28,7 +73,8 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "$COSMOTECH_CLIENT_SECRET_VAR",
       "redirectUris": [
-        "$CONTEXT_PATH_VAR/*"
+        "$CONTEXT_PATH_VAR/*",
+        "$CONTEXT_PATH_VAR*"
       ],
       "webOrigins": [
         "*"
