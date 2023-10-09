@@ -107,6 +107,13 @@ echo "[info] Working directory: ${WORKING_DIR}"
 pushd "${WORKING_DIR}"
 
 echo -- "[info] Working directory: ${WORKING_DIR}"
+  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+  helm repo add jetstack https://charts.jetstack.io
+  helm repo add bitnami https://charts.bitnami.com/bitnami
+  helm repo add argo https://argoproj.github.io/argo-helm
+  helm repo add grafana https://grafana.github.io/helm-charts
+  helm repo update
 
 # common exports
 export COSMOTECH_API_RELEASE_NAME="cosmotech-api-${API_VERSION}"
@@ -132,8 +139,6 @@ if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
   echo -- Monitoring stack
   export MONITORING_NAMESPACE="${NAMESPACE}-monitoring"
   kubectl create namespace "${MONITORING_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-  helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-  helm repo update
 
   MONITORING_NAMESPACE_VAR=${MONITORING_NAMESPACE} \
   PROM_STORAGE_CLASS_NAME_VAR=${PROM_STORAGE_CLASS_NAME:-"default"} \
@@ -400,9 +405,6 @@ else
 fi
 
 if [[ "${NGINX_INGRESS_CONTROLLER_ENABLED:-false}" == "true" ]]; then
-  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-  helm repo update
-
   export NGINX_INGRESS_CONTROLLER_REPLICA_COUNT="${NGINX_INGRESS_CONTROLLER_REPLICA_COUNT:-1}"
   export NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP="${NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP:-}"
 
@@ -494,8 +496,6 @@ if [[ "${TLS_CERTIFICATE_TYPE:-}" == "" ]]; then
   fi
 fi
 if [[ "${CERT_MANAGER_ENABLED:-false}" == "true" ]]; then
-  helm repo add jetstack https://charts.jetstack.io
-  helm repo update
 
 cat <<EOF > values-cert-manager.yaml
 installCRDs: true
@@ -694,9 +694,6 @@ kubectl apply -n "${NAMESPACE}" -f redis-pv.yaml
 fi
 
 # Redis Cluster
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-
 cat <<EOF > redis-master-pvc.yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -815,7 +812,6 @@ metrics:
     scrapeTimeout: 10s
 EOF
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
 helm upgrade --install ${MINIO_RELEASE_NAME} bitnami/minio --namespace "${NAMESPACE}" --version ${MINIO_VERSION} --values values-minio.yaml
 
 echo -- Postgres
@@ -859,7 +855,6 @@ metrics:
     scrapeTimeout: 10s
 EOF
 
-helm repo add bitnami https://charts.bitnami.com/bitnami
 helm upgrade --install -n "${NAMESPACE}" ${POSTGRES_RELEASE_NAME} bitnami/postgresql --version ${POSTGRESQL_VERSION} --values values-postgresql.yaml
 
 export ARGO_POSTGRESQL_SECRET_NAME=argo-postgres-config
@@ -995,11 +990,9 @@ mainContainer:
 
 EOF
 
-helm repo add argo https://argoproj.github.io/argo-helm
 helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
 
 echo "Installing Loki service"
-helm repo add grafana https://grafana.github.io/helm-charts
 cat <<EOF > loki-values.yaml
 loki:
   persistence:
