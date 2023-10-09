@@ -1,0 +1,171 @@
+{
+  "id": "$NAMESPACE_VAR",
+  "realm": "$NAMESPACE_VAR",
+  "displayName": "$NAMESPACE_VAR",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "Platform.Admin",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "$NAMESPACE_VAR",
+        "attributes": {}
+      },
+      {
+        "name": "Organization.User",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "$NAMESPACE_VAR",
+        "attributes": {}
+      }
+    ]
+  },
+  "users": [
+    {
+      "id": "admin-$NAMESPACE_VAR",
+      "username": "admin-$NAMESPACE_VAR",
+      "enabled": true,
+      "emailVerified": false,
+      "credentials": [ {
+          "temporary": false,
+          "type": "Password",
+          "userLabel": "admin-$NAMESPACE_VAR-password",
+          "value": "$TENANT_KEYCLOAK_ADMIN_PASSWORD_VAR"
+        }
+      ],
+      "clientRoles": 
+      {
+        "realm-management": [
+          "create-client",
+          "manage-events",
+          "manage-identity-providers",
+          "manage-realm",
+          "query-clients",
+          "query-groups",
+          "query-users",
+          "manage-realm",
+          "realm-admin",
+          "view-authorization",
+          "view-clients",
+          "impersonation",
+          "manage-authorization",
+          "manage-clients",
+          "manage-users",
+          "query-realms",
+          "view-events",
+          "view-realm",
+          "view-users"
+        ]
+      },
+      "realmRoles": [
+        "uma_authorization",
+        "default-roles-tenant7",
+        "offline_access"
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "cosmotech-api-client",
+      "name": "cosmotech-api-client",
+      "description": "Cosmotech API",
+      "rootUrl": "$APP_ID_URI_VAR",
+      "adminUrl": "",
+      "baseUrl": "$CONTEXT_PATH_VAR",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "$COSMOTECH_CLIENT_SECRET_VAR",
+      "redirectUris": [
+        "$CONTEXT_PATH_VAR/*",
+        "$CONTEXT_PATH_VAR*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "oidc.ciba.grant.enabled": "false",
+        "display.on.consent.screen": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "email",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "BranchCodeMapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "aggregate.attrs": "false",
+            "userinfo.token.claim": "true",
+            "multivalued": "false",
+            "user.attribute": "branch",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "branch",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "userRoles",
+            "jsonType.label": "String"
+          }
+        }
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    }
+  ]
+}

@@ -77,8 +77,8 @@ echo CHART_PACKAGE_VERSION: "$CHART_PACKAGE_VERSION"
 echo NAMEPSACE: "$NAMESPACE"
 echo API_VERSION: "$API_VERSION"
 
-export ARGO_VERSION="3.4.9"
-export ARGO_CHART_VERSION="0.32.2"
+export ARGO_VERSION="3.3.8"
+export ARGO_CHART_VERSION="0.16.6"
 export ARGO_RELEASE_NAME=argocsmv2
 export ARGO_RELEASE_NAMESPACE="${NAMESPACE}"
 export MINIO_VERSION="12.1.3"
@@ -90,7 +90,7 @@ export ARGO_POSTGRESQL_PASSWORD="$3"
 export INGRESS_NGINX_VERSION="4.2.5"
 export CERT_MANAGER_VERSION="1.9.1"
 export VERSION_REDIS="17.3.14"
-export VERSION_REDIS_COSMOTECH="1.0.2"
+export VERSION_REDIS_COSMOTECH="1.0.8"
 export VERSION_REDIS_INSIGHT="0.1.0"
 export PROMETHEUS_STACK_VERSION="45.0.0"
 export LOKI_RELEASE_NAME="loki"
@@ -888,18 +888,24 @@ do
   kubectl annotate --overwrite crd $crd meta.helm.sh/release-name=argocsmv2
 done
 
+# Argo
 ## CRDs
-echo "Installing Argo CRDs"
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_clusterworkflowtemplates.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_cronworkflows.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowartifactgctasks.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workfloweventbindings.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflows.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowtaskresults.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowtasksets.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowtemplates.yaml
 
-## Chart
+CRD=('argoproj.io_clusterworkflowtemplates.yaml' 'argoproj.io_cronworkflows.yaml' \
+'argoproj.io_workflowartifactgctasks.yaml' 'argoproj.io_workfloweventbindings.yaml' \
+'argoproj.io_workflows.yaml' 'argoproj.io_workflowtaskresults.yaml' 'argoproj.io_workflowtasksets.yaml' \
+'argoproj.io_workflowtemplates.yaml')
+
+for crd in "${CRD[@]}"
+do
+  echo "Downloading Argo CRDs: https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION_ENV}/manifests/base/crds/minimal/$crd"
+  curl -sSL --fail "https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION_ENV}/manifests/base/crds/minimal/$crd" -o $crd || true
+  if [[ -e "$crd" ]] ; then
+    echo "Installing Argo CRDs: $crd"
+    kubectl apply -n ${NAMESPACE} -f "$crd"
+  fi
+done
+
 export ARGO_SERVICE_ACCOUNT=workflowcsmv2
 cat <<EOF > values-argo.yaml
 singleNamespace: true
@@ -1094,7 +1100,7 @@ replicaCount: 2
 api:
   version: "$API_VERSION"
   servletContextPath: "/${NAMESPACE}"
-  multiTenant: ${MULTI_TENANT:-false}
+  multiTenant: ${MULTI_TENANT:-true}
   serviceMonitor:
     enabled: true
     namespace: $MONITORING_NAMESPACE
@@ -1104,6 +1110,10 @@ image:
   tag: "$CHART_PACKAGE_VERSION"
 
 config:
+  api:
+    serviceMonitor:
+      enabled: true
+      namespace: $MONITORING_NAMESPACE
   csm:
     platform:
       namespace: ${NAMESPACE}
