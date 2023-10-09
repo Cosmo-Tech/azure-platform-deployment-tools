@@ -48,6 +48,7 @@ help() {
   echo "- REDIS_RESOURCES_REQUESTS_MEMORY | memory requests for redis replicas/master (default: 4Go)"
   echo "- REDIS_RESOURCES_LIMITS_CPU | cpu limits for redis replicas/master (default: 1)"
   echo "- REDIS_RESOURCES_REQUESTS_CPU | cpu requests for redis replicas/master (default: 500m)"
+  echo "- MULTI_TENANT | boolean | enable multi-tenant mode (default is false)"
   echo
   echo "Usage: ./$(basename "$0") CHART_PACKAGE_VERSION NAMESPACE ARGO_POSTGRESQL_PASSWORD API_VERSION [any additional options to pass as is to the cosmotech-api Helm Chart]"
   echo
@@ -80,7 +81,8 @@ echo CHART_PACKAGE_VERSION: "$CHART_PACKAGE_VERSION"
 echo NAMEPSACE: "$NAMESPACE"
 echo API_VERSION: "$API_VERSION"
 
-export ARGO_VERSION="0.16.6"
+export ARGO_VERSION="3.3.8"
+export ARGO_CHART_VERSION="0.16.6"
 export ARGO_RELEASE_NAME=argocsmv2
 export ARGO_RELEASE_NAMESPACE="${NAMESPACE}"
 export MINIO_VERSION="12.1.3"
@@ -877,18 +879,6 @@ EOF
 kubectl apply -n "${NAMESPACE}" -f postgres-secret.yaml
 
 echo -- Argo
-# Argo
-# To fix CRD errors due to Argo update
-CRD=('clusterworkflowtemplates.argoproj.io' 'cronworkflows.argoproj.io' 'workfloweventbindings.argoproj.io' \
- 'workflows.argoproj.io' 'workflowtaskresults.argoproj.io' 'workflowtasksets.argoproj.io' \
- 'workflowtemplates.argoproj.io' 'workflowartifactgctasks.argoproj.io')
-
-for crd in "${CRD[@]}"
-do
-  kubectl label --overwrite crd $crd app.kubernetes.io/managed-by=Helm
-  kubectl annotate --overwrite crd $crd meta.helm.sh/release-namespace=phoenix
-  kubectl annotate --overwrite crd $crd meta.helm.sh/release-name=argocsmv2
-done
 
 export ARGO_SERVICE_ACCOUNT=workflowcsmv2
 cat <<EOF > values-argo.yaml
@@ -1075,12 +1065,23 @@ cat <<EOF > values-cosmotech-api-deploy.yaml
 replicaCount: 2
 api:
   version: "$API_VERSION"
+  servletContextPath: /
+  multiTenant: ${MULTI_TENANT:-false}
 
 image:
   repository: ghcr.io/cosmo-tech/cosmotech-api
   tag: "$CHART_PACKAGE_VERSION"
 
 config:
+  logging:
+    level:
+      com.cosmotech: TRACE
+      web: TRACE
+      org.springframework: TRACE
+      com.redis: TRACE
+  server:
+    error:
+      include-stacktrace: always
   api:
     serviceMonitor:
       enabled: true

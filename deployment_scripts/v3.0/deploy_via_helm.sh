@@ -81,8 +81,8 @@ echo CHART_PACKAGE_VERSION: "$CHART_PACKAGE_VERSION"
 echo NAMEPSACE: "$NAMESPACE"
 echo API_VERSION: "$API_VERSION"
 
-export ARGO_VERSION="3.4.9"
-export ARGO_CHART_VERSION="0.32.2"
+export ARGO_VERSION="3.3.8"
+export ARGO_CHART_VERSION="0.16.6"
 export ARGO_RELEASE_NAME=argocsmv2
 export ARGO_RELEASE_NAMESPACE="${NAMESPACE}"
 export MINIO_VERSION="12.1.3"
@@ -94,7 +94,7 @@ export ARGO_POSTGRESQL_PASSWORD="$3"
 export INGRESS_NGINX_VERSION="4.2.5"
 export CERT_MANAGER_VERSION="1.9.1"
 export VERSION_REDIS="17.3.14"
-export VERSION_REDIS_COSMOTECH="1.0.2"
+export VERSION_REDIS_COSMOTECH="1.0.8"
 export VERSION_REDIS_INSIGHT="0.1.0"
 export PROMETHEUS_STACK_VERSION="45.0.0"
 export LOKI_RELEASE_NAME="loki"
@@ -130,7 +130,7 @@ fi
 # https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack
 if [[ "${DEPLOY_PROMETHEUS_STACK:-false}" == "true" ]]; then
   echo -- Monitoring stack
-  export MONITORING_NAMESPACE="cosmotech-monitoring"
+  export MONITORING_NAMESPACE="${NAMESPACE}-monitoring"
   kubectl create namespace "${MONITORING_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   helm repo update
@@ -879,37 +879,9 @@ EOF
 kubectl apply -n "${NAMESPACE}" -f postgres-secret.yaml
 
 echo -- Argo
-# Argo
-# To fix CRD errors due to Argo update
-CRD=('clusterworkflowtemplates.argoproj.io' 'cronworkflows.argoproj.io' 'workfloweventbindings.argoproj.io' \
- 'workflows.argoproj.io' 'workflowtaskresults.argoproj.io' 'workflowtasksets.argoproj.io' \
- 'workflowtemplates.argoproj.io' 'workflowartifactgctasks.argoproj.io')
 
-for crd in "${CRD[@]}"
-do
-  kubectl label --overwrite crd $crd app.kubernetes.io/managed-by=Helm
-  kubectl annotate --overwrite crd $crd meta.helm.sh/release-namespace=phoenix
-  kubectl annotate --overwrite crd $crd meta.helm.sh/release-name=argocsmv2
-done
-
-## CRDs
-echo "Installing Argo CRDs"
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_clusterworkflowtemplates.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_cronworkflows.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowartifactgctasks.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workfloweventbindings.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflows.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowtaskresults.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowtasksets.yaml
-kubectl apply -n ${NAMESPACE} -f https://raw.githubusercontent.com/argoproj/argo-workflows/v${ARGO_VERSION}/manifests/base/crds/minimal/argoproj.io_workflowtemplates.yaml
-
-## Chart
 export ARGO_SERVICE_ACCOUNT=workflowcsmv2
 cat <<EOF > values-argo.yaml
-singleNamespace: true
-createAggregateRoles: false
-crds:
-  install: false
 images:
   pullPolicy: IfNotPresent
 workflow:
@@ -938,8 +910,6 @@ artifactRepository:
       name: ${MINIO_RELEASE_NAME}
       key: root-password
 server:
-  clusterWorkflowTemplates:
-    enabled: false
   extraArgs:
   - --auth-mode=server
   secure: false
@@ -963,8 +933,6 @@ controller:
   extraEnv:
   - name: DEFAULT_REQUEUE_TIME
     value: "${REQUEUE_TIME}"
-  clusterWorkflowTemplates:
-    enabled: false
   podLabels:
     networking/traffic-allowed: "yes"
   serviceMonitor:
@@ -1028,7 +996,7 @@ mainContainer:
 EOF
 
 helm repo add argo https://argoproj.github.io/argo-helm
-helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_CHART_VERSION} --values values-argo.yaml
+helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
 
 echo "Installing Loki service"
 helm repo add grafana https://grafana.github.io/helm-charts
@@ -1099,15 +1067,25 @@ api:
   version: "$API_VERSION"
   servletContextPath: "/${NAMESPACE}"
   multiTenant: ${MULTI_TENANT:-false}
-  serviceMonitor:
-    enabled: true
-    namespace: $MONITORING_NAMESPACE
 
 image:
   repository: ghcr.io/cosmo-tech/cosmotech-api
   tag: "$CHART_PACKAGE_VERSION"
 
 config:
+  logging:
+    level:
+      com.cosmotech: TRACE
+      web: TRACE
+      org.springframework: TRACE
+      com.redis: TRACE
+  server:
+    error:
+      include-stacktrace: always
+  api:
+    serviceMonitor:
+      enabled: true
+      namespace: $MONITORING_NAMESPACE
   csm:
     platform:
       namespace: ${NAMESPACE}
