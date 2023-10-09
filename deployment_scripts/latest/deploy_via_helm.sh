@@ -990,7 +990,7 @@ mainContainer:
 
 EOF
 
-helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_VERSION} --values values-argo.yaml
+helm upgrade --install -n "${NAMESPACE}" ${ARGO_RELEASE_NAME} argo/argo-workflows --version ${ARGO_CHART_VERSION} --values values-argo.yaml
 
 echo "Installing Loki service"
 cat <<EOF > loki-values.yaml
