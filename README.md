@@ -165,11 +165,11 @@ helm -n phoenix get values cosmotech-api-v2 | tail -n +2 > values.yaml
 # In Azure portal, retrieve Cosmos DB server URI and key.
 export COSMOSDB_URL="https://<cosmoDB-name>.documents.azure.com:443/"
 export COSMOSDB_KEY="<cosmoDB-key>"
-# Run upgrade script
+# An API upgrade script to update API v2 to version 2.4.9 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
 ./upgrade.sh 2.4.9 values.yaml phoenix v2
 ```
 ### Delete CosmoDB resource
-After verifying that API in running properly and API resources are available, delete CosmoDB resource (in Azure portal.)
+After verifying that API in running properly and API resources are available, delete CosmoDB resource (in Azure portal).
 
 
 # How to upgrade Cosmo Tech platform from 2.2.0 to 2.3.5
