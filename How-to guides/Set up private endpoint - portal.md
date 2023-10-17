@@ -33,7 +33,7 @@ Skip this step if the desired DNS zone already exists
     - Virtual Network : select the platform vnet
     - Subnet : select the subnet
     - Private IP configuration : Dynamically allocate IP address
-  DNS
+  - DNS
     - Integrate with private DNS zone : Yes
     - select subscription / resource group / private DNS zone (private DNS zone = `privatelink.blob.core.windows.net`)
 
