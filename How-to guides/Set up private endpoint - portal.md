@@ -14,7 +14,7 @@ Skip this step if the desired DNS zone already exists
 
 ## Disable the private endpoint network policies for the subnet
 
-- Go to the Azure Portal and open the Storage Account
+- Go to the Azure Portal and open virtual network
 - In `subnets`, select the subnet you want to attach the storage
 - In `NETWORK POLICY FOR PRIVATE ENDPOINTS`, remove the policies
 
