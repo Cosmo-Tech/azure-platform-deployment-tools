@@ -37,6 +37,17 @@ Skip this step if the desired DNS zone already exists
     - Integrate with private DNS zone : Yes
     - select subscription / resource group / private DNS zone (private DNS zone = `privatelink.blob.core.windows.net`)
 
+
+## Add the virtual network link
+
+- Open the created DNS zone `privatelink.blob.core.windows.net`
+- Select `Virtual network links`
+- Click on `Add` and enter:
+  - Link Name : `VNetLink1`
+  - Select the subscription and the platform virtual network
+  - Leave `Enable auto registration` disabled
+
+
 ## Disable Public network access
 
 - In the Storage Account page
