@@ -150,6 +150,28 @@ Define Power BI embedded authentication mode and related licensing plan.
     * Premium capacity is needed for Production applications
 * Power BI admin rights are required to `Enable Power BI embed content and service principals to use Power BI APIs` (for specific Power BI security group) in Power BI Admin Portal
 
+# How to upgrade Cosmo Tech platform from 2.3.5 to 2.4.9
+## Prerequisites
+* API version between 2.3.5 & 2.3.16
+* AKS version 1.25.6
+## Upgrade steps
+### Retrieve API values
+> Connect to AKS Cluster Context
+```bash
+helm -n phoenix get values cosmotech-api-v2 | tail -n +2 > values.yaml
+```
+### Set environment variables and run API upgrade script
+```bash
+# In Azure portal, retrieve Cosmos DB server URI and key.
+export COSMOSDB_URL="https://<cosmoDB-name>.documents.azure.com:443/"
+export COSMOSDB_KEY="<cosmoDB-key>"
+# An API upgrade script to update API v2 to version 2.4.9 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
+./upgrade.sh 2.4.9 values.yaml phoenix v2
+```
+### Delete CosmoDB resource
+After verifying that API in running properly and API resources are available, delete CosmoDB resource (in Azure portal).
+
+
 # How to upgrade Cosmo Tech platform from 2.2.0 to 2.3.5
 
 ## Prerequisites
@@ -168,7 +190,7 @@ Define Power BI embedded authentication mode and related licensing plan.
 ### Retrieve API values (optional)
 This step is optional, but useful to save API values in case of issue during the upgrade.
 > Connect to AKS Cluster Context
-```
+```bash
 helm -n phoenix get values cosmotech-api-v2 | tail -n +2 > values.yaml
 ```
 ### Migrate AKS from 1.23.x to 1.25.5
@@ -182,6 +204,6 @@ az aks upgrade --resource-group <myResourceGroup> --name <myAKSCluster> --kubern
 ### Run API upgrade script
 An API upgrade script to update API v2 to version 2.3.5 is available in the folder `deployment_scripts/v2.3/`. This script upgrades the Cosmo Tech Platform API and dependancies.
 > Connect to AKS Cluster Context
-```
+```bash
 ./upgrade.sh 2.3.5
 ```

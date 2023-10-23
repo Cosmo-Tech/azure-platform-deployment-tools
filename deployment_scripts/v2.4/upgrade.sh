@@ -66,14 +66,11 @@ fi
 
 echo Migrate data from CosmosDB to Redis...
 
-WORKING_DIR=$(mktemp -d -t cosmotech-api-migration-XXXXXXXXXX)
-pushd "${WORKING_DIR}"
-
 export COSMOSDB_DATABASE_NAME=phoenix-core
 export NAMESPACE="phoenix"
 export REDIS_INSTANCE="cosmotechredis"
 
-cat <<EOF > cosmosdb_migration_pod.yaml
+kubectl create -n phoenix -f - <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
@@ -86,9 +83,9 @@ spec:
     - name: COSMOSDB_DATABASE_NAME
       value: ${COSMOSDB_DATABASE_NAME}
     - name: COSMOSDB_URL
-      value: $(kubectl -n ${NAMESPACE} get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.uri')
+      value: ${COSMOSDB_URL}
     - name: COSMOSDB_KEY
-      value: $(kubectl -n ${NAMESPACE} get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.key')
+      value: ${COSMOSDB_KEY}
     - name: REDIS_SERVER
       value: "${REDIS_INSTANCE}-master"
     - name: REDIS_PASSWORD
@@ -101,19 +98,9 @@ spec:
     value: "cosmotech"
     effect: "NoSchedule"
   restartPolicy: Never
-  initContainers:
-  - name: download-dependencies
-    image: alpine:latest
-    command: ["sh", "-c", "wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64", "-o", "/usr/bin/yq", "&&", "chmod", "+x", "/usr/bin/yq"]
 EOF
 
-kubectl apply -n ${NAMESPACE} -f cosmosdb_migration_pod.yaml
-
-rm -rf "${WORKING_DIR}"
-
 echo End of the migration step
-
-
 
 if [[ -z "${COSMOTECH_API_RELEASE_VALUES_FILE}" ]]; then
   echo Getting cosmotech-api-${API_VERSION} helm values...
@@ -130,24 +117,6 @@ echo API_VERSION=${API_VERSION}
 echo GIT_BRANCH_NAME=${GIT_BRANCH_NAME}
 
 echo "Setting environment variables useful for this upgrade..."
-
-# Retrieve the Argo MinIO access and secret key credentials
-# shellcheck disable=SC2155
-export ARGO_MINIO_ACCESS_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -o=jsonpath='{.data.root-user}' | base64 -d)
-if [[ -z ${ARGO_MINIO_ACCESS_KEY} ]]; then
-  # migrate existing user
-  export MINIO_MIGRATE=true
-fi
-# shellcheck disable=SC2155
-export ARGO_MINIO_SECRET_KEY=$(kubectl -n "${NAMESPACE}" get secret miniocsmv2 -o=jsonpath='{.data.root-password}' | base64 -d)
-
-if [[ $MINIO_MIGRATE ]]; then
-  echo Deleting minio installation for migration
-  helm -n ${NAMESPACE} uninstall miniocsmv2
-fi
-
-echo Deleting minio secret for migration
-kubectl -n ${NAMESPACE} delete secret miniocsmv2
 
 # Retrieve the current Argo PostgreSQL secret
 # shellcheck disable=SC2155
