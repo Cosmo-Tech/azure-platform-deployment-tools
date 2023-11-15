@@ -1,4 +1,4 @@
-# How to deploy Cosmo Tech platform 2.3.5
+# How to deploy Cosmo Tech platform 2.4.9
 
 ## Prerequisites
 
@@ -23,14 +23,14 @@ A [Terraform script](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main
     * Platform app registration
     * Network ADT app registration
     * Swagger app registration
-    * Restish app registration
+    * Babylon app registration
     * Web app app registration
 * Role assignments:
     * Network ADT app registration Contributor on Public IP
     * Network ADT app registration Network Contributor on Virtual Network
 
 > **NOTE**
-> <br> Please provide to Cosmo Tech: Tenant ID, App registrations client ID & names
+> <br> Please provide to Cosmo Tech the Terraform outputs: Tenant ID, App registrations client ID & names, Service principals object ID
 
 ## Platform deployment
 
@@ -46,12 +46,14 @@ Follow the [deployment documentation](https://portal.cosmotech.com/docs//documen
 Here are some recommendations or details about platform deployment configuration:
 
 **Basics**
+* `Subscription`: select your subscription.
 * `Resource group`: created previously in the prerequisites step.
+* `Region`: select the resources location.
 * `Managed resource group name`: this resource group will be created automatically at the managed application deployment to host all managed application resources. Cosmo Tech, as the publisher of the managed application will be Contributor of this resource group.
 
 **Cosmo Tech Platform**
 * `Application name`: give a name to the platform to be deployed
-* `Platform Version`: version of the API to be deployed on the platform. Latest current version is 2.3.5.
+* `Platform Version`: version of the API to be deployed on the platform. Latest current version is 2.4.9.
 * `Platform App Registration Tenant ID`: Azure Active Directory tenant ID
 * `Platform App Registration ID`: Client ID of the Platform app registration
 * `Platform App Registration Secret`: Secret of the Platform app registration
@@ -63,7 +65,9 @@ Here are some recommendations or details about platform deployment configuration
 * Keep all default settings.
 
 **Compute**
-* If no specific sizing needs, keep all default settings.
+Keep all default settings except:
+* `Kubernetes version`: change to 1.25.6.
+* `Services pool instance type`: change size to *Standard B4ms*.
 
 **Scaling**
 * If no specific sizing needs, keep all default settings.
@@ -76,9 +80,10 @@ Here are some recommendations or details about platform deployment configuration
 * `Public IP address Resource`: Select Public IP created previously in prerequisites step.
 * `Fully qualified domain name`: Enter the FQDN defined previously in the prerequisites step (e.g. `dev.api.cosmotech.com`).
 * `TLS Certificate`: `Let's Encrypt` is recommended. For Custom certificate, please enter the certificate and key, as detailed in the [documentation](https://portal.cosmotech.com/docs//documentation/platform_help/2.2/Content/How_To_Build_My_App/Marketplace/Deployment/ExternalAccess_tab.htm).
+* `Contact Email`: set the contact email in case of certificate expiry.
 
 **Security**
-* `Authorized IP ranges`: In case you want to set an IP white list to access AKS cluster, enter the authorized IP ranges (please add Cosmo Tech IP to the list `185.55.98.20`). If empty: no IP restriction for accessing AKS cluster.
+* `Authorized IP ranges`: In case you want to set an IP white list to access AKS cluster, enter the authorized IP ranges (please add Cosmo Tech IP to the list `185.55.98.16/29`). If empty: no IP restriction for accessing AKS cluster.
 * `Service principal type`: Select existing.
 * `Service principal`: Select previously created NetworkADT app registration. Enter Network ADT app registration secret.
 
@@ -93,19 +98,12 @@ Once the platform is deployed, a simple check can be performed by a **Customer u
     * Let secret empty
     * Select the scope
 * The operation should succeed. The platform is ready for the next step: Users management in order to be able to run API queries.
-## Post Deployment Operations
-
-### Change platform authentication method to single
-When created with the [Platform Prerequisites Terraform](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main/azure/create-platform-prerequisites),
-the app registrations authentications are configured by default as single-tenant.</br>
-Until Cosmo Tech Platform version 2.3.5, API is deployed by default as multi-tenant.
-The [Configure platform as single-tenant]("./How-to guides/Configure platform as single-tenant.md") doc shows how to configure the Cosmo Tech API as single-tenant.
 
 ## Users management
 
 ### Objectives
 
-* Split users in 3 groups: Contributors users, Business users, Business readers
+* Split users in 2 groups: Contributors users, Business users.
 * Enable Cosmo Tech engineers to access the platform API and to manage resources outside of managed application (e.g. data integration, web app, etc).
 
 ### Users management steps
@@ -116,9 +114,7 @@ The [Configure platform as single-tenant]("./How-to guides/Configure platform as
 * Assign the following roles on the Platform Enterprise Application (in Azure portal > Enterprise applications > search for Platform app registration name > Users and groups > Add user/group):
     * Contributors users: Platform.Admin
     * Business users: Organization.User
-* Assign Azure Digital Twins Data Owner role on Azure Digital Twins resource to:
-    * Network ADT app registration
-    * Contributors users
+* Assign role Contributor to Contributors users, on all project resource groups.
 
 ## Optional: Configure Cosmo Tech platform to authorize access from Cosmo Tech tenant
 
@@ -168,6 +164,20 @@ export COSMOSDB_KEY="<cosmoDB-key>"
 # An API upgrade script to update API v2 to version 2.4.9 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
 ./upgrade.sh 2.4.9 values.yaml phoenix v2
 ```
+### Re-index Redis database
+* Connect to Redis service (Port forward on Redis service).
+* In Redis Insight, run the following commands in the terminal:
+```bash
+FT.DROPINDEX com.cosmotech.dataset.domain.DatasetIdx
+FT.DROPINDEX com.cosmotech.workspace.domain.WorkspaceIdx
+FT.DROPINDEX com.cosmotech.scenariorun.domain.ScenarioRunIdx
+FT.DROPINDEX com.cosmotech.solution.domain.SolutionIdx
+FT.DROPINDEX com.cosmotech.organization.domain.OrganizationIdx
+FT.DROPINDEX com.cosmotech.connector.domain.ConnectorIdx
+FT.DROPINDEX com.cosmotech.scenario.domain.ScenarioIdx
+```
+* Restart API pods in order to re-launch Redis indexing (in k9s, kill cosmotech-api-v2 pods).
+* Check that API is running and API resources are available.
 ### Delete CosmoDB resource
 After verifying that API in running properly and API resources are available, delete CosmoDB resource (in Azure portal).
 
