@@ -29,15 +29,17 @@ A [Terraform script](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main
     * Network ADT app registration Contributor on Public IP
     * Network ADT app registration Network Contributor on Virtual Network
 
-> **NOTE**
-> <br> Please provide to Cosmo Tech the Terraform outputs: Tenant ID, App registrations client ID & names, Service principals object ID
+> **NOTE**  
+> Please provide to Cosmo Tech the Terraform outputs: Tenant ID, App registrations client ID & names, Service principals object ID.
+
+> Ensure all admin consents are provided on App registrations API permissions.
 
 ## Platform deployment
 
 ### Platform deployment from Azure Marketplace
 
-> **IMPORTANT**
-> <br>The Cosmo Tech platform is an Azure Managed Application, meaning that Cosmo Tech, as the publisher of the managed application is Contributor of all the resources of the managed application.
+> **IMPORTANT**  
+> The Cosmo Tech platform is an Azure Managed Application, meaning that Cosmo Tech, as the publisher of the managed application is Contributor of all the resources of the managed application.
 
 Cosmo Tech Simulation Digital Twin Platform available on Azure Marketplace: select [Custom Plan v2](https://portal.azure.com/#create/cosmotech1600259358818.cosmotechsdtplatformuniversal_plan_v2).
 
