@@ -322,7 +322,7 @@ esac
 echo
 Add content to runTemplates field
 PAYLOAD=$PAYLOAD_R
-cp $PAYLOAD_R/*  ./.payload/
+cp $PAYLOAD_R/*.yaml  ./.payload/
 #create solution Asset
 echo "---------------------------------------------------create solution $1-----------------------------------------------"
 echo 
