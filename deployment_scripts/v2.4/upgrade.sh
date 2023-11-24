@@ -70,6 +70,8 @@ export COSMOSDB_DATABASE_NAME=phoenix-core
 export NAMESPACE="phoenix"
 export REDIS_INSTANCE="cosmotechredis"
 
+REDIS_PASSWORD=$(kubectl -n ${NAMESPACE} get secret ${REDIS_INSTANCE} -o jsonpath="{.data.redis-password}" | base64 --decode)
+
 kubectl create -n phoenix -f - <<EOF
 apiVersion: v1
 kind: Pod
@@ -89,7 +91,7 @@ spec:
     - name: REDIS_SERVER
       value: "${REDIS_INSTANCE}-master"
     - name: REDIS_PASSWORD
-      value: $(kubectl -n ${NAMESPACE} get secret ${REDIS_INSTANCE} -o jsonpath="{.data.redis-password}" | base64 --decode)
+      value: ${REDIS_PASSWORD}
   nodeSelector:
     "cosmotech.com/tier": "db"
   tolerations:
@@ -99,6 +101,17 @@ spec:
     effect: "NoSchedule"
   restartPolicy: Never
 EOF
+
+echo Give time to complete migration from CosmosDB...
+sleep 30
+
+REDIS_INDEXES=("com.cosmotech.dataset.domain.DatasetIdx" "com.cosmotech.workspace.domain.WorkspaceIdx" "com.cosmotech.scenariorun.domain.ScenarioRunIdx" "com.cosmotech.solution.domain.SolutionIdx" "com.cosmotech.organization.domain.OrganizationIdx" "com.cosmotech.connector.domain.ConnectorIdx" "com.cosmotech.scenario.domain.ScenarioIdx")
+
+echo Delete indexes created by step above. Cosmo Tech API needs to create by itself at startup...
+for index in ${REDIS_INDEXES[@]}; do
+  echo $index
+  kubectl -n phoenix exec -it cosmotechredis-master-0  -- /bin/bash -c "redis-cli -a $REDIS_PASSWORD FT.DROPINDEX $index"
+done
 
 echo End of the migration step
 
