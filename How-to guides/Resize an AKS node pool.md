@@ -3,6 +3,7 @@
 The AKS service of Cosmo Tech Platform contains a set of node pools sized in order to cover most of the use cases. However some cases can require an increase of the VM size of the nodes, as:
 * `services` nodes are too small in memory and API start is unstable. `services` default VM size `Standard_A2m_v2` should be upgraded to `Standard_B4ms`.
 * `basic` nodes are too small in memory for dataset import. `basic` default VM size `Standard_D2ads_v5` should be upgraded to `Standard_F4s_v2`
+* `highmemory` nodes are too large and can be reduced for lower Azure consumption. `highmemory` default VM size `Standard_E16ads_v5` should be downgraded to `Standard_E8ads_v5`
 
 This procedure enables to update an AKS node pool SKU with no availability interruption. 
 
@@ -61,6 +62,24 @@ az aks nodepool add --cluster-name "<AKS_cluster_name>" \
                     --node-taints "vendor=cosmotech:NoSchedule" \
                     --mode "User" \
                     --os-type "Linux"
+
+# command for creation of new "highmemory" node pool
+az aks nodepool add --cluster-name "<AKS_cluster_name>" \
+                    -g "<resource_group>" \
+                    --name "new_nodepool_name" \
+                    --node-count 0 \
+                    --node-vm-size "Standard_E8ads_v5" \
+                    --node-osdisk-size 128 \
+                    --node-osdisk-type "Managed" \
+                    --max-pods 110 \
+                    --max-count 3 \
+                    --min-count 0 \
+                    --enable-cluster-autoscaler \
+                    --labels "cosmotech.com/tier=compute" "cosmotech.com/size=highmemory" \
+                    --node-taints "vendor=cosmotech:NoSchedule" \
+                    --mode "User" \
+                    --os-type "Linux"
+
 ```
 
 **Cordon and drain the nodes**
