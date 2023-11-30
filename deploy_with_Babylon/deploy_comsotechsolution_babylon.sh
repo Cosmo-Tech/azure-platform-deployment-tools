@@ -114,13 +114,13 @@ echo "---> Enter the github$cl_grey repository$cl_df Variable for github deploye
 echo "$cl_green EX$cl_df: azure-webapp-asset-qa"
 read repository_D
 echo "---> Enter the github$cl_grey branch$cl_df Variable for github deployement : " 
-echo "$cl_green EX$cl_df: bash/asset"
+echo "$cl_green EX$cl_df: dev/asset"
 read branch_D
 echo "---> Enter the github$cl_grey repository$cl_df Variable to retrieve the GitHub webapp :" 
 echo "$cl_green EX$cl_df: phoenix-asset-product-webapp"
 read repository_R
 echo "---> Enter the github$cl_grey branch$cl_df Variable to retrieve the GitHub webapp :"
-echo "$cl_green EX$cl_df: deployment/dev1" 
+echo "$cl_green EX$cl_df: upstream/deployment/dev1" 
 read branch_R
 echo "---> Enter the github$cl_grey token$cl_df Variable to authenticate for the GitHub repository :"
 echo "$cl_green EX$cl_df:You should generate a token" 
@@ -175,9 +175,9 @@ babylon config set acr simulator_version $simulator_version -c $1 -p $2
 babylon config set azure function_artifact_url $function_artifact_url -c $1 -p $2
 babylon config set webapp deployment_name $deployment_name_$(head /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 4) -c $1 -p $2
 babylon config set webapp location $location -c $1 -p $2
-babylon config set github branch $branch -c $1 -p $2
+babylon config set github branch $branch_D -c $1 -p $2
 babylon config set github organization $organization -c $1 -p $2
-babylon config set github repository $repository -c $1 -p $2
+babylon config set github repository $repository_D -c $1 -p $2
 babylon config set api run_templates -c $1 -p $2 --item "common"
 babylon config set api url $url -c $1 -p $2
 echo
@@ -254,7 +254,7 @@ git remote add origin https://Cosmo-Tech:$pat@github.com/Cosmo-Tech/$repository_
 git remote add upstream https://oauth2:$pat@github.com/Cosmo-Tech/$repository_R.git
 git remote set-url upstream --push "NO"
 git fetch --all --tags --prune
-git checkout -B $branch_D upstream/$branch_R
+git checkout -B $branch_D $branch_R
 rm -r .github/
 git add .; git commit -m 'first commit'
 git push origin $branch_D -f
