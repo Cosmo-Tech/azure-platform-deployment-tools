@@ -19,6 +19,7 @@ help() {
   echo "- ARGO_MINIO_PERSISTENCE_SIZE | units of bytes (default is 500Gi) | Persistence size for the Argo MinIO server"
   echo "- LOKI_PERSISTENCE_MEMORY | units of bytes (default is 4Gi) | Memory for persistence of Loki system"
   echo "- LOKI_RETENTION_PERIOD | units of hours (default is 720h) | Loki logs retention period"
+  echo "- LOKI_MAX_ENTRIES_LIMIT_PER_QUERY | string | Maximum number of log entries per query"
   echo "- NGINX_INGRESS_CONTROLLER_ENABLED | boolean (default is false) | indicating whether an NGINX Ingress Controller should be deployed and an Ingress resource created too"
   echo "- NGINX_INGRESS_CONTROLLER_REPLICA_COUNT | int (default is 1) | number of pods for the NGINX Ingress Controller"
   echo "- NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP | IP Address String | optional public IP Address to use as LoadBalancer IP. You can create one with this Azure CLI command: az network public-ip create --resource-group <my-rg>> --name <a-name> --sku Standard --allocation-method static --query publicIp.ipAddress -o tsv "
@@ -1005,6 +1006,8 @@ loki:
     table_manager:
       retention_deletes_enabled: true
       retention_period: "${LOKI_RETENTION_PERIOD:-720h}"
+    limits_config:
+      max_entries_limit_per_query: ${LOKI_MAX_ENTRIES_LIMIT_PER_QUERY:-50000}
 promtail:
   config:
     clients:
