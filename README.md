@@ -166,20 +166,6 @@ export COSMOSDB_KEY="<cosmoDB-key>"
 # An API upgrade script to update API v2 to version 2.4.9 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
 ./upgrade.sh 2.4.9 values.yaml phoenix v2
 ```
-### Re-index Redis database
-* Connect to Redis service (Port forward on Redis service).
-* In Redis Insight, run the following commands in the terminal:
-```bash
-FT.DROPINDEX com.cosmotech.dataset.domain.DatasetIdx
-FT.DROPINDEX com.cosmotech.workspace.domain.WorkspaceIdx
-FT.DROPINDEX com.cosmotech.scenariorun.domain.ScenarioRunIdx
-FT.DROPINDEX com.cosmotech.solution.domain.SolutionIdx
-FT.DROPINDEX com.cosmotech.organization.domain.OrganizationIdx
-FT.DROPINDEX com.cosmotech.connector.domain.ConnectorIdx
-FT.DROPINDEX com.cosmotech.scenario.domain.ScenarioIdx
-```
-* Restart API pods in order to re-launch Redis indexing (in k9s, kill cosmotech-api-v2 pods).
-* Check that API is running and API resources are available.
 ### Delete CosmoDB resource
 After verifying that API in running properly and API resources are available, delete CosmoDB resource (in Azure portal).
 
