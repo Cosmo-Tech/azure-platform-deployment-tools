@@ -4,7 +4,7 @@ Cosmo Tech Platform deploys an AKS cluster which has a default configuration for
 
 > Warning: this Azure Active Directory integration can't be disabled once added, it is irreversible.
 
-Feature documentation and migration steps are detailed in (Microsoft documentation portal[https://learn.microsoft.com/en-us/azure/aks/enable-authentication-microsoft-entra-id]).
+Feature documentation and migration steps are detailed in [Microsoft documentation portal](https://learn.microsoft.com/en-us/azure/aks/enable-authentication-microsoft-entra-id).
 
 ## Migration steps for an existing AKS cluster
 
