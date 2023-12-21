@@ -1,4 +1,4 @@
-# How to deploy Cosmo Tech platform 2.4.9
+# How to deploy Cosmo Tech platform 2.4.10
 
 ## Prerequisites
 
@@ -55,7 +55,7 @@ Here are some recommendations or details about platform deployment configuration
 
 **Cosmo Tech Platform**
 * `Application name`: give a name to the platform to be deployed
-* `Platform Version`: version of the API to be deployed on the platform. Latest current version is 2.4.9.
+* `Platform Version`: version of the API to be deployed on the platform. Latest current version is 2.4.10.
 * `Platform App Registration Tenant ID`: Azure Active Directory tenant ID
 * `Platform App Registration ID`: Client ID of the Platform app registration
 * `Platform App Registration Secret`: Secret of the Platform app registration
