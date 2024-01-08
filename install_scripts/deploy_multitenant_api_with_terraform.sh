@@ -210,14 +210,13 @@ else
 fi
 # TERRAFORM INSTALLED
 
-export TF_VAR_owner_list='["nibaldo.donoso@cosmotech.com"]'
+export TF_VAR_owner_list='["nibaldo.donoso@cosmtech.com"]'
 export TF_VAR_backend_remote=false
 
 # retrieve terraform.
-git clone https://github.com/Cosmo-Tech/cosmotech-add-common.git common
+git clone -b ndons/vnetnew https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
-export TF_VAR_vnet_iprange="10.21.0.0/16"
 
 terraform init
 terraform plan -out tfplan
@@ -226,18 +225,14 @@ terraform apply tfplan
 export CLUSTER_NAME=$(terraform output -raw out_cluster_name)
 export VNET_NAME=$(terraform output -raw out_vnet_name)
 
-# popd
+popd
 
-# git clone https://github.com/Cosmo-Tech/cosmotech-add-tenant.git tenant
-# pushd tenant
+git clone -b ndon/addvars https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
+pushd tenant
 
-# export TF_VAR_cluster_name=$CLUSTER_NAME
-# export TF_VAR_platform_vnet=$VNET_NAME
-# export TF_VAR_vnet_iprange="10.40.0.0/16"
-# # vault setting
-# export TF_VAR_create_vault_entries=false
-# export TF_VAR_vault_addr="https://engineering.uksouth.cloudapp.azure.com"
+export TF_VAR_cluster_name=$CLUSTER_NAME
+export TF_VAR_platform_vnet=$VNET_NAME
 
-# terraform init
-# terraform plan -out tfplan
-# terraform apply tfplan
+terraform init
+terraform plan -out tfplan
+terraform apply tfplan
