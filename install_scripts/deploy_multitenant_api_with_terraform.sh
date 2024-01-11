@@ -214,7 +214,7 @@ export TF_VAR_owner_list='["nibaldo.donoso@cosmtech.com"]'
 export TF_VAR_backend_remote=false
 
 # retrieve terraform.
-git clone -b ndons/vnetnew https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
+git clone -b ndon/vnetnew https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
 
