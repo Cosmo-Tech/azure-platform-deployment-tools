@@ -211,14 +211,19 @@ fi
 # TERRAFORM INSTALLED
 
 export TF_VAR_owner_list='["nibaldo.donoso@cosmtech.com"]'
-export TF_VAR_backend_remote=false
+export TF_VAR_backend_remote=true
 
 # retrieve terraform.
 git clone -b ndon/vnetnew https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
+terraform init \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
+    -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
+    -backend-config "container_name=$TF_VAR_tf_container_name" \
+    -backend-config "key=$TF_VAR_tf_blob_name" \
+    -backend-config "access_key=$TF_VAR_tf_access_key"
 
-terraform init
 terraform plan -out tfplan
 terraform apply tfplan
 
@@ -231,8 +236,14 @@ git clone -b ndon/addvars https://github.com/Cosmo-Tech/terraform-azure-cosmotec
 pushd tenant
 
 export TF_VAR_cluster_name=$CLUSTER_NAME
-export TF_VAR_platform_vnet=$VNET_NAME
+export TF_VAR_vnet_name=$VNET_NAME
 
-terraform init
+terraform init \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
+    -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
+    -backend-config "container_name=$TF_VAR_tf_container_name" \
+    -backend-config "key=$TF_VAR_tf_blob_name" \
+    -backend-config "access_key=$TF_VAR_tf_access_key"
+
 terraform plan -out tfplan
 terraform apply tfplan
