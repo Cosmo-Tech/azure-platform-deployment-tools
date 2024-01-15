@@ -210,9 +210,6 @@ else
 fi
 # TERRAFORM INSTALLED
 
-export TF_VAR_owner_list='["nibaldo.donoso@cosmtech.com"]'
-
-# retrieve terraform.
 git clone -b ndon/vnetnew https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
