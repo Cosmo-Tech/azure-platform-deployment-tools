@@ -223,16 +223,10 @@ terraform init \
 terraform plan -out tfplan
 terraform apply tfplan
 
-export CLUSTER_NAME=$(terraform output -raw out_cluster_name)
-export VNET_NAME=$(terraform output -raw out_vnet_name)
-
 popd
 
 git clone -b ndon/addvars https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
-
-export TF_VAR_cluster_name=$CLUSTER_NAME
-export TF_VAR_vnet_name=$VNET_NAME
 
 terraform init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
