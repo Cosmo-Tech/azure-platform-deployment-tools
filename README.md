@@ -68,7 +68,7 @@ Here are some recommendations or details about platform deployment configuration
 
 **Compute**
 Keep all default settings except:
-* `Kubernetes version`: change to 1.25.6.
+* `Kubernetes version`: change to 1.26.10.
 * `Services pool instance type`: change size to *Standard B4ms*.
 
 **Scaling**
@@ -148,10 +148,10 @@ Define Power BI embedded authentication mode and related licensing plan.
     * Premium capacity is needed for Production applications
 * Power BI admin rights are required to `Enable Power BI embed content and service principals to use Power BI APIs` (for specific Power BI security group) in Power BI Admin Portal
 
-# How to upgrade Cosmo Tech platform from 2.3.5 to 2.4.9
+# How to upgrade Cosmo Tech platform from 2.3.5 to 2.4.10
 ## Prerequisites
 * API version between 2.3.5 & 2.3.16
-* AKS version 1.25.6
+* AKS version 1.26.10
 ## Upgrade steps
 ### Retrieve API values
 > Connect to AKS Cluster Context
@@ -163,8 +163,8 @@ helm -n phoenix get values cosmotech-api-v2 | tail -n +2 > values.yaml
 # In Azure portal, retrieve Cosmos DB server URI and key.
 export COSMOSDB_URL="https://<cosmoDB-name>.documents.azure.com:443/"
 export COSMOSDB_KEY="<cosmoDB-key>"
-# An API upgrade script to update API v2 to version 2.4.9 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
-./upgrade.sh 2.4.9 values.yaml phoenix v2
+# An API upgrade script to update API v2 to version 2.4.10 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
+./upgrade.sh 2.4.10 values.yaml phoenix v2
 ```
 ### Delete CosmoDB resource
 After verifying that API in running properly and API resources are available, delete CosmoDB resource (in Azure portal).
