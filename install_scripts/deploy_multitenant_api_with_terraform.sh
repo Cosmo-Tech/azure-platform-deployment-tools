@@ -228,15 +228,6 @@ popd
 git clone -b ndon/addvars https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
 
-# if [ $TF_VAR_tls_certificate_type == 'custom' ]; then
-#   echo "Fetching the custom TLS Certificate"
-#   echo $TF_VAR_tls_certificate_custom_certificate > certificate.crt
-#   export TF_VAR_TF_VAR_tls_certificate_custom_certificate_path=$(realpath ./certificate.crt)
-#   echo "Fetching the custom TLS Certificate Key"
-#   echo $TF_VAR_tls_certificate_custom_key > certificate_key.key
-#   export TF_VAR_tls_certificate_custom_key_path=$(realpath ./certificate_key.key)
-# fi
-
 terraform init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
