@@ -782,6 +782,7 @@ echo -- Minio
 # Minio
 cat <<EOF > values-minio.yaml
 fullnameOverride: ${MINIO_RELEASE_NAME}
+defaultBuckets: "${ARGO_BUCKET_NAME}"
 persistence:
   enabled: true
   size: "${ARGO_MINIO_PERSISTENCE_SIZE:-16Gi}"
@@ -813,18 +814,6 @@ metrics:
     namespace: $MONITORING_NAMESPACE
     interval: 30s
     scrapeTimeout: 10s
-provisioning:
-  buckets:
-  - name: ${ARGO_BUCKET_NAME}
-    versioning: false
-    lifecycle:
-    - id: Minio3DRetention
-      prefix: clean-prefix
-      disabled: false
-      expiry:
-        days: 3
-    quota:
-      type: clear
 EOF
 
 helm repo add bitnami https://charts.bitnami.com/bitnami
