@@ -726,6 +726,17 @@ image:
   tag: ${VERSION_REDIS_COSMOTECH}
 volumePermissions:
   enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: latest
+    pullPolicy: IfNotPresent
+sysctl:
+  image:
+    registry: docker.io
+    repository: bitnami/os-shell
+    tag: latest
+    pullPolicy: IfNotPresent
 master:
   persistence:
     existingClaim: ${REDIS_MASTER_NAME_PVC:-"cosmotech-database-master-pvc"}
