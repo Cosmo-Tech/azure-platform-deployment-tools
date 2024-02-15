@@ -1,59 +1,104 @@
-# How to secure Azure Function storage through a virtual network
+**How to Secure Azure Function Storage through a Virtual Network**
 
-This is the guide to configure network access policies on an Azure Storage and limit the access to an specific Azure Function App.
+This guide provides step-by-step instructions on configuring network access policies for an Azure Storage account to restrict access to a specific Azure Function App.
 
-## For an existing Azure Function App and Storage
+### For an Existing Azure Function App and Storage
 
-**Requirement**
+**Prerequisites**
 
-- The Azure Function App Service plan Must be Elastic Premium Plan (EP1, EP2, EP3)
-- 
+- Ensure that the Azure Function App Service plan is an Elastic Premium Plan (EP1, EP2, EP3).
+- Confirm that the following Active Directory roles are assigned:
 
-### 1. Create a Azure Virtual Network
+  - Network Contributor on the ressource group
+  - Contributor on the Azure Function App
+  - Storage Account Contributor
 
-Create a Virtual Network(VNet) with two subnet one for the Azure Storage one for the Azure Function App.
 
-- Go to Microsoft Azure portal search in the top bar `virtual networks` and select virtual networks
-- Click on `Create`
-- Select : your Subscription , Resource group and Virtual network name. For better performance choose the same `Region/Location` for your resources
-- On `IP addresses` tab click `Add subnet` chose a relevant name like `storagesubnet` keep all other default setting the `Add`
-- Click `Review + Create` and `Create`
+### 1. Create an Azure Virtual Network
+
+Create a Virtual Network (VNet) with two subnets, one for Azure Storage and one for the Azure Function App.
+
+- Navigate to the Microsoft Azure portal, and in the top bar, search for `virtual networks`. Select the "Virtual networks" option.
+- Click on `Create`.
+- Fill in the required details:
+  - Choose your subscription.
+  - Select or create a resource group.
+  - Enter a unique Virtual Network name.
+  - For optimal performance, choose the same `Region/Location` for your resources.
+- Navigate to the `IP addresses` tab, click `Add subnet`, and provide a relevant name such as `storagesubnet`. Keep all other settings as default and click `Add`.
+- Review the configuration on the `Review + Create` tab, then click `Create`.
 
 ### 2. Configure Virtual Network service endpoint
 
 [Configuring service endpoint provides secure and direct connectivity](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) to Azure services over an optimized route over the Azure backbone network.
 
-- Go to the created Virtual Network >> `Subnet` >> choose the second subnet name `storagesubnet`
-- In   the subnet Settings >> `Service Endpoints` >> Services >> `Select Microsoft.Storage` >> Save
+- Navigate to the created Virtual Network, then go to `Subnet` and choose the second subnet named `storagesubnet`.
+- In the subnet settings, locate `Service Endpoints` and click on it.
+- Under the `Services` section, select `Microsoft.Storage`.
+- Save the changes to apply the service endpoint configuration.
 
-### 3. Configure the Azure Storage Account Network policies
+### 3. Configure Azure Storage Account Network Policies
 
+#### 3.1 Using a Private Endpoint
 
-#### 3.1 Using a private endpoint
+- Navigate to the Storage Account, then go to `Networking` and select `Firewalls and virtual networks`.
+- Change Public network access to `Disabled`.
+- Under Network Routing, set the Routing preference to `Microsoft network`.
+- In the `Private endpoint connections` tab, click to add a Private Endpoint.
+- Choose an Instance Name and Network Interface Name, then click Next.
+- In the Resource section, select the target sub-resource as `blob` and click Next.
+- Under Virtual Network, choose the second subnet named `storagesubnet` and click Next three times.
+- Review the configuration and click Create to complete the setup.
 
-- Go to the Storage Account >> Networking >> `Firewalls and virtual networks`
-- Change Public network access to `Disabled`
-- In Network Routing >> Routing preference : choose Microsoft network
-- In `Private endpoint connections` Tabs click to add a Private endpoint
-- Choose an Instance Name and Network Interface Name then Next
-- In Resource >> Target sub-resource select blob then Next
-- In Virtual Network select the second subnet name `storagesubnet` then Next tree time and create.
+#### 3.2 Using Network Firewall Filter Rules
 
-#### 3.2 Using a Network firewall filter rules
+- Navigate to the Storage Account, then go to `Networking` and select `Firewalls and virtual networks`.
+- Change Public network access to `Enabled from selected virtual networks and IP addresses`.
+- Under Network Routing, set the Routing preference to `Microsoft network`.
+- In `Virtual networks`, click on 'Add existing virtual network'.
+- Select the created virtual network.
+- Choose the second subnet named `storagesubnet` and click Add.
+- In the Firewall section, under Address range, add your organization's VPN IP address if needed to allow connections from your organization's users.
 
-- Go to the Storage Account >> Networking >> `Firewalls and virtual networks`
-- Change Public network access to `Enabled from selected virtual networks and IP addresses`
-- In Network Routing >> Routing preference : choose Microsoft network
-- In `Virtual networks`  >> Add existing virtual network
-- Select the created virtual network
-- Select the second subnet name `storagesubnet` then click Add
-- In Firewall >> Address range,  add your organization VPN ip address if needed to allow connection form your organization users
+### 4. Configure Azure Function App Network
 
-### 4. Configure the Azure Function App Network
+**Important:** Ensure that the Azure Function App Service plan is an Elastic Premium Plan (EP1, EP2, EP3).
 
-Important : The Azure Function App Service plan Must be Elastic Premium Plan (EP1, EP2, EP3)
+- Navigate to the Azure Function App, then go to `Networking` and in `Outbound traffic configuration`.
+- Choose `Virtual network integration configuration`.
+- Click on `Add virtual network integration`.
+- Select the created virtual network.
+- Choose the default subnet, then click `Connect`.
 
-- Go to the Azure Function App >> Networking >> Outbound traffic configuration >> select Virtual network integration configuration
-- Add virtual network integration
-- Select the created virtual network
-- Select the default subnet then click connect
+```bash
+# Set your variables
+subscriptionId="your-subscription-id"
+resourceGroupName="your-resource-group-name"
+virtualNetworkName="your-virtual-network-name"
+location="your-location"
+subnetName="storagesubnet"
+
+# Create Virtual Network
+az network vnet create \
+  --subscription $subscriptionId \
+  --resource-group $resourceGroupName \
+  --name $virtualNetworkName \
+  --location $location \
+  --address-prefixes "10.0.0.0/16"  # Update with your desired address range
+
+# Add Subnet
+az network vnet subnet create \
+  --subscription $subscriptionId \
+  --resource-group $resourceGroupName \
+  --vnet-name $virtualNetworkName \
+  --name $subnetName \
+  --address-prefixes "10.0.1.0/24"  # Update with your desired subnet address range
+
+# Review and create
+az network vnet subnet update \
+  --subscription $subscriptionId \
+  --resource-group $resourceGroupName \
+  --vnet-name $virtualNetworkName \
+  --name $subnetName \
+  --service-endpoints Microsoft.Storage
+```
