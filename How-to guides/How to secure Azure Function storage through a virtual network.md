@@ -4,8 +4,10 @@ This is the guide to configure network access policies on an Azure Storage and l
 
 ## For an existing Azure Function App and Storage
 
-- Required IAM permissions
-- Required Plan for storage and Azure function plan
+**Requirement**
+
+- The Azure Function App Service plan Must be Elastic Premium Plan (EP1, EP2, EP3)
+- 
 
 ### 1. Create a Azure Virtual Network
 
@@ -26,6 +28,9 @@ Create a Virtual Network(VNet) with two subnet one for the Azure Storage one for
 
 ### 3. Configure the Azure Storage Account Network policies
 
+
+#### 3.1 Using a private endpoint
+
 - Go to the Storage Account >> Networking >> `Firewalls and virtual networks`
 - Change Public network access to `Disabled`
 - In Network Routing >> Routing preference : choose Microsoft network
@@ -34,6 +39,21 @@ Create a Virtual Network(VNet) with two subnet one for the Azure Storage one for
 - In Resource >> Target sub-resource select blob then Next
 - In Virtual Network select the second subnet name `storagesubnet` then Next tree time and create.
 
+#### 3.2 Using a Network firewall filter rules
+
+- Go to the Storage Account >> Networking >> `Firewalls and virtual networks`
+- Change Public network access to `Enabled from selected virtual networks and IP addresses`
+- In Network Routing >> Routing preference : choose Microsoft network
+- In `Virtual networks`  >> Add existing virtual network
+- Select the created virtual network
+- Select the second subnet name `storagesubnet` then click Add
+- In Firewall >> Address range,  add your organization VPN ip address if needed to allow connection form your organization users
+
 ### 4. Configure the Azure Function App Network
 
-- 
+Important : The Azure Function App Service plan Must be Elastic Premium Plan (EP1, EP2, EP3)
+
+- Go to the Azure Function App >> Networking >> Outbound traffic configuration >> select Virtual network integration configuration
+- Add virtual network integration
+- Select the created virtual network
+- Select the default subnet then click connect
