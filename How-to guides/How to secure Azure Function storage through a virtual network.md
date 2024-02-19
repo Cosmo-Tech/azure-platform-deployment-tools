@@ -1,8 +1,8 @@
-**How to Secure Azure Function Storage through a Virtual Network**
+# How to Secure Azure Function Storage through a Virtual Network
 
 This guide provides step-by-step instructions on configuring network access policies for an Azure Storage account to restrict access to a specific Azure Function App.
 
-### For an Existing Azure Function App and Storage
+## For an Existing Azure Function App and Storage
 
 **Prerequisites**
 
