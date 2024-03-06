@@ -92,7 +92,7 @@ export CERT_MANAGER_VERSION="1.9.1"
 export VERSION_REDIS="17.3.14"
 export VERSION_REDIS_COSMOTECH="1.0.8"
 export VERSION_REDIS_INSIGHT="0.1.0"
-export PROMETHEUS_STACK_VERSION="45.0.0"
+export PROMETHEUS_STACK_VERSION="47.6.1"
 
 export ARGO_DATABASE=argo_workflows
 export ARGO_BUCKET_NAME=argo-workflows
@@ -156,6 +156,8 @@ labels:
   networking/traffic-allowed: "yes"
 defaultRules:
   create: true
+kubernetesServiceMonitors:
+  enabled: true
 alertmanager:
   enabled: true
   alertmanagerSpec:
@@ -177,8 +179,28 @@ alertmanager:
       requests:
         cpu: 1
         memory: 400Mi
+windowsMonitoring:
+  enabled: false
 grafana:
   enabled: true
+  sidecar:
+    dashboards:
+      multicluster:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+        annotations: {}
+        global:
+          enabled: false
+        etcd:
+          enabled: false
+    datasources:
+      alertmanager:
+        enabled: true
+        uid: alertmanager
+        handleGrafanaManagedAlerts: false
+        implementation: prometheus
   grafana.ini:
     server:
       domain: "${COSMOTECH_API_DNS_NAME}"
@@ -276,26 +298,6 @@ kubeScheduler:
   enabled: true
 kubeStateMetrics:
   enabled: true
-kube-state-metrics:
-  tolerations:
-      - key: "vendor"
-        operator: "Equal"
-        value: "cosmotech"
-        effect: "NoSchedule"
-  nodeSelector:
-    "cosmotech.com/tier": "monitoring"
-  podMetadata:
-    labels:
-      networking/traffic-allowed: "yes"
-  resources:
-    limits:
-      cpu: 1
-      memory: 1Gi
-    requests:
-      cpu: 1
-      memory: 400Mi
-nodeExporter:
-  enabled: true
 prometheusOperator:
   tolerations:
     - key: "vendor"
@@ -317,6 +319,8 @@ prometheusOperator:
           effect: "NoSchedule"
 prometheus:
   enabled: true
+  networkPolicy:
+    enabled: false
   crname: prometheus
   serviceAccount:
     create: true
@@ -368,6 +372,154 @@ prometheus:
       selector:
         matchLabels:
           app.kubernetes.io/instance: cosmotech-api-v1
+kube-state-metrics:
+  namespaceOverride: ""
+  rbac:
+    create: true
+  releaseLabel: true
+  prometheus:
+    monitor:
+      enabled: true
+
+      ## Scrape interval. If not set, the Prometheus default scrape interval is used.
+      ##
+      interval: ""
+
+      ## SampleLimit defines per-scrape limit on number of scraped samples that will be accepted.
+      ##
+      sampleLimit: 0
+
+      ## TargetLimit defines a limit on the number of scraped targets that will be accepted.
+      ##
+      targetLimit: 0
+
+      ## Per-scrape limit on number of labels that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+      ##
+      labelLimit: 0
+
+      ## Per-scrape limit on length of labels name that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+      ##
+      labelNameLengthLimit: 0
+
+      ## Per-scrape limit on length of labels value that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+      ##
+      labelValueLengthLimit: 0
+
+      ## Scrape Timeout. If not set, the Prometheus default scrape timeout is used.
+      ##
+      scrapeTimeout: ""
+
+      ## proxyUrl: URL of a proxy that should be used for scraping.
+      ##
+      proxyUrl: ""
+
+      # Keep labels from scraped data, overriding server-side labels
+      ##
+      honorLabels: true
+
+      ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+      ##
+      metricRelabelings: []
+      # - action: keep
+      #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
+      #   sourceLabels: [__name__]
+
+      ## RelabelConfigs to apply to samples before scraping
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+      ##
+      relabelings: []
+      # - sourceLabels: [__meta_kubernetes_pod_node_name]
+      #   separator: ;
+      #   regex: ^(.*)$
+      #   targetLabel: nodename
+      #   replacement: $1
+      #   action: replace
+
+  selfMonitor:
+    enabled: false
+
+## Deploy node exporter as a daemonset to all nodes
+##
+nodeExporter:
+  enabled: true
+
+## Configuration for prometheus-node-exporter subchart
+##
+prometheus-node-exporter:
+  namespaceOverride: ""
+  podLabels:
+    ## Add the 'node-exporter' label to be used by serviceMonitor to match standard common usage in rules and grafana dashboards
+    ##
+    jobLabel: node-exporter
+  releaseLabel: true
+  extraArgs:
+    - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+    - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+  service:
+    portName: http-metrics
+  prometheus:
+    monitor:
+      enabled: true
+
+      jobLabel: jobLabel
+
+      ## Scrape interval. If not set, the Prometheus default scrape interval is used.
+      ##
+      interval: ""
+
+      ## SampleLimit defines per-scrape limit on number of scraped samples that will be accepted.
+      ##
+      sampleLimit: 0
+
+      ## TargetLimit defines a limit on the number of scraped targets that will be accepted.
+      ##
+      targetLimit: 0
+
+      ## Per-scrape limit on number of labels that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+      ##
+      labelLimit: 0
+
+      ## Per-scrape limit on length of labels name that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+      ##
+      labelNameLengthLimit: 0
+
+      ## Per-scrape limit on length of labels value that will be accepted for a sample. Only valid in Prometheus versions 2.27.0 and newer.
+      ##
+      labelValueLengthLimit: 0
+
+      ## How long until a scrape request times out. If not set, the Prometheus default scape timeout is used.
+      ##
+      scrapeTimeout: ""
+
+      ## proxyUrl: URL of a proxy that should be used for scraping.
+      ##
+      proxyUrl: ""
+
+      ## MetricRelabelConfigs to apply to samples after scraping, but before ingestion.
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+      ##
+      metricRelabelings: []
+      # - sourceLabels: [__name__]
+      #   separator: ;
+      #   regex: ^node_mountstats_nfs_(event|operations|transport)_.+
+      #   replacement: $1
+      #   action: drop
+
+      ## RelabelConfigs to apply to samples before scraping
+      ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+      ##
+      relabelings: []
+      # - sourceLabels: [__meta_kubernetes_pod_node_name]
+      #   separator: ;
+      #   regex: ^(.*)$
+      #   targetLabel: nodename
+      #   replacement: $1
+      #   action: replace
+  rbac:
+    ## If true, create PSPs for node-exporter
+    ##
+    pspEnabled: false
 EOF
 
   helm upgrade --install prometheus-operator prometheus-community/kube-prometheus-stack \
