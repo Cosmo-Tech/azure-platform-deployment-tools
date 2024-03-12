@@ -210,7 +210,7 @@ else
 fi
 # TERRAFORM INSTALLED
 
-git clone -b enoc/arm-v3 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
+git clone -b 1.0.0 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
 terraform init \
@@ -225,7 +225,7 @@ terraform apply tfplan
 
 popd
 
-git clone -b enoc/arm-v3 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
+git clone -b 1.0.0 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
 
 terraform init \
