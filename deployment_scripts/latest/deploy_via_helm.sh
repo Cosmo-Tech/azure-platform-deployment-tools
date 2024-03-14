@@ -1068,10 +1068,10 @@ image:
 config:
   logging:
     level:
-      com.cosmotech: TRACE
-      web: TRACE
-      org.springframework: TRACE
-      com.redis: TRACE
+      com.cosmotech: WARN
+      web: WARN
+      org.springframework: WARN
+      com.redis: WARN
   server:
     error:
       include-stacktrace: always
