@@ -225,7 +225,7 @@ terraform apply tfplan
 
 popd
 
-git clone -b 1.0.0 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
+git clone -b 1.0.2 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
 
 terraform init \
