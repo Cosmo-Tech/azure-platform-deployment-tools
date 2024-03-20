@@ -97,6 +97,7 @@ export VERSION_REDIS="17.3.14"
 export VERSION_REDIS_COSMOTECH="1.0.8"
 export VERSION_REDIS_INSIGHT="0.1.0"
 export PROMETHEUS_STACK_VERSION="45.0.0"
+export PROMETHEUS_RETENTION="100d"
 export LOKI_RELEASE_NAME="loki"
 
 export ARGO_DATABASE=argo_workflows
@@ -249,7 +250,9 @@ grafana:
         revision: 1
         datasource: Prometheus
       csm_licensing:
-        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v7/cosmotech_licensing.json"
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v8/cosmotech_licensing.json"
+      csm_licensing_light:
+        url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/cosmotech_licensing/v8/cosmotech_licensing_light.json"
       csm_customer_success:
         url: "https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/grafana/customer_success/v1/customer_success.json"
       csm_api:
@@ -343,7 +346,7 @@ prometheus:
       requests:
         cpu: 1
         memory: $PROM_CPU_MEM_REQUESTS_VAR
-    retention: 60d
+    retention: $PROMETHEUS_RETENTION
     storageSpec:
       volumeClaimTemplate:
         spec:
