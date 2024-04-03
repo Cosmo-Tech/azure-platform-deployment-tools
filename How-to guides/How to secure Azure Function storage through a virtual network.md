@@ -31,7 +31,9 @@ Create a Virtual Network (VNet) with two subnets, one for Azure Storage and one 
 - Keep all other settings as default and click `Add`.
 - Review the configuration on the `Review + Create` tab, then click `Create`.
 
-#### 1.2 Configure Virtual Network service endpoint
+#### 1.2 Configure Network Network service endpoint
+
+The Network Network aim to provide secure and direct connectivity to Azure services over an optimized and private route over the Azure backbone network.
 
 [Configuring service endpoint provides secure and direct connectivity](https://learn.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview) to Azure services over an optimized route over the Azure backbone network.
 
@@ -43,7 +45,9 @@ Create a Virtual Network (VNet) with two subnets, one for Azure Storage and one 
 
 ### 2. Configure Azure Storage Account Network Policies
 
-#### 2.1 Using a Private Endpoint
+Both methods below will restrict access to the storage account to the selected networks. The first method is recommended for production environments as it uses a private endpoint to connect the storage account to the virtual network. The second method uses network firewall filter rules to restrict access to the storage account.
+
+#### 2.1 Using a Private Endpoint (Option 1 - Recommended for Production)
 
 - In Storage Account, then go to `Networking` and select `Firewalls and virtual networks`.
 - Change Public network access to `Disabled`.
@@ -55,7 +59,7 @@ Create a Virtual Network (VNet) with two subnets, one for Azure Storage and one 
 - Review the configuration and click Create to complete the setup.
 
 
-#### 2.2 Using Network Firewall Filter Rules
+#### 2.2 Using Network Firewall Filter Rules (Option 2)
 
 - In Storage Account, then go to `Networking` and select `Firewalls and virtual networks`.
 - Change Public network access to `Enabled from selected virtual networks and IP addresses`.

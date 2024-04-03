@@ -8,15 +8,16 @@ This guide provides step-by-step instructions on configuring network access poli
 
 ```bash
 # Set your variables
-subscriptionId="YOUR_SUBSCRIPTION_ID"
-resourceGroupName="YOUR_RESOURCE_GROUP_NAME"
-virtualNetworkName="YOUR_VIRTUAL_NETWORK_NAME"
-location="YOUR_LOCATION"
-subnetName="YOUR_SUBNET_NAME"
-storageAccountName="YOUR_STORAGE_ACCOUNT_NAME"
-privateEndPointName="YOUR_PRIVATE_ENDPOINT_NAME"
-functionAppName="YOUR_FUNCTION_APP_NAME"
+subscriptionId="YOUR_AZURE_SUBSCRIPTION_ID"
+resourceGroupName="YOUR_AZURE_RESOURCE_GROUP_NAME"
+location="YOUR_AZURE_LOCATION"
+storageAccountName="YOUR_AZURE_STORAGE_ACCOUNT_NAME"
 vpnIpAddress="YOUR_VPN_IP_ADDRESS"
+functionAppName="YOUR_AZURE_FUNCTION_APP_NAME"
+# Define the names for the virtual network, subnet, and private endpoint
+virtualNetworkName="YOUR_AZURE_VIRTUAL_NETWORK_NAME"
+subnetName="YOUR_AZURE_SUBNET_NAME"
+privateEndPointName="YOUR_AZURE_PRIVATE_ENDPOINT_NAME"
 ```
 
 
@@ -59,7 +60,9 @@ az network vnet subnet update \
 
 ### 2. Configure Azure Storage Account Network Policies
 
-#### 2.1 Using a Private Endpoint
+Both methods below will restrict access to the storage account to the selected networks. The first method is recommended for production environments as it uses a private endpoint to connect the storage account to the virtual network. The second method uses network firewall filter rules to restrict access to the storage account.
+
+#### 2.1 Using a Private Endpoint (First Method - Recommended for Production)
 
 
 ```bash
@@ -86,7 +89,7 @@ az network private-endpoint create \
   --subnet $subnetName
 ```
 
-#### 2.2 Using Network Firewall Filter Rules
+#### 2.2 Using Network Firewall Filter Rules (Second Method)
 
 
 ```bash
