@@ -2,6 +2,8 @@
 
 This guide provides step-by-step instructions on configuring network access policies for an Azure Storage account to restrict access to a specific Azure Function App.
 
+The desired architecture is to have the Azure Function App and the Azure Storage Account in the same Virtual Network. This will allow the Azure Function App to access the Azure Storage Account using the private endpoint. The azure storage account will be configured to only allow access from the Virtual Network and the VPN IP Address. Other connections will be denied.
+
 ## For an Existing Azure Function App and Storage
 
 **Az Cli variables**
@@ -49,7 +51,7 @@ az network vnet subnet create \
   --name $subnetName \
   --address-prefixes "10.0.1.0/24"
 
-# Update storage Subnet with Service Endpoints
+# Update storage Subnet with Service Endpoints to allow only Azure Storage connections
 az network vnet subnet update \
   --subscription $subscriptionId \
   --resource-group $resourceGroupName \
