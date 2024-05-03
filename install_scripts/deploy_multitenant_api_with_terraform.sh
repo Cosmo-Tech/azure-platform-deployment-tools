@@ -210,8 +210,14 @@ else
 fi
 # TERRAFORM INSTALLED
 
-git clone -b 1.0.0 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
+git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" >> providers.tf
 
 terraform init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
@@ -220,13 +226,19 @@ terraform init \
     -backend-config "key=$TF_VAR_tf_blob_name" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
-terraform plan -out tfplan
-terraform apply tfplan
+terraform plan -out tfplancommon
+terraform apply tfplancommon
 
 popd
 
-git clone -b 1.0.2 https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
+git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" >> providers.tf
 
 terraform init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
@@ -235,5 +247,5 @@ terraform init \
     -backend-config "key=$TF_VAR_tf_blob_name_tenant" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
-terraform plan -out tfplan
-terraform apply tfplan
+terraform plan -out tfplantenant
+terraform apply tfplantenant
