@@ -11,7 +11,7 @@ help() {
   echo "You can retrieve the Helm values for your existing Platform with the following command:"
   echo "helm -n <NAMESPACE> get values cosmotech-api-<API_VERSION> | tail -n +2 | tee my_platform_cosmotech_api.values.yaml"
   echo
-  echo "Usage: ./$(basename "$0") CHART_PACKAGE_VERSION [/absolute/path/to/cosmotech_api_values.yaml=current] [NAMESPACE=phoenix] [API_VERSION=MajorVersionOrLatestOf(CHART_PACKAGE_VERSION)] [INSTALL_SCRIPT_BRANCH=main] [any additional options to pass as is to the cosmotech-api Helm Chart]"
+  echo "Usage: ./$(basename "$0") CHART_PACKAGE_VERSION [/absolute/path/to/cosmotech_api_values.yaml=current] [NAMESPACE=phoenix] [API_VERSION=MajorVersionOrLatestOf(CHART_PACKAGE_VERSION)] [INSTALL_SCRIPT_BRANCH=main] [any additional options to pass as is to the cosmotech-api Helm Chart] [API_URL=api/url/]"
   echo
   echo "Examples:"
   echo
@@ -41,6 +41,7 @@ export COSMOTECH_API_RELEASE_VALUES_FILE="$2"
 export NAMESPACE="$3"
 export API_VERSION="$4"
 export GIT_BRANCH_NAME="$5"
+export API_URL="$6"
 
 if [[ -z "${NAMESPACE}" ]]; then
   export NAMESPACE="phoenix"
@@ -62,6 +63,57 @@ fi
 if [[ -z "${GIT_BRANCH_NAME}" ]]; then
   export GIT_BRANCH_NAME="main"
 fi
+
+echo Migrate data from CosmosDB to Redis...
+
+WORKING_DIR=$(mktemp -d -t cosmotech-api-migration-XXXXXXXXXX)
+pushd "${WORKING_DIR}"
+
+export COSMOSDB_DATABASE_NAME=phoenix-core
+export NAMESPACE="phoenix"
+export REDIS_INSTANCE="cosmotechredis"
+
+cat <<EOF > cosmosdb_migration_pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: migration-pod
+spec:
+  containers:
+  - name: migration-pod
+    image: ghcr.io/cosmo-tech/platform-migrate-redis:1.0.0
+    env:
+    - name: COSMOSDB_DATABASE_NAME
+      value: ${COSMOSDB_DATABASE_NAME}
+    - name: COSMOSDB_URL
+      value: $(kubectl -n ${NAMESPACE} get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.uri')
+    - name: COSMOSDB_KEY
+      value: $(kubectl -n ${NAMESPACE} get secret cosmotech-api-v2 -o yaml | yq -r '.data["application-helm.yml"]' | base64 -d | yq '.csm.platform.azure.cosmos.key')
+    - name: REDIS_SERVER
+      value: "${REDIS_INSTANCE}-master"
+    - name: REDIS_PASSWORD
+      value: $(kubectl -n ${NAMESPACE} get secret ${REDIS_INSTANCE} -o jsonpath="{.data.redis-password}" | base64 --decode)
+  nodeSelector:
+    "cosmotech.com/tier": "db"
+  tolerations:
+  - key: "vendor"
+    operator: "Equal"
+    value: "cosmotech"
+    effect: "NoSchedule"
+  restartPolicy: Never
+  initContainers:
+  - name: download-dependencies
+    image: alpine:latest
+    command: ["sh", "-c", "wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64", "-o", "/usr/bin/yq", "&&", "chmod", "+x", "/usr/bin/yq"]
+EOF
+
+kubectl apply -n ${NAMESPACE} -f cosmosdb_migration_pod.yaml
+
+rm -rf "${WORKING_DIR}"
+
+echo End of the migration step
+
+
 
 if [[ -z "${COSMOTECH_API_RELEASE_VALUES_FILE}" ]]; then
   echo Getting cosmotech-api-${API_VERSION} helm values...
@@ -153,6 +205,10 @@ if [[ "${TLS_SECRET_NAME}" = letsencrypt-* ]]; then
 else
   if kubectl -n "${NAMESPACE}" get secret custom-tls-secret > /dev/null 2>&1; then
     export TLS_CERTIFICATE_TYPE=custom
+    kubectl -n phoenix get secret custom-tls-secret -o=json | jq -r '.data["tls.crt"]' | base64 -d > /tmp/tls.crt
+    export TLS_CERTIFICATE_CUSTOM_CERTIFICATE_PATH="/tmp/tls.crt"
+    kubectl -n phoenix get secret custom-tls-secret -o=json | jq -r '.data["tls.key"]' | base64 -d > /tmp/tls.key
+    export TLS_CERTIFICATE_CUSTOM_KEY_PATH="/tmp/tls.key"
   else
     export TLS_CERTIFICATE_TYPE=none
   fi
@@ -175,7 +231,7 @@ kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.c
 
 # Now run the deployment script with the right environment variables set
 echo "Now running the deployment script (from \"${GIT_BRANCH_NAME}\" Git Branch) with the right environment variables..."
-curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/latest/deploy_via_helm.sh | bash -s -- \
+curl -o- -sSL https://raw.githubusercontent.com/Cosmo-Tech/azure-platform-deployment-tools/main/deployment_scripts/v3.2/deploy_via_helm.sh | bash -s -- \
   "${CHART_PACKAGE_VERSION}" \
   "${NAMESPACE}" \
   "${ARGO_POSTGRESQL_PASSWORD}" \
