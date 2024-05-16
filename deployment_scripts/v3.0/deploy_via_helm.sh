@@ -19,6 +19,7 @@ help() {
   echo "- ARGO_MINIO_PERSISTENCE_SIZE | units of bytes (default is 500Gi) | Persistence size for the Argo MinIO server"
   echo "- LOKI_PERSISTENCE_MEMORY | units of bytes (default is 4Gi) | Memory for persistence of Loki system"
   echo "- LOKI_RETENTION_PERIOD | units of hours (default is 720h) | Loki logs retention period"
+  echo "- LOKI_MAX_ENTRIES_LIMIT_PER_QUERY | string | Maximum number of log entries per query"
   echo "- NGINX_INGRESS_CONTROLLER_ENABLED | boolean (default is false) | indicating whether an NGINX Ingress Controller should be deployed and an Ingress resource created too"
   echo "- NGINX_INGRESS_CONTROLLER_REPLICA_COUNT | int (default is 1) | number of pods for the NGINX Ingress Controller"
   echo "- NGINX_INGRESS_CONTROLLER_LOADBALANCER_IP | IP Address String | optional public IP Address to use as LoadBalancer IP. You can create one with this Azure CLI command: az network public-ip create --resource-group <my-rg>> --name <a-name> --sku Standard --allocation-method static --query publicIp.ipAddress -o tsv "
@@ -1011,47 +1012,44 @@ loki:
     - ReadWriteOnce
     size: "${LOKI_PERSISTENCE_MEMORY:-4Gi}"
   config:
+    auth_enabled: true
     table_manager:
       retention_deletes_enabled: true
       retention_period: "${LOKI_RETENTION_PERIOD:-720h}"
+    limits_config:
+      max_entries_limit_per_query: ${LOKI_MAX_ENTRIES_LIMIT_PER_QUERY:-50000}
 promtail:
   config:
+    clients:
+      - url: http://loki.${MONITORING_NAMESPACE}:3100/loki/api/v1/push
     snippets:
       pipelineStages:
       - cri: {}
       - match:
-          pipeline_name: "keep only ${NAMESPACE} ns"
-          selector: '{namespace!="${NAMESPACE}"}'
-          action: drop
-      - match:
-          pipeline_name: "drop argo server"
-          selector: '{app="argo-workflows-server"}'
-          action: drop
-      - match:
-          pipeline_name: "drop argo controller"
-          selector: '{app="argo-workflows-workflow-controller"}'
-          action: drop
-      - match:
-          pipeline_name: "drop redis"
-          selector: '{app="redis"}'
-          action: drop
-      - match:
-          pipeline_name: "drop minio"
-          selector: '{app="minio"}'
-          action: drop
-      - match:
-          pipeline_name: "drop postgresql"
-          selector: '{app="postgresql"}'
-          action: drop
-      - match:
-          pipeline_name: "drop cosmotech-api"
-          selector: '{app="cosmotech-api"}'
-          action: drop
+          selector: '{namespace="${NAMESPACE}"}'
+          stages:
+            - json:
+                expressions:
+                  output: log
+            - json:
+                source: output
+                expressions:
+                  tenant_id: ${NAMESPACE}
+                  message: message
+                  level: log.level
+            - labels:
+                tenant_id:
+                message:
+                namespace:
+            - tenant:
+                value: ${NAMESPACE}
+      - output:
+          source: message
   tolerations:
     - effect: NoSchedule
       operator: Exists
 EOF
-helm upgrade --install -n ${NAMESPACE} ${LOKI_RELEASE_NAME} grafana/loki-stack -f loki-values.yaml
+helm upgrade --install -n ${MONITORING_NAMESPACE} ${LOKI_RELEASE_NAME} grafana/loki-stack -f loki-values.yaml
 
 popd
 
