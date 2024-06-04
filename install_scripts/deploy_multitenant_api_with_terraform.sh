@@ -234,12 +234,6 @@ popd
 git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
 
-echo """
-terraform {
-  backend "azurerm" {}
-}
-""" >> providers.tf
-
 terraform init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
