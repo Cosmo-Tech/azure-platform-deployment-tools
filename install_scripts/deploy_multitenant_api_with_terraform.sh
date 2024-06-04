@@ -210,7 +210,7 @@ else
 fi
 # TERRAFORM INSTALLED
 
-git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
+git clone -b ndon/clustername https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
 echo """
