@@ -210,7 +210,7 @@ else
 fi
 # TERRAFORM INSTALLED
 
-git clone -b ndon/clustername https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
+git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
 echo """
@@ -233,6 +233,12 @@ popd
 
 git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" >> providers.tf
 
 terraform init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
