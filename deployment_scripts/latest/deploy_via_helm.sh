@@ -781,7 +781,7 @@ echo -- Minio
 # Minio
 cat <<EOF > values-minio.yaml
 fullnameOverride: ${MINIO_RELEASE_NAME}
-defaultBuckets: "${ARGO_BUCKET_NAME}"
+defaultBuckets: "${ARGO_BUCKET_NAME}:cosmotech-api"
 persistence:
   enabled: true
   size: "${ARGO_MINIO_PERSISTENCE_SIZE:-16Gi}"
