@@ -210,7 +210,7 @@ else
 fi
 # TERRAFORM INSTALLED
 
-git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
+git clone -b marketplace https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git common
 pushd common
 
 echo """
@@ -231,7 +231,7 @@ terraform apply tfplancommon
 
 popd
 
-git clone https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
+git clone -b marketplace https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git tenant
 pushd tenant
 
 echo """
