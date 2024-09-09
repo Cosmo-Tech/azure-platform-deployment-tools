@@ -249,3 +249,40 @@ terraform init \
 
 terraform plan -out tfplantenant
 terraform apply tfplantenant
+
+# GENERATE AND UPLOAD terraform.tfvars TO AZURE BLOB
+
+echo "Generating terraform.tfvars..."
+
+output_file="terraform.tfvars"
+
+rm -f "$output_file"
+
+# Iterate all environment variables and generate the tfvars file
+while IFS='=' read -r name value ; do
+    # Check if the variable starts with TF_VAR_
+    if [[ $name == TF_VAR_* ]] ; then
+        # Extract the variable name without the TF_VAR_ prefix
+        var_name=${name#TF_VAR_}
+        # Write the variable to the tfvars file
+        echo "$var_name = \"$value\"" >> "$output_file"
+    fi
+done < <(env)
+
+echo "File $output_file generated successfully."
+
+# Upload the file to Azure Blob Storage
+echo "Uploading $output_file to Azure Blob Storage..."
+
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name terraform.tfvars \
+    --file terraform.tfvars \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
+
+echo "File $output_file uploaded to Azure Blob Storage successfully."
+
+# End of script
+echo "Deployment and configuration completed."
