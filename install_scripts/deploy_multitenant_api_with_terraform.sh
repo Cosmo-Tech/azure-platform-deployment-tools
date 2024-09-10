@@ -283,7 +283,7 @@ client_secret   = \"$client_secret\"
 subscription_id = \"$subscription_id\"
 tenant_id       = \"$tenant_id\"
 location        = \"$cluster_location\"
-owner_list      = [\"nibaldo.donoso@cosmotech.com\"]
+owner_list      = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
 
 # project
 project_customer_name = \"cosmotech\"
