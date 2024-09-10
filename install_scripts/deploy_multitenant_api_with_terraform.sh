@@ -308,12 +308,12 @@ is_bare_metal = false
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name $core/terraform.infra.core.tfvars \
+    --name terraform.infra.core.tfvars \
     --file $core/terraform.infra.core.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core plan -out tfplan_core -var-file $core/terraform.infra.core.tfvars
+terraform -chdir=$core plan -out tfplan_core -var-file=$core/terraform.infra.core.tfvars
 terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
@@ -402,12 +402,12 @@ is_bare_metal   = false
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name $core_k8s/terraform.k8s.core.tfvars \
+    --name terraform.k8s.core.tfvars \
     --file $core_k8s/terraform.k8s.core.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file $core_k8s/terraform.k8s.core.tfvars
+terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file=$core_k8s/terraform.k8s.core.tfvars
 terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 ################## DEPLOY CORE K8S ##################
@@ -478,17 +478,18 @@ allowed_namespace       = \"$k8s_namespace_value\"
 organization_name       = \"$k8s_namespace_value\"
 identifier_uri          = \"https://$cluster_name_value.$dns_rone/$k8s_namespace_value\"
 engine_secret           = \"$k8s_namespace_value\"
+
 """ > $tenant/terraform.infra.tenant.tfvars
 
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name $tenant/terraform.infra.tenant.tfvars \
+    --name terraform.infra.tenant.tfvars \
     --file $tenant/terraform.infra.tenant.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant plan -out tfplan_tenant -var-file $tenant/terraform.infra.tenant.tfvars
+terraform -chdir=$tenant plan -out tfplan_tenant -var-file=$tenant/terraform.infra.tenant.tfvars
 terraform -chdir=$tenant apply tfplan_tenant
 
 ################## DEPLOY TENANT INFRA ##################
@@ -543,17 +544,18 @@ tls_deploy        = false
 orm mode
 postgresql_secrets_config_create = true
 create_rabbitmq_secret           = true
+
 """ > $tenant_k8s/terraform.k8s.tenant.tfvars
 
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name $tenant_k8s/terraform.k8s.tenant.tfvars \
+    --name terraform.k8s.tenant.tfvars \
     --file $tenant_k8s/terraform.k8s.tenant.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $tenant_k8s/terraform.k8s.tenant.tfvars
+terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file=$tenant_k8s/terraform.k8s.tenant.tfvars
 terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
 
 ################## DEPLOY TENANT K8S ##################
