@@ -308,8 +308,8 @@ is_bare_metal = false
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name terraform.infra.core.tfvars \
-    --file terraform.infra.core.tfvars \
+    --name $core/terraform.infra.core.tfvars \
+    --file $core/terraform.infra.core.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
@@ -317,9 +317,6 @@ terraform -chdir=$core plan -out tfplan_core -var-file $core/terraform.infra.cor
 terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
-
-
-
 
 ################## EXPORT CORE OUTPUT ##################
 
@@ -405,8 +402,8 @@ is_bare_metal   = false
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name terraform.k8s.core.tfvars \
-    --file terraform.k8s.core.tfvars \
+    --name $core_k8s/terraform.k8s.core.tfvars \
+    --file $core_k8s/terraform.k8s.core.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
@@ -486,8 +483,8 @@ engine_secret           = \"$k8s_namespace_value\"
 az storage blob upload \
     --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
-    --name terraform.infra.tenant.tfvars \
-    --file terraform.infra.tenant.tfvars \
+    --name $tenant/terraform.infra.tenant.tfvars \
+    --file $tenant/terraform.infra.tenant.tfvars \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
@@ -495,9 +492,6 @@ terraform -chdir=$tenant plan -out tfplan_tenant -var-file $tenant/terraform.inf
 terraform -chdir=$tenant apply tfplan_tenant
 
 ################## DEPLOY TENANT INFRA ##################
-
-
-
 
 ################## EXPORT TENANT INFRA OUTPUT ##################
 
@@ -535,8 +529,8 @@ deploy_api                          = true
 cosmotech_api_version               = \"$api_version\"
 cosmotech_api_chart_package_version = \"$api_version_chart\"
 cosmotech_api_version_path          = \"$api_version_path\"
-identity_token_url                  = \"https://login.microsoftonline.com/e413b834-8be8-4822-a370-be619545cb49/oauth2/v2.0/token\"
-identity_authorization_url          = \"https://login.microsoftonline.com/e413b834-8be8-4822-a370-be619545cb49/oauth2/v2.0/authorize\"
+identity_token_url                  = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/token\"
+identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/authorize\"
 
 argo_deploy       = true
 cert_deploy       = true
@@ -550,6 +544,14 @@ orm mode
 postgresql_secrets_config_create = true
 create_rabbitmq_secret           = true
 """ > $tenant_k8s/terraform.k8s.tenant.tfvars
+
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name $tenant_k8s/terraform.k8s.tenant.tfvars \
+    --file $tenant_k8s/terraform.k8s.tenant.tfvars \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
 
 terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $tenant_k8s/terraform.k8s.tenant.tfvars
 terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
