@@ -265,7 +265,7 @@ while IFS='=' read -r name value ; do
         # Extract the variable name without the TF_VAR_ prefix
         var_name=${name#TF_VAR_}
         # Write the variable to the tfvars file
-        echo "$var_name = \"$value\"" >> "$output_file"
+        echo "$var_name=\"$value\"" >> "$output_file"
     fi
 done < <(env)
 
