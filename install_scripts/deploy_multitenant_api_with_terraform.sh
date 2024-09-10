@@ -212,8 +212,8 @@ fi
 
 # CLONE REPOSITORIES
 git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git platform-infra-core
-git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git platform-infra-tenant
-git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-common.git platform-k8s-core
+git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git platform-infra-tenant
+git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-common.git platform-k8s-core
 git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-tenant.git platform-k8s-tenant
 
 ################## REPOSITORIES ##################
@@ -413,7 +413,7 @@ terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 ################## DEPLOY CORE K8S ##################
 
-
+terraform-azure-cosmotech-common
 
 
 
@@ -507,7 +507,7 @@ source out_tenant.txt
 ################## EXPORT TENANT INFRA OUTPUT ##################
 
 # out_core.txt
-# out_tenant.txt
+# out_tenant.txtterraform-azure-cosmotech-common
 
 
 ################# DEPLOY TENANT K8S ##################
