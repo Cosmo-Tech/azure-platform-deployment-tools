@@ -235,8 +235,7 @@ tenant_k8s="platform-k8s-tenant"
 
 ################## VARIABLES GLOBAL ##################
 
-client_id=""
-client_secret=""
+
 cluster_name_value="$TF_VAR_cluster_name"
 k8s_namespace_value="$TF_VAR_kubernetes_tenant_namespace"
 cluster_location="$TF_VAR_location"
@@ -278,10 +277,10 @@ terraform -chdir=$core init \
 
 echo installing tfvars in $core
 echo """
-client_id       = \"$client_id\"
-client_secret   = \"$client_secret\"
-subscription_id = \"$subscription_id\"
-tenant_id       = \"$tenant_id\"
+client_id       = \"$TF_VAR_client_id\"
+client_secret   = \"$TF_VAR_client_secret\"
+subscription_id = \"$TF_VAR_subscription_id\"
+tenant_id       = \"$TF_VAR_tenant_id\"
 location        = \"$cluster_location\"
 owner_list      = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
 
@@ -290,8 +289,9 @@ project_customer_name = \"cosmotech\"
 project_name          = \"$cluster_name_value\"
 
 # network
-network_dns_zone_name           = \"$dns_rone\"
-network_api_dns_name            = \"$cluster_name_value.$dns_rone\"
+# test $dns_zone
+network_dns_zone_name           = \"api.cosmo-platform.com\"
+network_api_dns_name            = \"$cluster_name_value.api.cosmo-platform.com\"
 network_dns_record              = \"$cluster_name_value\"
 network_dns_record_create       = true
 network_publicip_resource_group = \"$core_rg\"
@@ -343,8 +343,8 @@ terraform -chdir=$core_k8s init \
 
 echo "installing tfvars in $core_k8s"
 echo """
-client_id     = \"$client_id\"
-client_secret = \"$client_secret\"
+client_id     = \"$TF_VAR_client_id\"
+client_secret = \"$TF_VAR_client_secret\"
 
 # argocd
 argocd_deploy                  = true
@@ -428,9 +428,9 @@ terraform -chdir=$tenant init \
 echo "installing tfvars in $tenant"
 echo """
 # azure
-client_id                            = \"$client_id\"
-client_secret                        = \"$client_secret\"
-owner_list                           = [\"nibaldo.donoso@cosmotech.com\"]
+client_id                            = \"$TF_VAR_client_id\"
+client_secret                        = \"$TF_VAR_client_secret\"
+owner_list                           = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
 location                             = \"$cluster_location\"
 network_tenant_address_prefix        = \"10.31.0.0/24\"
 network_tenant_subnet_address_prefix = \"10.31.0.0/24\"
@@ -519,8 +519,8 @@ terraform -chdir=$tenant_k8s init \
 
 echo "installing tfvars in $tenant_k8s"
 echo """
-client_id     = \"$client_id\"
-client_secret = \"$client_secret\"
+client_id     = \"$TF_VAR_client_id\"
+client_secret = \"$TF_VAR_client_secret\"
 
 kubernetes_tenant_namespace = \"$k8s_namespace_value\"
 tenant_resource_group       = \"$k8s_namespace_value\"
