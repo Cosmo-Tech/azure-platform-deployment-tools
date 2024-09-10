@@ -306,17 +306,19 @@ is_bare_metal = false
 """ > $core/terraform.infra.core.tfvars
 
 az storage blob upload \
-    --account-name $storage_name \
+    --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
     --name terraform.infra.core.tfvars \
     --file terraform.infra.core.tfvars \
     --auth-mode key \
-    --account-key $storage_key
+    --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core plan -out tfplan_core
+terraform -chdir=$core plan -out tfplan_core -var-file $core/terraform.infra.core.tfvars
 terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
+
+
 
 
 ################## EXPORT CORE OUTPUT ##################
@@ -408,12 +410,11 @@ az storage blob upload \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core_k8s plan -out tfplan_core_k8s
+terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file $core_k8s/terraform.k8s.core.tfvars
 terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 ################## DEPLOY CORE K8S ##################
 
-terraform-azure-cosmotech-common
 
 
 
@@ -483,17 +484,18 @@ engine_secret           = \"$k8s_namespace_value\"
 """ > $tenant/terraform.infra.tenant.tfvars
 
 az storage blob upload \
-    --account-name $storage_name \
+    --account-name $TF_VAR_tf_storage_account_name \
     --container-name $TF_VAR_tf_container_name \
     --name terraform.infra.tenant.tfvars \
     --file terraform.infra.tenant.tfvars \
     --auth-mode key \
-    --account-key $storage_key
+    --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant plan -out tfplan_tenant
+terraform -chdir=$tenant plan -out tfplan_tenant -var-file $tenant/terraform.infra.tenant.tfvars
 terraform -chdir=$tenant apply tfplan_tenant
 
 ################## DEPLOY TENANT INFRA ##################
+
 
 
 
@@ -549,7 +551,7 @@ postgresql_secrets_config_create = true
 create_rabbitmq_secret           = true
 """ > $tenant_k8s/terraform.k8s.tenant.tfvars
 
-terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s
+terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $tenant_k8s/terraform.k8s.tenant.tfvars
 terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
 
 ################## DEPLOY TENANT K8S ##################
