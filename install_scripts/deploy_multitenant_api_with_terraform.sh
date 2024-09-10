@@ -237,16 +237,16 @@ tenant_k8s="platform-k8s-tenant"
 
 client_id=""
 client_secret=""
-cluster_name_value="$cluster_name"
-k8s_namespace_value="$kubernetes_tenant_namespace"
-cluster_location="$location"
-core_rg="$resource_group"
+cluster_name_value="$TF_VAR_cluster_name"
+k8s_namespace_value="$TF_VAR_kubernetes_tenant_namespace"
+cluster_location="$TF_VAR_location"
+core_rg="$TF_VAR_resource_group"
 dns_zone="api.cosmo-platform.com"
-k8s_version="$kubernetes_version"
-api_version="$cosmotech_api_version"
-api_version_chart="$chart_package_version"
-api_version_path="$api_version_path"
-
+k8s_version="$TF_VAR_kubernetes_version"
+api_version="$TF_VAR_cosmotech_api_version"
+api_version_chart="$TF_VAR_chart_package_version"
+api_version_path="$TF_VAR_api_version_path"
+number=$RANDOM
 ################## VARIABLES GLOBAL ##################
 
 
