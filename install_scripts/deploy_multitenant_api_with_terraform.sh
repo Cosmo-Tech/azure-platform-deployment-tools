@@ -210,12 +210,6 @@ else
 fi
 # TERRAFORM INSTALLED
 
-# CLONE REPOSITORIES
-git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git platform-infra-core
-git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git platform-infra-tenant
-git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-common.git platform-k8s-core
-git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-tenant.git platform-k8s-tenant
-
 ################## REPOSITORIES ##################
 
 # ./platform-infra-core
@@ -223,53 +217,28 @@ git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-
 # ./platform-k8s-core
 # ./platform-k8s-tenant
 
+################## REPOSITORIES ##################
 
+################## GLOBAL VARIABLES GLOBAL ##################
 core="platform-infra-core"
 tenant="platform-infra-tenant"
 core_k8s="platform-k8s-core"
 tenant_k8s="platform-k8s-tenant"
-
-################## REPOSITORIES ##################
-
-
-
-################## VARIABLES GLOBAL ##################
-
-
-cluster_name_value="$TF_VAR_cluster_name"
-k8s_namespace_value="$TF_VAR_kubernetes_tenant_namespace"
-cluster_location="$TF_VAR_location"
-core_rg="$TF_VAR_resource_group"
-dns_zone="api.cosmo-platform.com"
-k8s_version="$TF_VAR_kubernetes_version"
-api_version="$TF_VAR_cosmotech_api_version"
-api_version_chart="$TF_VAR_chart_package_version"
-api_version_path="$TF_VAR_api_version_path"
 number=$RANDOM
-################## VARIABLES GLOBAL ##################
-
-
-################## PROVIDER AZURERM ##################
-
-for i in $core $core_k8s $tenant $tenant_k8s
-do
-    echo install provider azurerm $i
-    echo """
-    terraform {
-        backend "azurerm" {}
-    }
-    """ > $i/providers.azure.tf
-done
-
-################## PROVIDER AZURERM ##################
-
-
+################## GLOBAL VARIABLES ##################
 
 ################## DEPLOY CORE ##################
+git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" > $core/providers.azure.tf
 
 echo "running terraform init: $core"
 terraform -chdir=$core init \
-    -backend-config "resource_group_name=$rg" \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
     -backend-config "key=$cluster_name_value-infra-core-$number" \
@@ -277,43 +246,47 @@ terraform -chdir=$core init \
 
 echo installing tfvars in $core
 echo """
-client_id       = \"$TF_VAR_client_id\"
-client_secret   = \"$TF_VAR_client_secret\"
-subscription_id = \"$TF_VAR_subscription_id\"
-tenant_id       = \"$TF_VAR_tenant_id\"
-location        = \"$cluster_location\"
-owner_list      = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
+client_id                = \"$TF_VAR_client_id\"
+network_sp_client_id     = \"$TF_VAR_network_sp_client_id\"
+client_secret            = \"$TF_VAR_client_secret\"
+network_sp_client_secret = \"$TF_VAR_network_sp_client_secret\"
+subscription_id          = \"$TF_VAR_subscription_id\"
+tenant_id                = \"$TF_VAR_tenant_id\"
+location                 = \"$TF_VAR_location\"
+owner_list               = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
 
 # project
 project_customer_name = \"cosmotech\"
-project_name          = \"$cluster_name_value\"
+project_name          = \"$TF_VAR_project_name\"
+
+# publicip
+network_publicip_name = \"$TF_VAR_publicip_name\"
 
 # network
-# test $dns_zone
 network_dns_zone_name           = \"api.cosmo-platform.com\"
-network_api_dns_name            = \"$cluster_name_value.api.cosmo-platform.com\"
-network_dns_record              = \"$cluster_name_value\"
+network_api_dns_name            = \"$TF_VAR_network_api_dns_name\"
+network_dns_record              = \"$TF_VAR_network_dns_record\"
 network_dns_record_create       = true
-network_publicip_resource_group = \"$core_rg\"
-network_resource_group          = \"$core_rg\"
+network_publicip_resource_group = \"$TF_VAR_network_publicip_resource_group\"
+network_resource_group          = \"$TF_VAR_network_resource_group\"
 
 # kubernetes
-kubernetes_version        = \"$k8s_version\"
-kubernetes_resource_group = \"$core_rg\"
-kubernetes_cluster_name   = \"$cluster_name_value\"
+kubernetes_version        = \"$TF_VAR_kubernetes_version\"
+kubernetes_resource_group = \"$TF_VAR_kubernetes_resource_group\"
+kubernetes_cluster_name   = \"$TF_VAR_kubernetes_cluster_name\"
 
 is_bare_metal = false
-""" > $core/terraform.infra.core.tfvars
+""" > $PWD/terraform.infra.core.tfvars
 
-az storage blob upload \
-    --account-name $TF_VAR_tf_storage_account_name \
-    --container-name $TF_VAR_tf_container_name \
-    --name terraform.infra.core.tfvars \
-    --file $core/terraform.infra.core.tfvars \
-    --auth-mode key \
-    --account-key $TF_VAR_tf_access_key
+# az storage blob upload \
+#     --account-name $TF_VAR_tf_storage_account_name \
+#     --container-name $TF_VAR_tf_container_name \
+#     --name terraform.infra.core.tfvars \
+#     --file terraform.infra.core.tfvars \
+#     --auth-mode key \
+#     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core plan -out tfplan_core -var-file=$core/terraform.infra.core.tfvars
+terraform -chdir=$core plan -out tfplan_core -var-file $PWD/terraform.infra.core.tfvars
 terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
@@ -324,7 +297,7 @@ terraform -chdir=$core output > out_core.txt
 sed -i 's/ = /=/' out_core.txt
 sed -i 's/out_/export TF_VAR_/' out_core.txt
 
-source out_core.txt
+source $PWD/out_core.txt
 
 ################## EXPORT CORE OUTPUT ##################
 
@@ -332,10 +305,17 @@ source out_core.txt
 
 
 ################## DEPLOY CORE K8S ##################
+git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-common.git $core_k8s
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" > $core_k8s/providers.azure.tf
 
 echo "running terraform init: $core_k8s"
 terraform -chdir=$core_k8s init \
-    -backend-config "resource_group_name=$rg" \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
     -backend-config "key=$cluster_name_value-k8s-core-$number" \
@@ -389,7 +369,12 @@ vault_secrets_operator_replicas           = 1
 
 # prometheus
 prometheus_stack_deploy   = true
-prom_redis_host_namespace = \"$k8s_namespace_value\"
+prom_redis_host_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
+
+# network
+keycloak_ingress_hostname = \"$TF_VAR_network_api_dns_name\"
+publicip_address          = \"$TF_VAR_loadbalancer_ip\"
+api_dns_name              = \"$TF_VAR_network_api_dns_name\"
 
 nginx_deploy    = true
 cert_deploy     = true
@@ -397,17 +382,17 @@ loki_deploy     = true
 keycloak_deploy = false
 is_bare_metal   = false
 
-""" > $core_k8s/terraform.k8s.core.tfvars
+""" > $PWD/terraform.k8s.core.tfvars
 
-az storage blob upload \
-    --account-name $TF_VAR_tf_storage_account_name \
-    --container-name $TF_VAR_tf_container_name \
-    --name terraform.k8s.core.tfvars \
-    --file $core_k8s/terraform.k8s.core.tfvars \
-    --auth-mode key \
-    --account-key $TF_VAR_tf_access_key
+# az storage blob upload \
+#     --account-name $TF_VAR_tf_storage_account_name \
+#     --container-name $TF_VAR_tf_container_name \
+#     --name terraform.k8s.core.tfvars \
+#     --file $core_k8s/terraform.k8s.core.tfvars \
+#     --auth-mode key \
+#     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file=$core_k8s/terraform.k8s.core.tfvars
+terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file $PWD/terraform.k8s.core.tfvars
 terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 ################## DEPLOY CORE K8S ##################
@@ -416,10 +401,17 @@ terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 
 ################## DEPLOY TENANT INFRA ##################
+git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git $tenant
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" > $tenant/providers.azure.tf
 
 echo "running terraform init: $tenant"
 terraform -chdir=$tenant init \
-    -backend-config "resource_group_name=$rg" \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
     -backend-config "key=$cluster_name_value-infra-tenant-$number" \
@@ -431,14 +423,18 @@ echo """
 client_id                            = \"$TF_VAR_client_id\"
 client_secret                        = \"$TF_VAR_client_secret\"
 owner_list                           = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
-location                             = \"$cluster_location\"
+location                             = \"$TF_VAR_location\"
 network_tenant_address_prefix        = \"10.31.0.0/24\"
 network_tenant_subnet_address_prefix = \"10.31.0.0/24\"
-tenant_resource_group                = \"$k8s_namespace_value\"
+tenant_resource_group                = \"$TF_VAR_kubernetes_tenant_namespace\"
 backup_create                        = false
 
+# network
+api_dns_name              = \"$TF_VAR_network_api_dns_name\"
+
 # kubernetes
-kubernetes_tenant_namespace = \"$k8s_namespace_value\"
+kubernetes_tenant_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
+cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
 
 # adx
 kusto_deploy = false
@@ -450,14 +446,14 @@ create_eventhub = false
 create_rabbitmq = true
 
 # cosmotech api
-cosmotech_api_version               = \"$api_version\"
-cosmotech_api_chart_package_version = \"$api_version_chart\"
-cosmotech_api_version_path          = \"$api_version_path\"
+cosmotech_api_version               = \"$TF_VAR_cosmotech_api_version\"
+cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_version\"
+cosmotech_api_version_path          = \"v3-2\"
 
 # project
 project_stage     = \"Dev\"
 storage_class_sku = \"Standard_LRS\"
-project_name      = \"$k8s_namespace_value\"
+project_name      = \"$TF_VAR_kubernetes_tenant_namespace\"
 
 # redis
 redis_disk_size_gb = 64
@@ -473,23 +469,23 @@ vault_sops_namespace = \"vault-secrets-operator\"
 # platform config
 services_secrets_create = true
 create_platform_config  = false
-platform_name           = \"$k8s_namespace_value\"
-allowed_namespace       = \"$k8s_namespace_value\"
-organization_name       = \"$k8s_namespace_value\"
-identifier_uri          = \"https://$cluster_name_value.$dns_rone/$k8s_namespace_value\"
-engine_secret           = \"$k8s_namespace_value\"
+platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
+allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
+organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
+identifier_uri          = \"https://$cluster_name_value.$dns_rone/$TF_VAR_kubernetes_tenant_namespace\"
+engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
 
-""" > $tenant/terraform.infra.tenant.tfvars
+""" > $PWD/terraform.infra.tenant.tfvars
 
-az storage blob upload \
-    --account-name $TF_VAR_tf_storage_account_name \
-    --container-name $TF_VAR_tf_container_name \
-    --name terraform.infra.tenant.tfvars \
-    --file $tenant/terraform.infra.tenant.tfvars \
-    --auth-mode key \
-    --account-key $TF_VAR_tf_access_key
+# az storage blob upload \
+#     --account-name $TF_VAR_tf_storage_account_name \
+#     --container-name $TF_VAR_tf_container_name \
+#     --name terraform.infra.tenant.tfvars \
+#     --file $tenant/terraform.infra.tenant.tfvars \
+#     --auth-mode key \
+#     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant plan -out tfplan_tenant -var-file=$tenant/terraform.infra.tenant.tfvars
+terraform -chdir=$tenant plan -out tfplan_tenant -var-file $PWD/terraform.infra.tenant.tfvars
 terraform -chdir=$tenant apply tfplan_tenant
 
 ################## DEPLOY TENANT INFRA ##################
@@ -508,10 +504,17 @@ source out_tenant.txt
 
 
 ################# DEPLOY TENANT K8S ##################
+git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-tenant.git $tenant_k8s
+
+echo """
+terraform {
+  backend "azurerm" {}
+}
+""" > $tenant_k8s/providers.azure.tf
 
 echo "running terraform init: $tenant_k8s"
 terraform -chdir=$tenant_k8s init \
-    -backend-config "resource_group_name=$rg" \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
     -backend-config "key=$cluster_name_value-k8s-tenant-$number" \
@@ -522,14 +525,15 @@ echo """
 client_id     = \"$TF_VAR_client_id\"
 client_secret = \"$TF_VAR_client_secret\"
 
-kubernetes_tenant_namespace = \"$k8s_namespace_value\"
-tenant_resource_group       = \"$k8s_namespace_value\"
+kubernetes_tenant_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
+tenant_resource_group       = \"$TF_VAR_tenant_resource_group\"
+cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
 
 # api
 deploy_api                          = true
-cosmotech_api_version               = \"$api_version\"
-cosmotech_api_chart_package_version = \"$api_version_chart\"
-cosmotech_api_version_path          = \"$api_version_path\"
+cosmotech_api_version               = \"$TF_VAR_cosmotech_api_version\"
+cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_version\"
+cosmotech_api_version_path          = \"v3-2\"
 identity_token_url                  = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/token\"
 identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/authorize\"
 
@@ -541,21 +545,21 @@ rabbitmq_deploy   = true
 minio_deploy      = true
 tls_deploy        = false
 
-orm mode
+terraform mode
 postgresql_secrets_config_create = true
 create_rabbitmq_secret           = true
 
-""" > $tenant_k8s/terraform.k8s.tenant.tfvars
+""" > terraform.k8s.tenant.tfvars
 
-az storage blob upload \
-    --account-name $TF_VAR_tf_storage_account_name \
-    --container-name $TF_VAR_tf_container_name \
-    --name terraform.k8s.tenant.tfvars \
-    --file $tenant_k8s/terraform.k8s.tenant.tfvars \
-    --auth-mode key \
-    --account-key $TF_VAR_tf_access_key
+# az storage blob upload \
+#     --account-name $TF_VAR_tf_storage_account_name \
+#     --container-name $TF_VAR_tf_container_name \
+#     --name terraform.k8s.tenant.tfvars \
+#     --file $tenant_k8s/terraform.k8s.tenant.tfvars \
+#     --auth-mode key \
+#     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file=$tenant_k8s/terraform.k8s.tenant.tfvars
+terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $PWD/terraform.k8s.tenant.tfvars
 terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
 
 ################## DEPLOY TENANT K8S ##################
@@ -585,13 +589,13 @@ echo "File $output_file generated successfully."
 # Upload the file to Azure Blob Storage
 echo "Uploading $output_file to Azure Blob Storage..."
 
-az storage blob upload \
-    --account-name $TF_VAR_tf_storage_account_name \
-    --container-name $TF_VAR_tf_container_name \
-    --name $output_file \
-    --file $output_file \
-    --auth-mode key \
-    --account-key $TF_VAR_tf_access_key
+# az storage blob upload \
+#     --account-name $TF_VAR_tf_storage_account_name \
+#     --container-name $TF_VAR_tf_container_name \
+#     --name $output_file \
+#     --file $output_file \
+#     --auth-mode key \
+#     --account-key $TF_VAR_tf_access_key
 
 echo "File $output_file uploaded to Azure Blob Storage successfully."
 
