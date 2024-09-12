@@ -492,6 +492,7 @@ terraform -chdir=$tenant apply tfplan_tenant
 
 terraform -chdir=$tenant output > $PWD/out_tenant.txt
 sed -i 's/ = /=/' $PWD/out_tenant.txt
+sed -i 's/<sensitive>/""/' $PWD/out_tenant.txt
 sed -i 's/out_/export TF_VAR_/' $PWD/out_tenant.txt
 
 source $PWD/out_tenant.txt
