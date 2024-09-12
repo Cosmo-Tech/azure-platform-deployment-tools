@@ -552,8 +552,8 @@ minio_deploy      = true
 tls_deploy        = false
 
 # terraform mode
-postgresql_secrets_config_create = false
-create_rabbitmq_secret           = false
+postgresql_secrets_config_create = true
+create_rabbitmq_secret           = true
 
 # vault
 create_platform_config  = false
