@@ -470,7 +470,7 @@ create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
 organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
-identifier_uri          = \"https://${TF_VAR_kubernetes_cluster_name}.api.cosmo-platform.com/${TF_VAR_kubernetes_tenant_namespace}\"
+identifier_uri          = \"api://df425ffc-23e4-4005-81d5-02c92fa9e3f0\"
 engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
 
 """ > $PWD/terraform.infra.tenant.tfvars
