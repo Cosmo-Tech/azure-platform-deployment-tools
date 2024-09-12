@@ -241,7 +241,7 @@ terraform -chdir=$core init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=$cluster_name_value-infra-core-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-infra-core-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo installing tfvars in $core
@@ -318,7 +318,7 @@ terraform -chdir=$core_k8s init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=$cluster_name_value-k8s-core-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-k8s-core-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo "installing tfvars in $core_k8s"
@@ -414,7 +414,7 @@ terraform -chdir=$tenant init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=$cluster_name_value-infra-tenant-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-infra-tenant-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo "installing tfvars in $tenant"
@@ -453,7 +453,7 @@ cosmotech_api_version_path          = \"v3-2\"
 # project
 project_stage     = \"Dev\"
 storage_class_sku = \"Standard_LRS\"
-project_name      = \"$TF_VAR_kubernetes_tenant_namespace\"
+project_name      = \"$TF_VAR_kubernetes_cluster_name\"
 
 # redis
 redis_disk_size_gb = 64
@@ -472,7 +472,7 @@ create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
 organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
-identifier_uri          = \"https://$cluster_name_value.$dns_rone/$TF_VAR_kubernetes_tenant_namespace\"
+identifier_uri          = \"https://${TF_VAR_kubernetes_cluster_name}.api.cosmo-platform.com/${TF_VAR_kubernetes_tenant_namespace}\"
 engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
 
 """ > $PWD/terraform.infra.tenant.tfvars
@@ -517,7 +517,7 @@ terraform -chdir=$tenant_k8s init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=$cluster_name_value-k8s-tenant-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-k8s-tenant-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo "installing tfvars in $tenant_k8s"
@@ -549,7 +549,7 @@ terraform mode
 postgresql_secrets_config_create = true
 create_rabbitmq_secret           = true
 
-""" > terraform.k8s.tenant.tfvars
+""" > $PWD/terraform.k8s.tenant.tfvars
 
 # az storage blob upload \
 #     --account-name $TF_VAR_tf_storage_account_name \
