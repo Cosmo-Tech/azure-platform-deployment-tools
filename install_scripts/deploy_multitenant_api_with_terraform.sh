@@ -302,8 +302,6 @@ source $PWD/out_core.txt
 ################## EXPORT CORE OUTPUT ##################
 
 
-
-
 ################## DEPLOY CORE K8S ##################
 git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-common.git $core_k8s
 
