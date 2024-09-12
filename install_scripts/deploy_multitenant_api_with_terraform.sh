@@ -293,9 +293,9 @@ terraform -chdir=$core apply tfplan_core
 
 ################## EXPORT CORE OUTPUT ##################
 
-terraform -chdir=$core output > out_core.txt
-sed -i 's/ = /=/' out_core.txt
-sed -i 's/out_/export TF_VAR_/' out_core.txt
+terraform -chdir=$core output > $PWD/out_core.txt
+sed -i 's/ = /=/' $PWD/out_core.txt
+sed -i 's/out_/export TF_VAR_/' $PWD/out_core.txt
 
 source $PWD/out_core.txt
 
@@ -490,11 +490,11 @@ terraform -chdir=$tenant apply tfplan_tenant
 
 ################## EXPORT TENANT INFRA OUTPUT ##################
 
-terraform -chdir=$tenant output > out_tenant.txt
-sed -i 's/ = /=/' out_tenant.txt
-sed -i 's/out_/export TF_VAR_/' out_tenant.txt
+terraform -chdir=$tenant output > $PWD/out_tenant.txt
+sed -i 's/ = /=/' $PWD/out_tenant.txt
+sed -i 's/out_/export TF_VAR_/' $PWD/out_tenant.txt
 
-source out_tenant.txt
+source $PWD/out_tenant.txt
 ################## EXPORT TENANT INFRA OUTPUT ##################
 
 # out_core.txt
