@@ -224,6 +224,10 @@ core="platform-infra-core"
 tenant="platform-infra-tenant"
 core_k8s="platform-k8s-core"
 tenant_k8s="platform-k8s-tenant"
+file_infra_core="terraform.infra.core.tfvars"
+file_k8s_core="terraform.k8s.core.tfvars"
+file_infra_tenant="terraform.infra.tenant.tfvars"
+file_k8s_tenant="terraform.k8s.tenant.tfvars"
 number=$RANDOM
 ################## GLOBAL VARIABLES ##################
 
@@ -266,7 +270,7 @@ network_publicip_name = \"$TF_VAR_publicip_name\"
 network_dns_zone_name           = \"api.cosmo-platform.com\"
 network_api_dns_name            = \"$TF_VAR_network_api_dns_name\"
 network_dns_record              = \"$TF_VAR_network_dns_record\"
-network_dns_record_create       = true
+network_dns_record_create       = false
 network_publicip_resource_group = \"$TF_VAR_network_publicip_resource_group\"
 network_resource_group          = \"$TF_VAR_network_resource_group\"
 
@@ -276,17 +280,17 @@ kubernetes_resource_group = \"$TF_VAR_kubernetes_resource_group\"
 kubernetes_cluster_name   = \"$TF_VAR_kubernetes_cluster_name\"
 
 is_bare_metal = false
-""" > $PWD/terraform.infra.core.tfvars
+""" > $PWD/$file_infra_core
 
-# az storage blob upload \
-#     --account-name $TF_VAR_tf_storage_account_name \
-#     --container-name $TF_VAR_tf_container_name \
-#     --name terraform.infra.core.tfvars \
-#     --file terraform.infra.core.tfvars \
-#     --auth-mode key \
-#     --account-key $TF_VAR_tf_access_key
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name $file_infra_core \
+    --file $PWD/$file_infra_core \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core plan -out tfplan_core -var-file $PWD/terraform.infra.core.tfvars
+terraform -chdir=$core plan -out tfplan_core -var-file $PWD/$file_infra_core
 terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
@@ -380,17 +384,17 @@ loki_deploy     = true
 keycloak_deploy = false
 is_bare_metal   = false
 
-""" > $PWD/terraform.k8s.core.tfvars
+""" > $PWD/$file_k8s_core
 
-# az storage blob upload \
-#     --account-name $TF_VAR_tf_storage_account_name \
-#     --container-name $TF_VAR_tf_container_name \
-#     --name terraform.k8s.core.tfvars \
-#     --file $core_k8s/terraform.k8s.core.tfvars \
-#     --auth-mode key \
-#     --account-key $TF_VAR_tf_access_key
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name $file_k8s_core \
+    --file $PWD/$file_k8s_core \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file $PWD/terraform.k8s.core.tfvars
+terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file $PWD/$file_k8s_core
 terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 ################## DEPLOY CORE K8S ##################
@@ -465,7 +469,7 @@ vault_namespace      = \"vault\"
 vault_sops_namespace = \"vault-secrets-operator\"
 
 # platform config
-services_secrets_create = true
+services_secrets_create = false
 create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
@@ -473,17 +477,17 @@ organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
 identifier_uri          = \"api://df425ffc-23e4-4005-81d5-02c92fa9e3f0\"
 engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
 
-""" > $PWD/terraform.infra.tenant.tfvars
+""" > $PWD/$file_infra_tenant
 
-# az storage blob upload \
-#     --account-name $TF_VAR_tf_storage_account_name \
-#     --container-name $TF_VAR_tf_container_name \
-#     --name terraform.infra.tenant.tfvars \
-#     --file $tenant/terraform.infra.tenant.tfvars \
-#     --auth-mode key \
-#     --account-key $TF_VAR_tf_access_key
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name $file_infra_tenant \
+    --file $PWD/$file_infra_tenant \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant plan -out tfplan_tenant -var-file $PWD/terraform.infra.tenant.tfvars
+terraform -chdir=$tenant plan -out tfplan_tenant -var-file $PWD/$file_infra_tenant
 terraform -chdir=$tenant apply tfplan_tenant
 
 ################## DEPLOY TENANT INFRA ##################
@@ -536,6 +540,9 @@ cosmotech_api_version_path          = \"v3-2\"
 identity_token_url                  = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/token\"
 identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/authorize\"
 
+# network
+api_dns_name              = \"$TF_VAR_network_api_dns_name\"
+
 argo_deploy       = true
 cert_deploy       = true
 postgresql_deploy = true
@@ -545,20 +552,25 @@ minio_deploy      = true
 tls_deploy        = false
 
 # terraform mode
-postgresql_secrets_config_create = true
-create_rabbitmq_secret           = true
+postgresql_secrets_config_create = false
+create_rabbitmq_secret           = false
 
-""" > $PWD/terraform.k8s.tenant.tfvars
+# vault
+create_platform_config  = false
+vault_engine_secret     = false
+allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
 
-# az storage blob upload \
-#     --account-name $TF_VAR_tf_storage_account_name \
-#     --container-name $TF_VAR_tf_container_name \
-#     --name terraform.k8s.tenant.tfvars \
-#     --file $tenant_k8s/terraform.k8s.tenant.tfvars \
-#     --auth-mode key \
-#     --account-key $TF_VAR_tf_access_key
+""" > $PWD/$file_k8s_tenant
 
-terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $PWD/terraform.k8s.tenant.tfvars
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name $file_k8s_tenant \
+    --file $PWD/$file_k8s_tenant \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
+
+terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $PWD/$file_k8s_tenant
 terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
 
 ################## DEPLOY TENANT K8S ##################
@@ -568,9 +580,9 @@ terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
 
 echo "Generating terraform.tfvars..."
 
-output_file="terraform.marketplace.tfvars"
+output_file="terraform.all.tfvars"
 
-rm -f "$output_file"
+rm -f "$PWD/$output_file"
 
 # Iterate all environment variables and generate the tfvars file
 while IFS='=' read -r name value ; do
@@ -579,24 +591,24 @@ while IFS='=' read -r name value ; do
         # Extract the variable name without the TF_VAR_ prefix
         var_name=${name#TF_VAR_}
         # Write the variable to the tfvars file
-        echo "$var_name=\"$value\"" >> "$output_file"
+        echo "$var_name=\"$value\"" >> "$PWD/$output_file"
     fi
 done < <(env)
 
-echo "File $output_file generated successfully."
+echo "File $PWD/$output_file generated successfully."
 
 # Upload the file to Azure Blob Storage
-echo "Uploading $output_file to Azure Blob Storage..."
+echo "Uploading $PWD/$output_file to Azure Blob Storage..."
 
-# az storage blob upload \
-#     --account-name $TF_VAR_tf_storage_account_name \
-#     --container-name $TF_VAR_tf_container_name \
-#     --name $output_file \
-#     --file $output_file \
-#     --auth-mode key \
-#     --account-key $TF_VAR_tf_access_key
+az storage blob upload \
+    --account-name $TF_VAR_tf_storage_account_name \
+    --container-name $TF_VAR_tf_container_name \
+    --name $output_file \
+    --file $PWD/$output_file \
+    --auth-mode key \
+    --account-key $TF_VAR_tf_access_key
 
-echo "File $output_file uploaded to Azure Blob Storage successfully."
+echo "File $PWD/$output_file uploaded to Azure Blob Storage successfully."
 
 # End of script
 echo "Deployment and configuration completed."
