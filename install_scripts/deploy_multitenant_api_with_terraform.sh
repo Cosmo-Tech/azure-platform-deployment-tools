@@ -469,7 +469,7 @@ vault_namespace      = \"vault\"
 vault_sops_namespace = \"vault-secrets-operator\"
 
 # platform config
-services_secrets_create = false
+services_secrets_create = true
 create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
@@ -552,8 +552,8 @@ minio_deploy      = true
 tls_deploy        = false
 
 # terraform mode
-postgresql_secrets_config_create = true
-create_rabbitmq_secret           = true
+postgresql_secrets_config_create = false
+create_rabbitmq_secret           = false
 
 # vault
 create_platform_config  = false
