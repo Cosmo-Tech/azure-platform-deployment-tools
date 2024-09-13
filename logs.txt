@@ -1,0 +1,10 @@
+8s-tenant'... 
+Alive[################################################################] 100.0000%
+Finished[#############################################################] 100.0000% [31m╷[0m[0m [31m│[0m 
+[0m[1m[31mError: [0m[0m[1mAttempt to get attribute from null value[0m [31m│[0m [0m [31m│[0m 
+[0m[0m on create-redis-stack/main.tf line 2, in locals: [31m│[0m [0m 2
+: local_redis_admin_password = var.redis_admin_password == "" ? data.kubernetes_secret.redis_secret.data[4m.password[0m : var.redis_admin_password[0m [
+    31m│[0m [0m [31m│[0m [0mThis value is null, so it does not have any attributes. [31m╵[0m[0m [31m╷[0m[0m [31m│[0m [0
+    m[1m[31mError: [0m[0m[1mAttempt to get attribute from null value[0m [31m│[0m [0m [31m│[0m [0m[0m on create-redis-stack/outputs.tf line 6,
+     in output "out_redis_admin_password": [31m│[0m [0m 6: value = data.kubernetes_secret.redis_secret.data[4m.password[0m[0m [31m│[0m [0m
+      [31m│[0m [0mThis value is null, so it does not have any attributes. [31m╵[0m[0m
