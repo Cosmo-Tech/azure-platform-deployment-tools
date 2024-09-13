@@ -447,6 +447,9 @@ create_eventhub = false
 # rabbitmq
 create_rabbitmq = true
 
+# storage
+storage_public_network_access_enabled = true
+
 # cosmotech api
 cosmotech_api_version               = \"$TF_VAR_cosmotech_api_version\"
 cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_version\"
@@ -559,6 +562,9 @@ create_rabbitmq_secret           = false
 create_platform_config  = false
 vault_engine_secret     = false
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
+
+tenant_sp_client_id     = \"$TF_VAR_tenant_client_id\"
+tenant_sp_client_secret = \"$TF_VAR_tenant_client_secret\"
 
 """ > $PWD/$file_k8s_tenant
 
