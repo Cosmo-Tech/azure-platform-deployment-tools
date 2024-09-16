@@ -257,7 +257,7 @@ network_sp_client_secret = \"$TF_VAR_network_sp_client_secret\"
 subscription_id          = \"$TF_VAR_subscription_id\"
 tenant_id                = \"$TF_VAR_tenant_id\"
 location                 = \"$TF_VAR_location\"
-owner_list               = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
+owner_list               = $TF_VAR_owner_list
 
 # project
 project_customer_name = \"cosmotech\"
@@ -424,10 +424,10 @@ echo """
 # azure
 client_id                            = \"$TF_VAR_client_id\"
 client_secret                        = \"$TF_VAR_client_secret\"
-owner_list                           = [\"nibaldo.donoso@thecosmocompany69.onmicrosoft.com\"]
+owner_list                           = $TF_VAR_owner_list
 location                             = \"$TF_VAR_location\"
-network_tenant_address_prefix        = \"10.31.0.0/24\"
-network_tenant_subnet_address_prefix = \"10.31.0.0/24\"
+network_tenant_address_prefix        = \"10.31.0.0/16\"
+network_tenant_subnet_address_prefix = \"10.31.0.0/16\"
 tenant_resource_group                = \"$TF_VAR_kubernetes_tenant_namespace\"
 backup_create                        = false
 
@@ -453,7 +453,7 @@ storage_public_network_access_enabled = true
 # cosmotech api
 cosmotech_api_version               = \"$TF_VAR_cosmotech_api_version\"
 cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_version\"
-cosmotech_api_version_path          = \"v3-2\"
+cosmotech_api_version_path          = \"$TF_VAR_cosmotech_api_version_path\"
 
 # project
 project_stage     = \"Dev\"
@@ -477,7 +477,7 @@ create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
 organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
-identifier_uri          = \"api://df425ffc-23e4-4005-81d5-02c92fa9e3f0\"
+identifier_uri          = \"\"
 engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
 
 """ > $PWD/$file_infra_tenant
@@ -539,7 +539,7 @@ cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
 deploy_api                          = true
 cosmotech_api_version               = \"$TF_VAR_cosmotech_api_version\"
 cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_version\"
-cosmotech_api_version_path          = \"v3-2\"
+cosmotech_api_version_path          = \"$TF_VAR_cosmotech_api_version_path\"
 identity_token_url                  = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/token\"
 identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/authorize\"
 
