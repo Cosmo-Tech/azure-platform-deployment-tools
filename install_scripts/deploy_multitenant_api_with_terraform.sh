@@ -349,7 +349,7 @@ argocd_repositories = [
 ]
 
 # vault
-vault_deploy             = false
+vault_deploy             = true
 vault_helm_chart         = \"vault\"
 vault_helm_chart_version = \"0.28.1\"
 vault_helm_release_name  = \"vault\"
@@ -357,7 +357,7 @@ vault_helm_repo_url      = \"https://helm.releases.hashicorp.com\"
 vault_namespace          = \"vault\"
 vault_replicas           = 3
 vault_secret_name        = \"vault-token-secret\"
-vault_ingress_enabled    = false
+vault_ingress_enabled    = true
 
 # VSOPS
 vault_secrets_operator_deploy             = false
