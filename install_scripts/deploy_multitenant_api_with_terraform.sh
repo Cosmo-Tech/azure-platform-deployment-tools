@@ -257,7 +257,7 @@ network_sp_client_secret = \"$TF_VAR_network_sp_client_secret\"
 subscription_id          = \"$TF_VAR_subscription_id\"
 tenant_id                = \"$TF_VAR_tenant_id\"
 location                 = \"$TF_VAR_location\"
-owner_list               = $TF_VAR_owner_list
+owner_list               = [\"$TF_VAR_owner_list\"]
 
 # project
 project_customer_name = \"cosmotech\"
@@ -424,7 +424,7 @@ echo """
 # azure
 client_id                            = \"$TF_VAR_client_id\"
 client_secret                        = \"$TF_VAR_client_secret\"
-owner_list                           = $TF_VAR_owner_list
+owner_list                           = [\"$TF_VAR_owner_list\"]
 location                             = \"$TF_VAR_location\"
 network_tenant_address_prefix        = \"10.31.0.0/16\"
 network_tenant_subnet_address_prefix = \"10.31.0.0/16\"
@@ -477,7 +477,7 @@ create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
 organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
-identifier_uri          = \"\"
+identifier_uri          = \"api://$TF_VAR_tenant_client_id\"
 engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
 
 """ > $PWD/$file_infra_tenant
