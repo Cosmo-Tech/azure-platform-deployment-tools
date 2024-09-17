@@ -595,7 +595,7 @@ while IFS='=' read -r name value ; do
     # Check if the variable starts with TF_VAR_
     if [[ $name == TF_VAR_* ]] ; then
         # Extract the variable name without the TF_VAR_ prefix
-        var_name=${name#TF_VAR_}
+        var_name=${name}
         # Write the variable to the tfvars file
         echo "$var_name=\"$value\"" >> "$PWD/$output_file"
     fi
