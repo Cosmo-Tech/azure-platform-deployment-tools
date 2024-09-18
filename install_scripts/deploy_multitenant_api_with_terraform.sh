@@ -426,8 +426,8 @@ client_id                            = \"$TF_VAR_client_id\"
 client_secret                        = \"$TF_VAR_client_secret\"
 owner_list                           = [\"$TF_VAR_owner_list\"]
 location                             = \"$TF_VAR_location\"
-network_tenant_address_prefix        = \"10.31.0.0/16\"
-network_tenant_subnet_address_prefix = \"10.31.0.0/16\"
+network_tenant_address_prefix        = \"10.31.0.0/21\"
+network_tenant_subnet_address_prefix = \"10.31.0.0/21\"
 tenant_resource_group                = \"$TF_VAR_kubernetes_tenant_namespace\"
 backup_create                        = false
 
@@ -597,7 +597,7 @@ while IFS='=' read -r name value ; do
         # Extract the variable name without the TF_VAR_ prefix
         var_name=${name}
         # Write the variable to the tfvars file
-        echo "$var_name=\"$value\"" >> "$PWD/$output_file"
+        echo "export $var_name=\"$value\"" >> "$PWD/$output_file"
     fi
 done < <(env)
 
