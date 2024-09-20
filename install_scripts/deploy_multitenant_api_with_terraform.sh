@@ -378,6 +378,10 @@ keycloak_ingress_hostname = \"$TF_VAR_network_api_dns_name\"
 publicip_address          = \"$TF_VAR_loadbalancer_ip\"
 api_dns_name              = \"$TF_VAR_network_api_dns_name\"
 
+certificate_cert_content  = \"$TF_VAR_tls_certificate_custom_certificate\"
+certificate_key_content   = \"$TF_VAR_tls_certificate_custom_key\"
+tls_certificate_type      = \"$TF_VAR_tls_certificate_type\"
+
 nginx_deploy    = true
 cert_deploy     = true
 loki_deploy     = true
