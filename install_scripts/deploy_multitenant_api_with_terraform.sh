@@ -378,12 +378,9 @@ keycloak_ingress_hostname = \"$TF_VAR_network_api_dns_name\"
 publicip_address          = \"$TF_VAR_loadbalancer_ip\"
 api_dns_name              = \"$TF_VAR_network_api_dns_name\"
 
-certificate_cert_content  = \"$TF_VAR_tls_certificate_custom_certificate\"
-certificate_key_content   = \"$TF_VAR_tls_certificate_custom_key\"
 tls_certificate_type      = \"$TF_VAR_tls_certificate_type\"
 
 nginx_deploy    = true
-cert_deploy     = true
 loki_deploy     = true
 keycloak_deploy = false
 is_bare_metal   = false
@@ -549,14 +546,13 @@ identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VA
 
 # network
 api_dns_name              = \"$TF_VAR_network_api_dns_name\"
+tls_certificate_type      = \"$TF_VAR_tls_certificate_type\"
 
 argo_deploy       = true
-cert_deploy       = true
 postgresql_deploy = true
 redis_deploy      = true
 rabbitmq_deploy   = true
 minio_deploy      = true
-tls_deploy        = false
 
 # terraform mode
 postgresql_secrets_config_create = false
