@@ -224,10 +224,10 @@ core="platform-infra-core"
 tenant="platform-infra-tenant"
 core_k8s="platform-k8s-core"
 tenant_k8s="platform-k8s-tenant"
-file_infra_core="terraform.infra.core.tfvars"
-file_k8s_core="terraform.k8s.core.tfvars"
-file_infra_tenant="terraform.infra.tenant.tfvars"
-file_k8s_tenant="terraform.k8s.tenant.tfvars"
+file_infra_core="terraform.core.infra.tfvars"
+file_k8s_core="terraform.core.k8s.tfvars"
+file_infra_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.infra.tfvars"
+file_k8s_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.k8s.tfvars"
 number=$RANDOM
 ################## GLOBAL VARIABLES ##################
 
@@ -245,7 +245,7 @@ terraform -chdir=$core init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-infra-core-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-core-infra-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo installing tfvars in $core
@@ -320,7 +320,7 @@ terraform -chdir=$core_k8s init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-k8s-core-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-core-k8s-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo "installing tfvars in $core_k8s"
@@ -417,7 +417,7 @@ terraform -chdir=$tenant init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-infra-tenant-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-$TF_VAR_kubernetes_tenant_namespace-infra-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo "installing tfvars in $tenant"
@@ -524,7 +524,7 @@ terraform -chdir=$tenant_k8s init \
     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
     -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
     -backend-config "container_name=$TF_VAR_tf_container_name" \
-    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-k8s-tenant-$number" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-$TF_VAR_kubernetes_tenant_namespace-k8s-$number" \
     -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo "installing tfvars in $tenant_k8s"
@@ -619,8 +619,8 @@ echo "File $PWD/$output_file uploaded to Azure Blob Storage successfully."
 # End of script
 echo "Deployment and configuration completed."
 
-# terraform.marketplace.tfvars
-# terraform.infra.core.tfvars
-# terraform.k8s.core.tfvars
-# terraform.infra.tenant.tfvars
-# terraform.k8s.tenant.tfvars
+# terraform.all.tfvars
+# terraform.core.infra.tfvars
+# terraform.core.k8s.tfvars
+# terraform.tenant.infra.tfvars
+# terraform.tenant.k8s.tfvars
