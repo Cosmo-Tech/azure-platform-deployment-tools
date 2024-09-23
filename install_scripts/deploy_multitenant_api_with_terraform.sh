@@ -267,7 +267,7 @@ project_name          = \"$TF_VAR_project_name\"
 network_publicip_name = \"$TF_VAR_publicip_name\"
 
 # network
-network_dns_zone_name           = \"api.cosmo-platform.com\"
+network_dns_zone_name           = \"$TF_VAR_network_dns_zone_name\"
 network_api_dns_name            = \"$TF_VAR_network_api_dns_name\"
 network_dns_record              = \"$TF_VAR_network_dns_record\"
 network_dns_record_create       = false
