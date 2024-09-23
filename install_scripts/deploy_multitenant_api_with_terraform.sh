@@ -232,7 +232,7 @@ number=$RANDOM
 ################## GLOBAL VARIABLES ##################
 
 ################## DEPLOY CORE ##################
-git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
+git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
 
 echo """
 terraform {
@@ -404,7 +404,7 @@ terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 
 ################## DEPLOY TENANT INFRA ##################
-git clone -b marketplace-rc https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git $tenant
+git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-tenant.git $tenant
 
 echo """
 terraform {
