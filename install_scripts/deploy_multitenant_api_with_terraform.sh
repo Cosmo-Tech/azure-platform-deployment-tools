@@ -427,8 +427,8 @@ client_id                            = \"$TF_VAR_client_id\"
 client_secret                        = \"$TF_VAR_client_secret\"
 owner_list                           = [\"$TF_VAR_owner_list\"]
 location                             = \"$TF_VAR_location\"
-network_tenant_address_prefix        = \"10.31.0.0/21\"
-network_tenant_subnet_address_prefix = \"10.31.0.0/21\"
+network_tenant_address_prefix        = \"10.20.0.0/16\"
+network_tenant_subnet_address_prefix = \"10.20.0.0/24\"
 tenant_resource_group                = \"$TF_VAR_kubernetes_tenant_namespace\"
 backup_create                        = false
 
@@ -440,13 +440,13 @@ kubernetes_tenant_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
 cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
 
 # adx
-kusto_deploy = false
+kusto_deploy = true
 
 # eventhub
 create_eventhub = false
 
 # rabbitmq
-create_rabbitmq = true
+create_rabbitmq = false
 
 # storage
 storage_public_network_access_enabled = true
@@ -457,7 +457,7 @@ cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_vers
 cosmotech_api_version_path          = \"$TF_VAR_cosmotech_api_version_path\"
 
 # project
-project_stage     = \"Dev\"
+project_stage     = \"Prod\"
 storage_class_sku = \"Standard_LRS\"
 project_name      = \"$TF_VAR_kubernetes_cluster_name\"
 
@@ -473,7 +473,7 @@ vault_namespace      = \"vault\"
 vault_sops_namespace = \"vault-secrets-operator\"
 
 # platform config
-services_secrets_create = true
+services_secrets_create = false
 create_platform_config  = false
 platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
 allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
