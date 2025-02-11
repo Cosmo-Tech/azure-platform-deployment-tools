@@ -210,6 +210,8 @@ else
 fi
 # TERRAFORM INSTALLED
 
+az login --service-principal -u \"$TF_VAR_network_sp_client_id\" -p \"$TF_VAR_network_sp_client_secret\" --tenant \"$TF_VAR_tenant_id\"
+
 ################## REPOSITORIES ##################
 
 # ./platform-infra-core
