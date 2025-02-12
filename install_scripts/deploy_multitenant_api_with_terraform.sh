@@ -233,6 +233,7 @@ file_k8s_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.k8s.tfvars"
 number=$RANDOM
 ################## GLOBAL VARIABLES ##################
 
+
 ################## DEPLOY CORE ##################
 git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
 
@@ -261,18 +262,13 @@ tenant_id                = \"$TF_VAR_tenant_id\"
 location                 = \"$TF_VAR_location\"
 owner_list               = [\"$TF_VAR_owner_list\"]
 
+deployment_type          = \"$TF_VAR_deployment_type"\
+
 # project
 project_customer_name = \"cosmotech\"
 project_name          = \"$TF_VAR_project_name\"
 
-# publicip
-network_publicip_name = \"$TF_VAR_publicip_name\"
-
 # network
-network_dns_zone_name           = \"$TF_VAR_network_dns_zone_name\"
-network_fqdn                    = \"$TF_VAR_network_fqdn\"
-network_dns_record              = \"$TF_VAR_network_dns_record\"
-network_dns_record_create       = false
 network_resource_group          = \"$TF_VAR_network_resource_group\"
 
 # kubernetes
