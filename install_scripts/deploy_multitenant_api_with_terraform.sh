@@ -270,10 +270,9 @@ network_publicip_name = \"$TF_VAR_publicip_name\"
 
 # network
 network_dns_zone_name           = \"$TF_VAR_network_dns_zone_name\"
-network_api_dns_name            = \"$TF_VAR_network_api_dns_name\"
+network_fqdn                    = \"$TF_VAR_network_fqdn\"
 network_dns_record              = \"$TF_VAR_network_dns_record\"
 network_dns_record_create       = false
-network_publicip_resource_group = \"$TF_VAR_network_publicip_resource_group\"
 network_resource_group          = \"$TF_VAR_network_resource_group\"
 
 # kubernetes
