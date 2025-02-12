@@ -262,7 +262,7 @@ tenant_id                = \"$TF_VAR_tenant_id\"
 location                 = \"$TF_VAR_location\"
 owner_list               = [\"$TF_VAR_owner_list\"]
 
-deployment_type          = \"$TF_VAR_deployment_type"\
+deployment_type          = \"$TF_VAR_deployment_type\"
 
 # project
 project_customer_name = \"cosmotech\"
