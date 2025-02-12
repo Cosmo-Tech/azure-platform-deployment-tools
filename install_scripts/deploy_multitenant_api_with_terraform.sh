@@ -292,7 +292,7 @@ az storage blob upload \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core plan -out tfplan_core -var-file $PWD/$file_infra_core -var-file terraform.default.tfvars
+terraform -chdir=$core plan -out tfplan_core -var-file terraform.default.tfvars -var-file $PWD/$file_infra_core 
 terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
@@ -397,7 +397,7 @@ az storage blob upload \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file $PWD/$file_k8s_core -var-file terraform.default.tfvars
+terraform -chdir=$core_k8s plan -out tfplan_core_k8s -var-file terraform.default.tfvars -var-file $PWD/$file_k8s_core 
 terraform -chdir=$core_k8s apply tfplan_core_k8s
 
 ################## DEPLOY CORE K8S ##################
@@ -493,7 +493,7 @@ az storage blob upload \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant plan -out tfplan_tenant -var-file $PWD/$file_infra_tenant -var-file terraform.default.tfvars
+terraform -chdir=$tenant plan -out tfplan_tenant -var-file terraform.default.tfvars -var-file $PWD/$file_infra_tenant 
 terraform -chdir=$tenant apply tfplan_tenant
 
 ################## DEPLOY TENANT INFRA ##################
@@ -578,7 +578,7 @@ az storage blob upload \
     --auth-mode key \
     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file $PWD/$file_k8s_tenant -var-file terraform.default.tfvars
+terraform -chdir=$tenant_k8s plan -out tfplan_tenant_k8s -var-file terraform.default.tfvars -var-file $PWD/$file_k8s_tenant 
 terraform -chdir=$tenant_k8s apply tfplan_tenant_k8s
 
 ################## DEPLOY TENANT K8S ##################
