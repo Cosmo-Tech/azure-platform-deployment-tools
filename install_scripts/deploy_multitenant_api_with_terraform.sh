@@ -213,12 +213,10 @@ fi
 az login --service-principal -u $TF_VAR_network_sp_client_id -p $TF_VAR_network_sp_client_secret --tenant $TF_VAR_tenant_id
 
 ################## REPOSITORIES ##################
-
 # ./platform-infra-core
 # ./platform-infra-tenant
 # ./platform-k8s-core
 # ./platform-k8s-tenant
-
 ################## REPOSITORIES ##################
 
 ################## GLOBAL VARIABLES GLOBAL ##################
@@ -262,20 +260,37 @@ tenant_id                = \"$TF_VAR_tenant_id\"
 location                 = \"$TF_VAR_location\"
 owner_list               = [\"$TF_VAR_owner_list\"]
 
-deployment_type          = \"$TF_VAR_deployment_type\"
-
 # project
 project_customer_name = \"cosmotech\"
 project_name          = \"$TF_VAR_project_name\"
 
+# azure
+deployment_type          = \"$TF_VAR_deployment_type\"
+
 # network
-network_resource_group          = \"$TF_VAR_network_resource_group\"
+network_dns_record       = \"$TF_VAR_network_dns_record\"
+network_resource_group   = \"$TF_VAR_network_resource_group\"
 
 # kubernetes
-kubernetes_version        = \"$TF_VAR_kubernetes_version\"
-kubernetes_resource_group = \"$TF_VAR_kubernetes_resource_group\"
-kubernetes_cluster_name   = \"$TF_VAR_kubernetes_cluster_name\"
+kubernetes_version                      = \"$TF_VAR_kubernetes_version\"
+kubernetes_resource_group               = \"$TF_VAR_kubernetes_resource_group\"
+kubernetes_cluster_name                 = \"$TF_VAR_kubernetes_cluster_name\"
+kubernetes_admin_group_object_ids = [
+  "2f18e364-03a9-4298-ba33-8f9fdb236cf0"
+]
+kubernetes_azure_rbac_enabled = true
 
+# velero
+velero_storage_name   = "veleroio"
+velero_storage_csm_ip = "185.55.98.16/29"
+velero_resource_group = "warp"
+velero_tags = {
+  vendor      = "cosmotech"
+  cost_center = "NA"
+  customer    = "warp"
+  project     = "warp"
+  stage       = "Dev"
+}
 is_bare_metal = false
 """ > $PWD/$file_infra_core
 
@@ -293,13 +308,11 @@ terraform -chdir=$core apply tfplan_core
 ################## DEPLOY CORE ##################
 
 ################## EXPORT CORE OUTPUT ##################
-
 terraform -chdir=$core output > $PWD/out_core.txt
 sed -i 's/ = /=/' $PWD/out_core.txt
 sed -i 's/out_/export TF_VAR_/' $PWD/out_core.txt
 
 source $PWD/out_core.txt
-
 ################## EXPORT CORE OUTPUT ##################
 
 
@@ -325,63 +338,38 @@ echo """
 client_id     = \"$TF_VAR_client_id\"
 client_secret = \"$TF_VAR_client_secret\"
 
-# argocd
-argocd_deploy                  = true
-argocd_helm_chart              = \"argo-cd\"
-argocd_helm_chart_version      = \"7.5.0\"
-argocd_helm_release_name       = \"argocd\"
-argocd_helm_repo_url           = \"https://argoproj.github.io/argo-helm\"
-argocd_replicas                = 3
-argocd_create_ingress          = false
-argocd_namespace               = \"argocd\"
-argocd_project                 = \"phoenix\"
-argocd_setup_job_image_version = \"v2.0.5\"
-argocd_repositories = [
-  {
-    url      = \"https://github.com/Cosmo-Tech/cosmotech-api.git\"
-    private  = false
-    username = \"\"
-    token    = \"\"
-  }
-]
-
-# vault
-vault_deploy             = true
-vault_helm_chart         = \"vault\"
-vault_helm_chart_version = \"0.28.1\"
-vault_helm_release_name  = \"vault\"
-vault_helm_repo_url      = \"https://helm.releases.hashicorp.com\"
-vault_namespace          = \"vault\"
-vault_replicas           = 3
-vault_secret_name        = \"vault-token-secret\"
-vault_ingress_enabled    = true
-
-# VSOPS
-vault_secrets_operator_deploy             = false
-vault_secrets_operator_helm_chart         = \"vault-secrets-operator\"
-vault_secrets_operator_helm_chart_version = \"0.8.1\"
-vault_secrets_operator_helm_release_name  = \"vault-secrets-operator\"
-vault_secrets_operator_helm_repo_url      = \"https://helm.releases.hashicorp.com\"
-vault_secrets_operator_namespace          = \"vault-secrets-operator\"
-vault_secrets_operator_vault_address      = \"http://vault.vault.svc.cluster.local:8200\"
-vault_secrets_operator_replicas           = 1
-
-# prometheus
-prometheus_stack_deploy   = true
-prom_redis_host_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
-
 # network
-keycloak_ingress_hostname = \"$TF_VAR_network_api_dns_name\"
-publicip_address          = \"$TF_VAR_loadbalancer_ip\"
-api_dns_name              = \"$TF_VAR_network_api_dns_name\"
-
 tls_certificate_type      = \"$TF_VAR_tls_certificate_type\"
 
-nginx_deploy    = true
-loki_deploy     = true
-keycloak_deploy = false
-is_bare_metal   = false
+# velero
+velero_azure_subcription_id          = \"$TF_VAR_subscription_id\"
+velero_backup_resource_group_cluster = ""
+velero_storage_account_name          = "veleroszrio"
+velero_storage_account_resource_name = \"$TF_VAR_network_resource_group\"
+velero_azure_tenant_id               = \"$TF_VAR_tenant_id\"
+velero_backup_client_id              = ""
+velero_backup_client_secret          = ""
+velero_storage_account_access_key    = ""
 
+# namespace
+prom_redis_host_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
+
+tf_resource_group_name  = \"$TF_VAR_network_resource_group\"
+tf_storage_account_name = \"$TF_VAR_tf_storage_account_name\"
+tf_access_key           = \"$TF_VAR_tf_access_key\"
+tf_container_name       = \"$TF_VAR_tf_container_name\"
+tf_blob_name_core_ip    = \"\"
+tf_blob_name_core_infra = \"\"
+
+# remote dns
+tf_resource_group_name_dns  = \"$TF_VAR_network_resource_group\"
+tf_storage_account_name_dns = \"$TF_VAR_tf_storage_account_name\"
+tf_container_name_dns       = \"$TF_VAR_tf_container_name\"
+tf_blob_name_core_dns       = ""
+tf_access_key_dns           = \"$TF_VAR_tf_access_key\"
+
+# admin user or not
+kubernetes_cluster_admin_activate = true
 """ > $PWD/$file_k8s_core
 
 az storage blob upload \
@@ -422,19 +410,25 @@ echo """
 # azure
 client_id                            = \"$TF_VAR_client_id\"
 client_secret                        = \"$TF_VAR_client_secret\"
+subscription_id                      = \"$TF_VAR_subscription_id\"
+tenant_id                            = \"$TF_VAR_tenant_id\"
 owner_list                           = [\"$TF_VAR_owner_list\"]
 location                             = \"$TF_VAR_location\"
-network_tenant_address_prefix        = \"10.20.0.0/16\"
-network_tenant_subnet_address_prefix = \"10.20.0.0/24\"
 tenant_resource_group                = \"$TF_VAR_kubernetes_tenant_namespace\"
+common_resource_group                = \"$TF_VAR_tf_resource_group_name\"
 backup_create                        = false
-
-# network
-api_dns_name              = \"$TF_VAR_network_api_dns_name\"
 
 # kubernetes
 kubernetes_tenant_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
+kubernetes_resource_group   = \"$TF_VAR_tenant_resource_group\"
 cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
+
+# network
+api_dns_name                         = \"$TF_VAR_network_api_dns_name\"
+network_resource_group               = \"$TF_VAR_network_resource_group\"
+network_tenant_address_prefix        = "10.20.0.0/16"
+network_tenant_subnet_address_prefix = "10.20.0.0/24"
+storage_csm_ip                       = "185.55.98.16/29"
 
 # adx
 kusto_deploy = true
@@ -445,38 +439,58 @@ create_eventhub = false
 # rabbitmq
 create_rabbitmq = false
 
-# storage
-storage_public_network_access_enabled = true
-
 # cosmotech api
 cosmotech_api_version               = \"$TF_VAR_cosmotech_api_version\"
 cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_version\"
 cosmotech_api_version_path          = \"$TF_VAR_cosmotech_api_version_path\"
 
+# apps 
+create_secrets = false
+create_babylon = true
+create_restish = true
+
 # project
-project_stage     = \"Prod\"
-storage_class_sku = \"Standard_LRS\"
+project_stage     = "PRod"
+storage_class_sku = "Standard_LRS"
 project_name      = \"$TF_VAR_kubernetes_cluster_name\"
 
 # redis
 redis_disk_size_gb = 64
-redis_disk_sku     = \"Premium_LRS\"
-redis_disk_tier    = \"P6\"
+redis_disk_sku     = "Premium_LRS"
+redis_disk_tier    = "P6"
 
 # vault
-vault_create_entries = false
-vault_address        = \"http://vault.vault.svc.cluster.local\"
-vault_namespace      = \"vault\"
-vault_sops_namespace = \"vault-secrets-operator\"
+vault_create_entries = true
+vault_address        = "http://vault.vault.svc.cluster.local:8200"
+vault_namespace      = "vault"
+vault_sops_namespace = "vault-secrets-operator"
+container_tag        = "1.3.5"
+engine_version       = "v1"
+engine_secret        = "cosmotech"
+platform_id          = \"$TF_VAR_kubernetes_tenant_namespace\"
+organization_name    = "cosmotech"
+
+# storage
+storage_public_network_access_enabled = true
+storage_default_action                = "Allow"
+
+# backend storage
+tf_resource_group_name  = \"$TF_VAR_network_resource_group\"
+tf_storage_account_name = \"$TF_VAR_tf_storage_account_name\"
+tf_access_key           = \"$TF_VAR_tf_access_key\"
+tf_container_name       = \"$TF_VAR_tf_container_name\"
+tf_blob_name_tenant     = \"$file_infra_tenant\"
 
 # platform config
-services_secrets_create = false
-create_platform_config  = false
-platform_name           = \"$TF_VAR_kubernetes_tenant_namespace\"
-allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
-organization_name       = \"$TF_VAR_kubernetes_tenant_namespace\"
-identifier_uri          = \"api://$TF_VAR_tenant_client_id\"
-engine_secret           = \"$TF_VAR_kubernetes_tenant_namespace\"
+create_platform_config            = false
+allowed_namespace                 = \"$TF_VAR_kubernetes_tenant_namespace\"
+services_secrets_create           = false
+create_platform_config            = false
+platform_name                     = \"$TF_VAR_kubernetes_tenant_namespace\"
+identifier_uri                    = \"api://$TF_VAR_tenant_client_id\"
+kubernetes_cluster_admin_activate = true
+
+first_tenant_in_cluster = true
 
 """ > $PWD/$file_infra_tenant
 
@@ -503,9 +517,6 @@ sed -i 's/out_/export TF_VAR_/' $PWD/out_tenant.txt
 source $PWD/out_tenant.txt
 ################## EXPORT TENANT INFRA OUTPUT ##################
 
-# out_core.txt
-# out_tenant.txtterraform-azure-cosmotech-common
-
 
 ################# DEPLOY TENANT K8S ##################
 git clone -b azure https://github.com/Cosmo-Tech/terraform-kubernetes-cosmotech-tenant.git $tenant_k8s
@@ -526,12 +537,16 @@ terraform -chdir=$tenant_k8s init \
 
 echo "installing tfvars in $tenant_k8s"
 echo """
-client_id     = \"$TF_VAR_client_id\"
-client_secret = \"$TF_VAR_client_secret\"
+client_id                = \"$TF_VAR_client_id\"
+client_secret            = \"$TF_VAR_client_secret\"
+subscription_id          = \"$TF_VAR_subscription_id\"
+tenant_id                = \"$TF_VAR_tenant_id\"
 
+# kubernetes
 kubernetes_tenant_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
 tenant_resource_group       = \"$TF_VAR_tenant_resource_group\"
 cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
+kubernetes_resource_group   = "customer-delivery"
 
 # api
 deploy_api                          = true
@@ -540,6 +555,20 @@ cosmotech_api_chart_package_version = \"$TF_VAR_cosmotech_api_chart_package_vers
 cosmotech_api_version_path          = \"$TF_VAR_cosmotech_api_version_path\"
 identity_token_url                  = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/token\"
 identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/authorize\"
+identifier_uri                      = "https://customer-delivery.api.cosmotech.com/adp-adx-dev"
+list_authorized_mime_types = [
+  "application/zip",
+  "application/xml",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/x-tika-ooxml",
+  "text/csv",
+  "text/plain",
+  "text/x-yaml",
+  "application/json",
+  "application/gzip",
+]
+max_file_size     = "100MB"
+max_request_size  = "100MB"
 
 # network
 api_dns_name              = \"$TF_VAR_network_api_dns_name\"
@@ -548,10 +577,10 @@ tls_certificate_type      = \"$TF_VAR_tls_certificate_type\"
 argo_deploy       = true
 postgresql_deploy = true
 redis_deploy      = true
-rabbitmq_deploy   = true
 minio_deploy      = true
+rabbitmq_deploy   = false
 
-# terraform mode
+# terraform mode #false
 postgresql_secrets_config_create = false
 create_rabbitmq_secret           = false
 
@@ -563,6 +592,16 @@ allowed_namespace       = \"$TF_VAR_kubernetes_tenant_namespace\"
 tenant_sp_client_id     = \"$TF_VAR_tenant_client_id\"
 tenant_sp_client_secret = \"$TF_VAR_tenant_client_secret\"
 
+# backend tenant infra
+tf_resource_group_name    = \"$TF_VAR_network_resource_group\"
+tf_storage_account_name   = \"$TF_VAR_tf_storage_account_name\"
+tf_access_key             = \"$TF_VAR_tf_access_key\"
+tf_container_name         = \"$TF_VAR_tf_container_name\"
+tf_blob_name_tenant_infra = \"$file_infra_tenant\"
+
+kubernetes_cluster_admin_activate = true
+
+first_tenant_in_cluster = true
 """ > $PWD/$file_k8s_tenant
 
 az storage blob upload \
