@@ -233,7 +233,7 @@ number=$RANDOM
 
 
 ################## DEPLOY CORE ##################
-git clone -b ndon/subnet https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
+git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
 
 echo """
 terraform {
@@ -270,8 +270,8 @@ deployment_type          = \"$TF_VAR_deployment_type\"
 # network
 network_dns_record       = \"$TF_VAR_network_dns_record\"
 network_resource_group   = \"$TF_VAR_network_resource_group\"
-network_new              = \"existing\"
-network_name             = \"CosmoTechcosmotechtestNibaldoDevVNet\"
+network_new              = \"$TF_VAR_network_new\"
+network_name             = \"$TF_VAR_network_name\"
 
 # kubernetes
 kubernetes_version                      = \"$TF_VAR_kubernetes_version\"
