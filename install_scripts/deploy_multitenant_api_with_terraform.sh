@@ -233,7 +233,7 @@ number=$RANDOM
 
 
 ################## DEPLOY CORE ##################
-git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
+git clone -b ndon/subnet https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
 
 echo """
 terraform {
@@ -270,6 +270,8 @@ deployment_type          = \"$TF_VAR_deployment_type\"
 # network
 network_dns_record       = \"$TF_VAR_network_dns_record\"
 network_resource_group   = \"$TF_VAR_network_resource_group\"
+network_new              = \"existing\"
+network_name             = \"CosmoTechcosmotechtestNibaldoDevVNet\"
 
 # kubernetes
 kubernetes_version                      = \"$TF_VAR_kubernetes_version\"
@@ -281,7 +283,7 @@ kubernetes_azure_rbac_enabled           = true
 # velero
 velero_storage_name   = \"veleroio\"
 velero_storage_csm_ip = \"185.55.98.16/29\"
-velero_resource_group = \"\"
+velero_resource_group = \"$TF_VAR_kubernetes_resource_group\"
 velero_tags = {
   vendor      = \"cosmotech\"
   cost_center = \"NA\"
