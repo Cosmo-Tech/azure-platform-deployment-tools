@@ -275,21 +275,19 @@ network_resource_group   = \"$TF_VAR_network_resource_group\"
 kubernetes_version                      = \"$TF_VAR_kubernetes_version\"
 kubernetes_resource_group               = \"$TF_VAR_kubernetes_resource_group\"
 kubernetes_cluster_name                 = \"$TF_VAR_kubernetes_cluster_name\"
-kubernetes_admin_group_object_ids = [
-  "2f18e364-03a9-4298-ba33-8f9fdb236cf0"
-]
-kubernetes_azure_rbac_enabled = true
+kubernetes_admin_group_object_ids       = [\"2f18e364-03a9-4298-ba33-8f9fdb236cf0\"]
+kubernetes_azure_rbac_enabled           = true
 
 # velero
-velero_storage_name   = "veleroio"
-velero_storage_csm_ip = "185.55.98.16/29"
-velero_resource_group = "warp"
+velero_storage_name   = \"veleroio\"
+velero_storage_csm_ip = \"185.55.98.16/29\"
+velero_resource_group = \"\"
 velero_tags = {
-  vendor      = "cosmotech"
-  cost_center = "NA"
-  customer    = "warp"
-  project     = "warp"
-  stage       = "Dev"
+  vendor      = \"cosmotech\"
+  cost_center = \"NA\"
+  customer    = \"cosmotech\"
+  project     = \"$TF_VAR_project_name\"
+  stage       = \"Prod\"
 }
 is_bare_metal = false
 """ > $PWD/$file_infra_core
@@ -343,13 +341,13 @@ tls_certificate_type      = \"$TF_VAR_tls_certificate_type\"
 
 # velero
 velero_azure_subcription_id          = \"$TF_VAR_subscription_id\"
-velero_backup_resource_group_cluster = ""
-velero_storage_account_name          = "veleroszrio"
+velero_backup_resource_group_cluster = \"\"
+velero_storage_account_name          = \"veleroszrio\"
 velero_storage_account_resource_name = \"$TF_VAR_network_resource_group\"
 velero_azure_tenant_id               = \"$TF_VAR_tenant_id\"
-velero_backup_client_id              = ""
-velero_backup_client_secret          = ""
-velero_storage_account_access_key    = ""
+velero_backup_client_id              = \"\"
+velero_backup_client_secret          = \"\"
+velero_storage_account_access_key    = \"\"
 
 # namespace
 prom_redis_host_namespace = \"$TF_VAR_kubernetes_tenant_namespace\"
@@ -426,9 +424,9 @@ cluster_name                = \"$TF_VAR_kubernetes_cluster_name\"
 # network
 api_dns_name                         = \"$TF_VAR_network_api_dns_name\"
 network_resource_group               = \"$TF_VAR_network_resource_group\"
-network_tenant_address_prefix        = "10.20.0.0/16"
-network_tenant_subnet_address_prefix = "10.20.0.0/24"
-storage_csm_ip                       = "185.55.98.16/29"
+network_tenant_address_prefix        = \"10.20.0.0/16\"
+network_tenant_subnet_address_prefix = \"10.20.0.0/24\"
+storage_csm_ip                       = \"185.55.98.16/29\"
 
 # adx
 kusto_deploy = true
@@ -450,29 +448,29 @@ create_babylon = true
 create_restish = true
 
 # project
-project_stage     = "PRod"
-storage_class_sku = "Standard_LRS"
+project_stage     = \"Prod\"
+storage_class_sku = \"Standard_LRS\"
 project_name      = \"$TF_VAR_kubernetes_cluster_name\"
 
 # redis
 redis_disk_size_gb = 64
-redis_disk_sku     = "Premium_LRS"
-redis_disk_tier    = "P6"
+redis_disk_sku     = \"Premium_LRS\"
+redis_disk_tier    = \"P6\"
 
 # vault
 vault_create_entries = true
-vault_address        = "http://vault.vault.svc.cluster.local:8200"
-vault_namespace      = "vault"
-vault_sops_namespace = "vault-secrets-operator"
-container_tag        = "1.3.5"
-engine_version       = "v1"
-engine_secret        = "cosmotech"
+vault_address        = \"http://vault.vault.svc.cluster.local:8200\"
+vault_namespace      = \"vault\"
+vault_sops_namespace = \"vault-secrets-operator\"
+container_tag        = \"1.3.5\"
+engine_version       = \"v1\"
+engine_secret        = \"cosmotech\"
 platform_id          = \"$TF_VAR_kubernetes_tenant_namespace\"
-organization_name    = "cosmotech"
+organization_name    = \"cosmotech\"
 
 # storage
 storage_public_network_access_enabled = true
-storage_default_action                = "Allow"
+storage_default_action                = \"Allow\"
 
 # backend storage
 tf_resource_group_name  = \"$TF_VAR_network_resource_group\"
@@ -557,18 +555,18 @@ identity_token_url                  = \"https://login.microsoftonline.com/$TF_VA
 identity_authorization_url          = \"https://login.microsoftonline.com/$TF_VAR_tenant_id/oauth2/v2.0/authorize\"
 identifier_uri                      = "https://customer-delivery.api.cosmotech.com/adp-adx-dev"
 list_authorized_mime_types = [
-  "application/zip",
-  "application/xml",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  "application/x-tika-ooxml",
-  "text/csv",
-  "text/plain",
-  "text/x-yaml",
-  "application/json",
-  "application/gzip",
+  \"application/zip\",
+  \"application/xml\",
+  \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\",
+  \"application/x-tika-ooxml\",
+  \"text/csv\",
+  \"text/plain\",
+  \"text/x-yaml\",
+  \"application/json\",
+  \"application/gzip\",
 ]
-max_file_size     = "100MB"
-max_request_size  = "100MB"
+max_file_size     = \"100MB\"
+max_request_size  = \"100MB\"
 
 # network
 api_dns_name              = \"$TF_VAR_network_api_dns_name\"
