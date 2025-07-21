@@ -24,7 +24,7 @@ A [Terraform script](https://github.com/Cosmo-Tech/cosmotech-terraform/tree/main
     * Network ADT app registration
     * Swagger app registration
     * Babylon app registration
-    * Web app app registration
+    * Web app registration
 * Role assignments:
     * Network ADT app registration Contributor on Public IP
     * Network ADT app registration Network Contributor on Virtual Network
@@ -163,7 +163,7 @@ helm -n phoenix get values cosmotech-api-v2 | tail -n +2 > values.yaml
 # In Azure portal, retrieve Cosmos DB server URI and key.
 export COSMOSDB_URL="https://<cosmoDB-name>.documents.azure.com:443/"
 export COSMOSDB_KEY="<cosmoDB-key>"
-# An API upgrade script to update API v2 to version 2.4.10 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependancies.
+# An API upgrade script to update API v2 to version 2.4.10 is available in the folder `deployment_scripts/v2.4/`. This script upgrades the Cosmo Tech Platform API and dependencies.
 ./upgrade.sh 2.4.10 values.yaml phoenix v2
 ```
 ### Delete CosmoDB resource
@@ -200,7 +200,7 @@ az aks upgrade --resource-group <myResourceGroup> --name <myAKSCluster> --kubern
 az aks upgrade --resource-group <myResourceGroup> --name <myAKSCluster> --kubernetes-version 1.25.5
 ```
 ### Run API upgrade script
-An API upgrade script to update API v2 to version 2.3.5 is available in the folder `deployment_scripts/v2.3/`. This script upgrades the Cosmo Tech Platform API and dependancies.
+An API upgrade script to update API v2 to version 2.3.5 is available in the folder `deployment_scripts/v2.3/`. This script upgrades the Cosmo Tech Platform API and dependencies.
 > Connect to AKS Cluster Context
 ```bash
 ./upgrade.sh 2.3.5
