@@ -270,6 +270,14 @@ publicip_resource_group = \"$TF_VAR_publicip_resource_group\"
 terraform -chdir=$publicip_dns plan -out tfplan_core_ip_dns -var-file $PWD/$file_publicip_dns
 terraform -chdir=$publicip_dns apply tfplan_core_ip_dns
 
+# ################## EXPORT CORE IP&DNS OUTPUT ##################
+terraform -chdir=$publicip_dns output > $PWD/out_core_ip_dns.txt
+sed -i 's/ = /=/' $PWD/out_core_ip_dns.txt
+sed -i 's/out_/export TF_VAR_/' $PWD/out_core_ip_dns.txt
+
+source $PWD/out_core_ip_dns.txt
+# ################## EXPORT IP&DNS OUTPUT ##################
+
 # echo """
 # terraform {
 #   backend "azurerm" {}
