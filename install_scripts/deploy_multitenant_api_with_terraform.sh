@@ -239,7 +239,12 @@ number=$RANDOM
 # git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
 git clone https://github.com/Cosmo-Tech/terraform-publicip-dnsrecord.git $publicip_dns
 
-terraform -chdir=$publicip_dns init
+terraform -chdir=$publicip_dns init \
+    -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
+    -backend-config "storage_account_name=$TF_VAR_tf_storage_account_name" \
+    -backend-config "container_name=$TF_VAR_tf_container_name" \
+    -backend-config "key=${TF_VAR_kubernetes_cluster_name}-core-ip-dns-$number" \
+    -backend-config "access_key=$TF_VAR_tf_access_key"
 
 echo installing tfvars in $publicip_dns
 echo """
@@ -261,6 +266,9 @@ network_dns_record = \"$TF_VAR_network_dns_record\"
 publicip_resource_group = \"$TF_VAR_publicip_resource_group\"
 
 """ > $PWD/$file_publicip_dns
+
+terraform -chdir=$publicip_dns plan -out tfplan_core_ip_dns -var-file $PWD/$file_publicip_dns
+terraform -chdir=$publicip_dns apply tfplan_core_ip_dns
 
 # echo """
 # terraform {
