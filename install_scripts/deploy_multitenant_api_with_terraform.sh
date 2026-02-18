@@ -210,13 +210,14 @@ else
 fi
 # TERRAFORM INSTALLED
 
-# az login --service-principal -u $TF_VAR_app_client_id -p $TF_VAR_app_client_secret --tenant $TF_VAR_tenant_id
+az login --service-principal -u $TF_VAR_app_client_id -p $TF_VAR_app_client_secret --tenant $TF_VAR_tenant_id
+az account set --subscription "$TF_VAR_subscription_id"
 
-export ARM_USE_AZURECLI=false
-export ARM_CLIENT_ID="$TF_VAR_app_client_id"
-export ARM_CLIENT_SECRET="$TF_VAR_app_client_secret"
-export ARM_TENANT_ID="$TF_VAR_tenant_id"
-export ARM_SUBSCRIPTION_ID="$TF_VAR_subscription_id"
+# export ARM_USE_AZURECLI=false
+# export ARM_CLIENT_ID="$TF_VAR_app_client_id"
+# export ARM_CLIENT_SECRET="$TF_VAR_app_client_secret"
+# export ARM_TENANT_ID="$TF_VAR_tenant_id"
+# export ARM_SUBSCRIPTION_ID="$TF_VAR_subscription_id"
 
 ################## REPOSITORIES ##################
 # ./terraform-publicip-dnsrecord
