@@ -213,34 +213,61 @@ fi
 # az login --service-principal -u $TF_VAR_network_sp_client_id -p $TF_VAR_network_sp_client_secret --tenant $TF_VAR_tenant_id
 
 ################## REPOSITORIES ##################
-# ./platform-infra-core
+# ./terraform-publicip-dnsrecord
+# ./terraform-azure-core
 # ./platform-infra-tenant
 # ./platform-k8s-core
 # ./platform-k8s-tenant
 ################## REPOSITORIES ##################
 
-################## GLOBAL VARIABLES GLOBAL ##################
-core="platform-infra-core"
-tenant="platform-infra-tenant"
-core_k8s="platform-k8s-core"
-tenant_k8s="platform-k8s-tenant"
-file_infra_core="terraform.core.infra.tfvars"
-file_k8s_core="terraform.core.k8s.tfvars"
-file_infra_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.infra.tfvars"
-file_k8s_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.k8s.tfvars"
+################## GLOBAL VARIABLES GLOBAL #################
+publicip_dns="terraform-publicip-dnsrecord"
+# core="terraform-azure-core"
+# tenant="platform-infra-tenant"
+# core_k8s="platform-k8s-core"
+# tenant_k8s="platform-k8s-tenant"
+file_publicip_dns="terraform.publicip_dns.tfvars"
+# file_infra_core="terraform.core.infra.tfvars"
+# file_k8s_core="terraform.core.k8s.tfvars"
+# file_infra_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.infra.tfvars"
+# file_k8s_tenant="terraform.$TF_VAR_kubernetes_tenant_namespace.k8s.tfvars"
 number=$RANDOM
 ################## GLOBAL VARIABLES ##################
 
 
 ################## DEPLOY CORE ##################
-git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
+# git clone -b azure https://github.com/Cosmo-Tech/terraform-azure-cosmotech-common.git $core
+git clone https://github.com/Cosmo-Tech/terraform-publicip-dnsrecord.git $publicip_dns
+
+terraform -chdir=$publicip_dns init
+
+echo installing tfvars in $publicip_dns
+echo """
+# azure
+subscription_id = \"$TF_VAR_subscription_id\"
+tenant_id       = \"$TF_VAR_tenant_id\"
+location        = \"$TF_VAR_location\"
+
+# project
+project_cost_center   = \"$TF_VAR_project_cost_center\"
+project_customer_name = \"$TF_VAR_project_customer_name\"
+project_name          = \"$TF_VAR_project_name\"
+project_stage         = \"$TF_VAR_project_stage\"
+
+# dns
+network_dns_record = \"$TF_VAR_network_dns_record\"
+
+# public ip
+publicip_resource_group = \"$TF_VAR_publicip_resource_group\"
+
+""" > $PWD/$file_publicip_dns
 
 # echo """
 # terraform {
 #   backend "azurerm" {}
 # }
 # """ > $core/providers.azure.tf
-terraform -chdir=$core init
+# terraform -chdir=$core init
 # echo "running terraform init: $core"
 # terraform -chdir=$core init \
 #     -backend-config "resource_group_name=$TF_VAR_tf_resource_group_name" \
@@ -249,61 +276,61 @@ terraform -chdir=$core init
 #     -backend-config "key=${TF_VAR_kubernetes_cluster_name}-core-infra-$number" \
 #     -backend-config "access_key=$TF_VAR_tf_access_key"
 
-echo installing tfvars in $core
-echo """
-client_id                = \"$TF_VAR_client_id\"
-network_sp_client_id     = \"$TF_VAR_network_sp_client_id\"
-client_secret            = \"$TF_VAR_client_secret\"
-network_sp_client_secret = \"$TF_VAR_network_sp_client_secret\"
-subscription_id          = \"$TF_VAR_subscription_id\"
-tenant_id                = \"$TF_VAR_tenant_id\"
-location                 = \"$TF_VAR_location\"
-owner_list               = [\"$TF_VAR_owner_list\"]
+# echo installing tfvars in $core
+# echo """
+# client_id                = \"$TF_VAR_client_id\"
+# network_sp_client_id     = \"$TF_VAR_network_sp_client_id\"
+# client_secret            = \"$TF_VAR_client_secret\"
+# network_sp_client_secret = \"$TF_VAR_network_sp_client_secret\"
+# subscription_id          = \"$TF_VAR_subscription_id\"
+# tenant_id                = \"$TF_VAR_tenant_id\"
+# location                 = \"$TF_VAR_location\"
+# owner_list               = [\"$TF_VAR_owner_list\"]
 
-# project
-project_customer_name = \"cosmotech\"
-project_name          = \"$TF_VAR_project_name\"
+# # project
+# project_customer_name = \"cosmotech\"
+# project_name          = \"$TF_VAR_project_name\"
 
-# azure
-deployment_type          = \"$TF_VAR_deployment_type\"
+# # azure
+# deployment_type          = \"$TF_VAR_deployment_type\"
 
-# network
-network_dns_record                    = \"$TF_VAR_network_dns_record\"
-network_resource_group                = \"$TF_VAR_network_resource_group\"
-network_new                           = \"$TF_VAR_network_new\"
-network_name                          = \"$TF_VAR_network_name\"
+# # network
+# network_dns_record                    = \"$TF_VAR_network_dns_record\"
+# network_resource_group                = \"$TF_VAR_network_resource_group\"
+# network_new                           = \"$TF_VAR_network_new\"
+# network_name                          = \"$TF_VAR_network_name\"
 
-# kubernetes
-kubernetes_version                      = \"$TF_VAR_kubernetes_version\"
-kubernetes_resource_group               = \"$TF_VAR_kubernetes_resource_group\"
-kubernetes_cluster_name                 = \"$TF_VAR_kubernetes_cluster_name\"
-kubernetes_admin_group_object_ids       = [\"9c7a5d4c-abb6-421b-a2e7-cd3ed3f4d060\"]
-kubernetes_azure_rbac_enabled           = true
+# # kubernetes
+# kubernetes_version                      = \"$TF_VAR_kubernetes_version\"
+# kubernetes_resource_group               = \"$TF_VAR_kubernetes_resource_group\"
+# kubernetes_cluster_name                 = \"$TF_VAR_kubernetes_cluster_name\"
+# kubernetes_admin_group_object_ids       = [\"9c7a5d4c-abb6-421b-a2e7-cd3ed3f4d060\"]
+# kubernetes_azure_rbac_enabled           = true
 
-# velero
-velero_storage_name   = \"veleroio\"
-velero_storage_csm_ip = \"185.55.98.16/29\"
-velero_resource_group = \"$TF_VAR_kubernetes_resource_group\"
-velero_tags = {
-  vendor      = \"cosmotech\"
-  cost_center = \"NA\"
-  customer    = \"cosmotech\"
-  project     = \"$TF_VAR_project_name\"
-  stage       = \"Prod\"
-}
-is_bare_metal = false
-""" > $PWD/$file_infra_core
+# # velero
+# velero_storage_name   = \"veleroio\"
+# velero_storage_csm_ip = \"185.55.98.16/29\"
+# velero_resource_group = \"$TF_VAR_kubernetes_resource_group\"
+# velero_tags = {
+#   vendor      = \"cosmotech\"
+#   cost_center = \"NA\"
+#   customer    = \"cosmotech\"
+#   project     = \"$TF_VAR_project_name\"
+#   stage       = \"Prod\"
+# }
+# is_bare_metal = false
+# """ > $PWD/$file_infra_core
 
-# az storage blob upload \
-#     --account-name $TF_VAR_tf_storage_account_name \
-#     --container-name $TF_VAR_tf_container_name \
-#     --name $file_infra_core \
-#     --file $PWD/$file_infra_core \
-#     --auth-mode key \
-#     --account-key $TF_VAR_tf_access_key
+# # az storage blob upload \
+# #     --account-name $TF_VAR_tf_storage_account_name \
+# #     --container-name $TF_VAR_tf_container_name \
+# #     --name $file_infra_core \
+# #     --file $PWD/$file_infra_core \
+# #     --auth-mode key \
+# #     --account-key $TF_VAR_tf_access_key
 
-terraform -chdir=$core plan -out tfplan_core -var-file $PWD/$core/terraform.default.tfvars -var-file $PWD/$file_infra_core 
-terraform -chdir=$core apply tfplan_core
+# terraform -chdir=$core plan -out tfplan_core -var-file $PWD/$core/terraform.default.tfvars -var-file $PWD/$file_infra_core 
+# terraform -chdir=$core apply tfplan_core
 
 ################## DEPLOY CORE ##################
 
